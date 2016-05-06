@@ -32,8 +32,8 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.util.ArrayUtilities;
 
-import cz.cas.mbu.cytimeseries.TimeSeries;
-import cz.cas.mbu.cytimeseries.TimeSeriesManager;
+import cz.cas.mbu.cytimeseries.TimeSeriesMetadata;
+import cz.cas.mbu.cytimeseries.DataSeriesManager;
 
 public class TimeSeriesVisualPanel extends JPanel implements CytoPanelComponent2, RowsSetListener {
 
@@ -41,12 +41,12 @@ public class TimeSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 	
 	//private final CyNetworkManager cyNetworkManager;
 	private final CyApplicationManager cyApplicationManager;
-	private final TimeSeriesManager timeSeriesManager;
+	private final DataSeriesManager timeSeriesManager;
 	
 	private final TimeSeriesChartContainer<CyNode> nodeChart;
 	private final ChartPanel nodeChartPanel;
 	
-	public TimeSeriesVisualPanel(CyApplicationManager cyApplicationManager, TimeSeriesManager timeSeriesManager) {
+	public TimeSeriesVisualPanel(CyApplicationManager cyApplicationManager, DataSeriesManager timeSeriesManager) {
 		this.cyApplicationManager = cyApplicationManager;
 		this.timeSeriesManager = timeSeriesManager;
 		setLayout(new BorderLayout());

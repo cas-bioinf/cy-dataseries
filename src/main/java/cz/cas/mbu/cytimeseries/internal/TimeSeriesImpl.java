@@ -7,10 +7,10 @@ import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
 
-import cz.cas.mbu.cytimeseries.TimeSeries;
+import cz.cas.mbu.cytimeseries.TimeSeriesMetadata;
 import cz.cas.mbu.cytimeseries.TimeSeriesException;
 
-public class TimeSeriesImpl<TARGET_CLASS extends CyIdentifiable> implements TimeSeries<TARGET_CLASS>  {
+public class TimeSeriesImpl<TARGET_CLASS extends CyIdentifiable> implements TimeSeriesMetadata<TARGET_CLASS>  {
 	private final CyRow row;
 	private final Class<TARGET_CLASS> targetClass;
 	

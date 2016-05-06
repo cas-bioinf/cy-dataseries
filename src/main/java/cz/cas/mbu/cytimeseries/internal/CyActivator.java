@@ -15,7 +15,7 @@ import org.cytoscape.work.ServiceProperties;
 import org.cytoscape.work.TaskFactory;
 import org.osgi.framework.BundleContext;
 
-import cz.cas.mbu.cytimeseries.TimeSeriesManager;
+import cz.cas.mbu.cytimeseries.DataSeriesManager;
 
 public class CyActivator extends AbstractCyActivator {
 
@@ -29,7 +29,7 @@ public class CyActivator extends AbstractCyActivator {
 		CyNetworkTableManager cyNetworkTableManager = getService(bc, CyNetworkTableManager.class);
 
 		TimeSeriesManagerImpl timeSeriesManager = new TimeSeriesManagerImpl(cyTableManager, cyTableFactory, cyNetworkTableManager);
-		registerService(bc, timeSeriesManager, TimeSeriesManager.class, new Properties());
+		registerService(bc, timeSeriesManager, DataSeriesManager.class, new Properties());
 		
 		NetworkSelectedParameterPassingTaskFactory<AddTimeSeriesTask> addTaskFactory = new NetworkSelectedParameterPassingTaskFactory<>(AddTimeSeriesTask.class, cyApplicationManager, cyApplicationManager, timeSeriesManager);
 		

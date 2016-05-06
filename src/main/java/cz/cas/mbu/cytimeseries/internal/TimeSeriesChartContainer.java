@@ -12,7 +12,7 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.DefaultXYDataset;
 
-import cz.cas.mbu.cytimeseries.TimeSeries;
+import cz.cas.mbu.cytimeseries.TimeSeriesMetadata;
 
 public class TimeSeriesChartContainer<TYPE extends CyIdentifiable> {
 	private JFreeChart chart;
@@ -34,10 +34,10 @@ public class TimeSeriesChartContainer<TYPE extends CyIdentifiable> {
 		return chart;
 	}
 	
-	public void setSeriesData(Collection<TimeSeries<TYPE>> allSeries, CyRow row)
+	public void setSeriesData(Collection<TimeSeriesMetadata<TYPE>> allSeries, CyRow row)
 	{
 		//TODO this does not handle series deletion
-		for(TimeSeries<TYPE> series : allSeries)
+		for(TimeSeriesMetadata<TYPE> series : allSeries)
 		{
 			List<Double> timePointsList = series.getTimePoints();
 			double[] timePoints = new double[timePointsList.size()];
@@ -58,7 +58,7 @@ public class TimeSeriesChartContainer<TYPE extends CyIdentifiable> {
 		}
 	}
 	
-	public void setSeriesVisible(TimeSeries<TYPE> series, boolean visible)
+	public void setSeriesVisible(TimeSeriesMetadata<TYPE> series, boolean visible)
 	{
 		int seriesIndex = dataset.indexOf(series.getName());
 		renderer.setSeriesLinesVisible(seriesIndex, visible);

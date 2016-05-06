@@ -13,8 +13,8 @@ import org.cytoscape.work.TunableValidator;
 import org.cytoscape.work.TunableValidator.ValidationState;
 import org.cytoscape.work.util.ListSingleSelection;
 
-import cz.cas.mbu.cytimeseries.TimeSeries;
-import cz.cas.mbu.cytimeseries.TimeSeriesManager;
+import cz.cas.mbu.cytimeseries.TimeSeriesMetadata;
+import cz.cas.mbu.cytimeseries.DataSeriesManager;
 
 public class AddTimeSeriesTask extends AbstractTimeSeriesRelatedTask implements TunableValidator{
 
@@ -25,7 +25,7 @@ public class AddTimeSeriesTask extends AbstractTimeSeriesRelatedTask implements 
 	public TimeSeriesTunableParams params;
 	
 	
-	public AddTimeSeriesTask(CyApplicationManager cyApplicationManager, TimeSeriesManager manager) {
+	public AddTimeSeriesTask(CyApplicationManager cyApplicationManager, DataSeriesManager manager) {
 		super(cyApplicationManager, manager);
 		targetClass = new ListSingleSelection<>(new TargetClassInfo("Nodes", CyNode.class), new TargetClassInfo("Edges", CyEdge.class));
 		params = new TimeSeriesTunableParams(cyApplicationManager, null);
@@ -42,7 +42,7 @@ public class AddTimeSeriesTask extends AbstractTimeSeriesRelatedTask implements 
 	@Override
 	public void run(TaskMonitor tm) throws Exception {
 		//A bit hackish here, but I have no way to have a proper type params available... Long live type erasure.
-		TimeSeries series = manager.createTimeSeries(network, targetClass.getSelectedValue().getTargetClass());
+		TimeSeriesMetadata series = manager.createTimeSeries(network, targetClass.getSelectedValue().getTargetClass());
 		params.applyToSeries(series);
 	}
 

@@ -10,7 +10,7 @@ import org.cytoscape.work.Task;
 import org.cytoscape.work.TaskIterator;
 
 import cz.cas.mbu.cytimeseries.TimeSeriesException;
-import cz.cas.mbu.cytimeseries.TimeSeriesManager;
+import cz.cas.mbu.cytimeseries.DataSeriesManager;
 
 public class ParameterPassingTaskFactory<TASK extends Task> extends AbstractTaskFactory {
 	

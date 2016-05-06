@@ -6,8 +6,16 @@ import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyTable;
 
-public interface TimeSeriesManager {
+public interface DataSeriesManager {
 	public static final String TIME_SERIES_TABLE_CONTEXT = "cz.cas.mbu.cytimeseries";
+	
+	
+	List<DataSeries<?,?>> getAllDataSeries();
+	<T extends DataSeries<?, ?>> List<T> getDataSeriesByType(Class<T> type); 
+	<T extends DataSeries<?, DATA>, DATA> List<T> getDataSeriesByDataType(Class<DATA> dataType); 
+	<T extends DataSeries<INDEX, DATA>, INDEX, DATA> List<T> getDataSeriesByIndexAndDataType(Class<INDEX> indexType, Class<DATA> dataType); 
+	
+	//Code below is old and will probably be changed
 	
 	/**
 	 * Returns the time series table to let you, for example, add additional time series attributes as columns.
@@ -26,7 +34,7 @@ public interface TimeSeriesManager {
 	 */
 	public CyTable ensureTimeSeriesTableExists(CyNetwork network);
 	
-	public <TARGET_TYPE extends CyIdentifiable> TimeSeries<TARGET_TYPE> createTimeSeries(CyNetwork network, Class<TARGET_TYPE> targetClass);
-	public <TARGET_TYPE extends CyIdentifiable> List<TimeSeries<TARGET_TYPE>> getAllTimeSeries(CyNetwork network, Class<TARGET_TYPE> targetClass);	
-	public <TARGET_TYPE extends CyIdentifiable> void deleteTimeSeries(TimeSeries<TARGET_TYPE> series);
+	public <TARGET_TYPE extends CyIdentifiable> TimeSeriesMetadata<TARGET_TYPE> createTimeSeries(CyNetwork network, Class<TARGET_TYPE> targetClass);
+	public <TARGET_TYPE extends CyIdentifiable> List<TimeSeriesMetadata<TARGET_TYPE>> getAllTimeSeries(CyNetwork network, Class<TARGET_TYPE> targetClass);	
+	public <TARGET_TYPE extends CyIdentifiable> void deleteTimeSeries(TimeSeriesMetadata<TARGET_TYPE> series);
 }

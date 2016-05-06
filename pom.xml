@@ -140,10 +140,16 @@
 			<version>1.9.0</version>
 			<optional>true</optional>
 		</dependency>
-		<dependency>
+<!-- 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
 			<version>4.1</version>
+			<optional>true</optional>
+		</dependency>-->
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>19.0</version>
 			<optional>true</optional>
 		</dependency>
 	</dependencies>
