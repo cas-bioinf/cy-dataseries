@@ -2,27 +2,19 @@ package cz.cas.mbu.cytimeseries.internal;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
-import javax.annotation.Generated;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.Predicate;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
-import org.cytoscape.model.CyTable;
 import org.cytoscape.work.Tunable;
 import org.cytoscape.work.TunableValidator;
 import org.cytoscape.work.util.ListMultipleSelection;
-import org.cytoscape.work.util.ListSingleSelection;
 import org.slf4j.LoggerFactory;
 
-import cz.cas.mbu.cytimeseries.TimeSeries;
+import cz.cas.mbu.cytimeseries.TimeSeriesMetadata;
 import cz.cas.mbu.cytimeseries.TimeSeriesException;
 
 public class TimeSeriesTunableParams implements TunableValidator{
@@ -39,7 +31,7 @@ public class TimeSeriesTunableParams implements TunableValidator{
 	@Tunable(description="Time points for the series.", tooltip = "A comma separated list. Matlab notation (1:5, 1:0.5:15) supported.")
 	public String timePointsString;
 	
-	public <TARGET_CLASS extends CyIdentifiable> TimeSeriesTunableParams(CyApplicationManager applicationManager, TimeSeries<TARGET_CLASS> currentParams)
+	public <TARGET_CLASS extends CyIdentifiable> TimeSeriesTunableParams(CyApplicationManager applicationManager, TimeSeriesMetadata<TARGET_CLASS> currentParams)
 	{
 		network = applicationManager.getCurrentNetwork();
 		if(network == null)
@@ -140,7 +132,7 @@ public class TimeSeriesTunableParams implements TunableValidator{
 		}
 	}
 
-	public <TARGET_CLASS extends CyIdentifiable> void applyToSeries(TimeSeries<TARGET_CLASS> timeSeries)
+	public <TARGET_CLASS extends CyIdentifiable> void applyToSeries(TimeSeriesMetadata<TARGET_CLASS> timeSeries)
 	{
 		timeSeries.setName(name);
 		timeSeries.setSourceType(TimeSeriesSourceType.SeparateColumns);
