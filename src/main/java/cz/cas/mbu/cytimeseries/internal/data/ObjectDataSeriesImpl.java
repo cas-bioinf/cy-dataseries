@@ -9,8 +9,8 @@ public class ObjectDataSeriesImpl<INDEX, DATA> extends AbstractListIndexDataSeri
 	Class<DATA> dataClass;
 	
 	
-	public ObjectDataSeriesImpl(List<Long> rowSuids, List<INDEX> indexData, Class<INDEX> indexClass, DATA[][] data, Class<DATA> dataClass) {
-		super(rowSuids, indexData, indexClass);
+	public ObjectDataSeriesImpl(List<Long> rowSuids, List<String> rowNames, List<INDEX> indexData, Class<INDEX> indexClass, DATA[][] data, Class<DATA> dataClass) {
+		super(rowSuids, rowNames, indexData, indexClass);
 		this.data = data;
 		this.dataClass = dataClass;
 	}
@@ -21,7 +21,7 @@ public class ObjectDataSeriesImpl<INDEX, DATA> extends AbstractListIndexDataSeri
 	}
 
 	@Override
-	public List<DATA> getData(int row) {
+	public List<DATA> getRowData(int row) {
 		return Arrays.asList(data[row]);
 	}
 	

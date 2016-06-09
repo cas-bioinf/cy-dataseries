@@ -14,7 +14,7 @@ import org.cytoscape.work.TunableValidator;
 import org.cytoscape.work.util.ListMultipleSelection;
 import org.slf4j.LoggerFactory;
 
-import cz.cas.mbu.cytimeseries.TimeSeriesMetadata;
+import cz.cas.mbu.cytimeseries.DataSeriesStorageProvider;
 import cz.cas.mbu.cytimeseries.TimeSeriesException;
 
 public class TimeSeriesTunableParams implements TunableValidator{
@@ -31,7 +31,7 @@ public class TimeSeriesTunableParams implements TunableValidator{
 	@Tunable(description="Time points for the series.", tooltip = "A comma separated list. Matlab notation (1:5, 1:0.5:15) supported.")
 	public String timePointsString;
 	
-	public <TARGET_CLASS extends CyIdentifiable> TimeSeriesTunableParams(CyApplicationManager applicationManager, TimeSeriesMetadata<TARGET_CLASS> currentParams)
+	public <TARGET_CLASS extends CyIdentifiable> TimeSeriesTunableParams(CyApplicationManager applicationManager, DataSeriesStorageProvider<TARGET_CLASS> currentParams)
 	{
 		network = applicationManager.getCurrentNetwork();
 		if(network == null)
@@ -132,7 +132,7 @@ public class TimeSeriesTunableParams implements TunableValidator{
 		}
 	}
 
-	public <TARGET_CLASS extends CyIdentifiable> void applyToSeries(TimeSeriesMetadata<TARGET_CLASS> timeSeries)
+	public <TARGET_CLASS extends CyIdentifiable> void applyToSeries(DataSeriesStorageProvider<TARGET_CLASS> timeSeries)
 	{
 		timeSeries.setName(name);
 		timeSeries.setSourceType(TimeSeriesSourceType.SeparateColumns);

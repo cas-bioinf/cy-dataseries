@@ -13,16 +13,27 @@ public abstract class AbstractDataSeries<INDEX, DATA> implements DataSeries<INDE
 	private List<Long> rowSuids;
 	private Map<Long, Integer> rowMap;
 	
-	protected AbstractDataSeries(List<Long> rowSuids) {
+	private List<String> rowNames;
+	
+	protected AbstractDataSeries(List<Long> rowSuids, List<String> rowNames) {
 		rowMap = new HashMap<>();
-		setRowSUIDs(rowSuids);		 
+		setRowSUIDs(rowSuids);		
+		
+		this.rowNames = new ArrayList<>(rowNames);
 	}
 	
 	
 	
 	@Override
-	public List<Long> getRowSUIDs() {
+	public List<Long> getRowIDs() {
 		return Collections.unmodifiableList(rowSuids);
+	}
+
+	
+	
+	@Override
+	public Long getRowID(int row) {
+		return rowSuids.get(row);
 	}
 
 
@@ -45,7 +56,7 @@ public abstract class AbstractDataSeries<INDEX, DATA> implements DataSeries<INDE
 	//TODO: functions to call when row added/deleted/suid changed, to update the suid map 
 	
 	@Override
-	public int suidToRow(Long suid) {
+	public int idToRow(Long suid) {
 		Integer index = rowMap.get(suid);
 		if(index == null)
 		{
@@ -53,6 +64,19 @@ public abstract class AbstractDataSeries<INDEX, DATA> implements DataSeries<INDE
 		}
 		return index;
 	}
+
+	
+	@Override
+	public List<String> getRowNames() {
+		return Collections.unmodifiableList(rowNames);
+	}
+
+
+	@Override
+	public String getRowName(int row) {
+		return rowNames.get(row);
+	}
+	
 
 	@Override
 	public int getDependentCount() {

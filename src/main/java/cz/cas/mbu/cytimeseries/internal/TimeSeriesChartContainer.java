@@ -12,9 +12,10 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.DefaultXYDataset;
 
-import cz.cas.mbu.cytimeseries.TimeSeriesMetadata;
+import cz.cas.mbu.cytimeseries.DataSeriesStorageProvider;
+import cz.cas.mbu.cytimeseries.TimeSeries;
 
-public class TimeSeriesChartContainer<TYPE extends CyIdentifiable> {
+public class TimeSeriesChartContainer {
 	private JFreeChart chart;
 	DefaultXYDataset dataset;
 	XYLineAndShapeRenderer renderer;
@@ -34,19 +35,18 @@ public class TimeSeriesChartContainer<TYPE extends CyIdentifiable> {
 		return chart;
 	}
 	
-	public void setSeriesData(Collection<TimeSeriesMetadata<TYPE>> allSeries, CyRow row)
+	public void setSeriesData(List<TimeSeries> allSeries, List<Integer> rowIds)
 	{
 		//TODO this does not handle series deletion
-		for(TimeSeriesMetadata<TYPE> series : allSeries)
+		for(int i = 0; i < allSeries.size(); i++)
 		{
-			List<Double> timePointsList = series.getTimePoints();
-			double[] timePoints = new double[timePointsList.size()];
-			for(int i = 0; i < timePointsList.size(); i++)
+			TimeSeries series = allSeries.get(i);
+			int row = series.idToRow(rowIds.get(i));
+			if(row >= 0)
 			{
-				timePoints[i] = timePointsList.get(i);
-			}
-			double [][] data = new double[][] { timePoints, series.getData(row) };
-			dataset.addSeries(series.getName(), data);				
+				double [][] data = new double[][] { series.getIndexArray(), series.getRowDataArray(row) };
+				dataset.addSeries(series.getName(), data);
+			}			
 		}		
 	}
 	
@@ -58,7 +58,7 @@ public class TimeSeriesChartContainer<TYPE extends CyIdentifiable> {
 		}
 	}
 	
-	public void setSeriesVisible(TimeSeriesMetadata<TYPE> series, boolean visible)
+	public void setSeriesVisible(TimeSeries series, boolean visible)
 	{
 		int seriesIndex = dataset.indexOf(series.getName());
 		renderer.setSeriesLinesVisible(seriesIndex, visible);

@@ -8,9 +8,9 @@ public class DoubleDataSeriesImpl<INDEX> extends AbstractListIndexDataSeries<IND
 
 	private double[][] dataArray;
 
-	public DoubleDataSeriesImpl(List<Long> rowSuids, List<INDEX> indexData, Class<INDEX> indexClass,
+	public DoubleDataSeriesImpl(List<Long> rowSuids, List<String> rowNames, List<INDEX> indexData, Class<INDEX> indexClass,
 			double[][] dataArray) {
-		super(rowSuids, indexData, indexClass);
+		super(rowSuids, rowNames, indexData, indexClass);
 		this.dataArray = dataArray;
 	}
 

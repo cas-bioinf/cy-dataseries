@@ -19,6 +19,8 @@ import cz.cas.mbu.cytimeseries.DataSeriesManager;
 
 public class CyActivator extends AbstractCyActivator {
 
+	public static final String APP_NAME_FOR_STORAGE = CyActivator.class.getPackage().getName();
+	
 	@Override
 	public void start(BundleContext bc) throws Exception {
 		
@@ -28,8 +30,8 @@ public class CyActivator extends AbstractCyActivator {
 		CyTableFactory cyTableFactory = getService(bc, CyTableFactory.class);
 		CyNetworkTableManager cyNetworkTableManager = getService(bc, CyNetworkTableManager.class);
 
-		TimeSeriesManagerImpl timeSeriesManager = new TimeSeriesManagerImpl(cyTableManager, cyTableFactory, cyNetworkTableManager);
-		registerService(bc, timeSeriesManager, DataSeriesManager.class, new Properties());
+		DataSeriesManagerImpl timeSeriesManager = new DataSeriesManagerImpl(cyTableManager, cyTableFactory, cyNetworkTableManager);
+		registerAllServices(bc, timeSeriesManager, new Properties());
 		
 		NetworkSelectedParameterPassingTaskFactory<AddTimeSeriesTask> addTaskFactory = new NetworkSelectedParameterPassingTaskFactory<>(AddTimeSeriesTask.class, cyApplicationManager, cyApplicationManager, timeSeriesManager);
 		

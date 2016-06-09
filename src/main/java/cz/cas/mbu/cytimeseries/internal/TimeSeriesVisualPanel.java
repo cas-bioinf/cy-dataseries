@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -20,6 +21,7 @@ import org.cytoscape.application.swing.CytoPanelName;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyNode;
+import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTableUtil;
 import org.cytoscape.model.events.RowsSetEvent;
 import org.cytoscape.model.events.RowsSetListener;
@@ -32,8 +34,11 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.util.ArrayUtilities;
 
-import cz.cas.mbu.cytimeseries.TimeSeriesMetadata;
+import cz.cas.mbu.cytimeseries.DataSeriesStorageProvider;
+import cz.cas.mbu.cytimeseries.TimeSeries;
+import cz.cas.mbu.cytimeseries.DataSeries;
 import cz.cas.mbu.cytimeseries.DataSeriesManager;
+import cz.cas.mbu.cytimeseries.DataSeriesMappingManager;
 
 public class TimeSeriesVisualPanel extends JPanel implements CytoPanelComponent2, RowsSetListener {
 
@@ -41,22 +46,24 @@ public class TimeSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 	
 	//private final CyNetworkManager cyNetworkManager;
 	private final CyApplicationManager cyApplicationManager;
-	private final DataSeriesManager timeSeriesManager;
+	private final DataSeriesManager dataSeriesManager;
+	private final DataSeriesMappingManager dataSeriesMappingManager;
 	
-	private final TimeSeriesChartContainer<CyNode> nodeChart;
-	private final ChartPanel nodeChartPanel;
+	private final TimeSeriesChartContainer chartContainer;
+	private final ChartPanel chartPanel;
 	
-	public TimeSeriesVisualPanel(CyApplicationManager cyApplicationManager, DataSeriesManager timeSeriesManager) {
+	public TimeSeriesVisualPanel(CyApplicationManager cyApplicationManager, DataSeriesManager dataSeriesManager, DataSeriesMappingManager dataSeriesMappingManager) {
 		this.cyApplicationManager = cyApplicationManager;
-		this.timeSeriesManager = timeSeriesManager;
+		this.dataSeriesManager = dataSeriesManager;
+		this.dataSeriesMappingManager = dataSeriesMappingManager;
 		setLayout(new BorderLayout());
 		
-		nodeChart = new TimeSeriesChartContainer<>();
-		nodeChartPanel = new ChartPanel(nodeChart.getChart(), getWidth(), getHeight(), ChartPanel.DEFAULT_MINIMUM_DRAW_WIDTH, ChartPanel.DEFAULT_MINIMUM_DRAW_HEIGHT, Integer.MAX_VALUE, Integer.MAX_VALUE, ChartPanel.DEFAULT_BUFFER_USED, true /*properties*/, true /* save */, true /* print */, true /* zoom */, true /* tooltips */);
+		chartContainer = new TimeSeriesChartContainer();
+		chartPanel = new ChartPanel(chartContainer.getChart(), getWidth(), getHeight(), ChartPanel.DEFAULT_MINIMUM_DRAW_WIDTH, ChartPanel.DEFAULT_MINIMUM_DRAW_HEIGHT, Integer.MAX_VALUE, Integer.MAX_VALUE, ChartPanel.DEFAULT_BUFFER_USED, true /*properties*/, true /* save */, true /* print */, true /* zoom */, true /* tooltips */);
 
 		
-		this.add(nodeChartPanel, BorderLayout.CENTER);
-		nodeChartPanel.addMouseListener(new MouseAdapter() {
+		this.add(chartPanel, BorderLayout.CENTER);
+		chartPanel.addMouseListener(new MouseAdapter() {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -98,7 +105,21 @@ public class TimeSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 		if(!nodes.isEmpty())
 		{
 			CyNode node = nodes.get(0);
-			nodeChart.setSeriesData(timeSeriesManager.getAllTimeSeries(network, CyNode.class), network.getRow(node));			
+			CyRow row = network.getRow(node);
+			List<TimeSeries> allSeries = new ArrayList<>();
+			List<Integer> rowIds = new ArrayList<>();
+			
+			dataSeriesMappingManager.getAllMappings(CyNode.class, TimeSeries.class).entrySet().forEach(
+					(entry) -> {
+						Integer id = row.get(entry.getKey(), Integer.class);
+						if(id != null)
+						{
+							allSeries.add(entry.getValue());
+							rowIds.add(id);							
+						}
+					});
+			
+			chartContainer.setSeriesData(allSeries, rowIds);			
 		}
 	}
 	

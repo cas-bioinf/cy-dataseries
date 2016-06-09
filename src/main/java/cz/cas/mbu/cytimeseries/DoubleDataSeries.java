@@ -7,7 +7,7 @@ import java.util.stream.DoubleStream;
 
 public interface DoubleDataSeries<INDEX> extends DataSeries<INDEX, Double>{
 	/**
-	 * First index corresponds the index. 
+	 * First array index corresponds to the row and second to the column. 
 	 * @return
 	 */
 	public double[][] getDataArray();
@@ -17,9 +17,15 @@ public interface DoubleDataSeries<INDEX> extends DataSeries<INDEX, Double>{
 		return Double.class;
 	}
 	
-	default List<Double> getData(int row)
+	default List<Double> getRowData(int row)
 	{
-		return DoubleStream.of(getDataArray()[row]).boxed().collect(Collectors.toList()); 
+		return DoubleStream.of(getDataArray()[row])
+				.boxed()
+				.collect(Collectors.toList()); 
 	}
 
+	default double[] getRowDataArray(int row)
+	{
+		return getDataArray()[row];
+	}
 }

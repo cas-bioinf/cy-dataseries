@@ -8,8 +8,8 @@ public abstract class AbstractListIndexDataSeries<INDEX,DATA> extends AbstractDa
 	private Class<INDEX> indexClass;
 	
 	
-	public AbstractListIndexDataSeries(List<Long> rowSuids, List<INDEX> indexData, Class<INDEX> indexClass) {
-		super(rowSuids);
+	public AbstractListIndexDataSeries(List<Long> rowSuids, List<String> rowNames, List<INDEX> indexData, Class<INDEX> indexClass) {
+		super(rowSuids, rowNames);
 		this.indexData = indexData;
 		this.indexClass = indexClass;
 	}
