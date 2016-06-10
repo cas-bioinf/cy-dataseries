@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.cytoscape.session.events.SessionAboutToBeSavedEvent;
 import org.cytoscape.session.events.SessionAboutToBeSavedListener;
@@ -24,7 +25,7 @@ import cz.cas.mbu.cytimeseries.DataSeriesStorageProvider;
 public class DataSeriesManagerImpl implements DataSeriesManager {
 
 	
-	private static final Logger logger = LoggerFactory.getLogger(DataSeriesManagerImpl.class); 
+	private final Logger logger = LoggerFactory.getLogger(DataSeriesManagerImpl.class); 
 	
 	
 	private final List<DataSeries<?, ?>> dataSeries;
@@ -37,8 +38,7 @@ public class DataSeriesManagerImpl implements DataSeriesManager {
 	
 	@Override
 	public List<DataSeries<?, ?>> getAllDataSeries() {
-		// TODO Auto-generated method stub
-		return null;
+		return dataSeries;
 	}
 
 
@@ -50,9 +50,12 @@ public class DataSeriesManagerImpl implements DataSeriesManager {
 
 
 	@Override
-	public <T extends DataSeries<?, ?>> List<T> getDataSeriesByType(Class<T> type) {
-		// TODO Auto-generated method stub
-		return null;
+	@SuppressWarnings("unchecked")
+	public <T extends DataSeries<?, ?>> List<T> getDataSeriesByType(Class<T> type) {		
+		return dataSeries.stream()
+				.filter(ds -> type.isAssignableFrom(ds.getClass()))
+				.map(ds -> ((T)ds))
+				.collect(Collectors.toList());		
 	}
 
 
@@ -60,9 +63,12 @@ public class DataSeriesManagerImpl implements DataSeriesManager {
 
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public <T extends DataSeries<?, DATA>, DATA> List<T> getDataSeriesByDataType(Class<DATA> dataType) {
-		// TODO Auto-generated method stub
-		return null;
+		return dataSeries.stream()
+				.filter(ds -> dataType.isAssignableFrom(ds.getDataClass()))
+				.map(ds -> ((T)ds))
+				.collect(Collectors.toList());		
 	}
 
 
@@ -70,10 +76,25 @@ public class DataSeriesManagerImpl implements DataSeriesManager {
 
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public <T extends DataSeries<INDEX, DATA>, INDEX, DATA> List<T> getDataSeriesByIndexAndDataType(
 			Class<INDEX> indexType, Class<DATA> dataType) {
-		// TODO Auto-generated method stub
-		return null;
+		return dataSeries.stream()
+				.filter(ds -> dataType.isAssignableFrom(ds.getDataClass()) && indexType.isAssignableFrom(ds.getIndexClass()))
+				.map(ds -> ((T)ds))
+				.collect(Collectors.toList());		
+	}
+
+
+	@Override
+	public void registerDataSeries(DataSeries<?, ?> ds) {
+		dataSeries.add(ds);		
+	}
+
+
+	@Override
+	public void unregisterDataSeries(DataSeries<?, ?> ds) {
+		dataSeries.remove(ds);
 	}
 
 

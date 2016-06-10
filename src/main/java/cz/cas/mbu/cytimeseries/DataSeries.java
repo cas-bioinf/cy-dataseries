@@ -39,11 +39,11 @@ public interface DataSeries<INDEX, DATA> extends CyIdentifiable {
 	   * Human-interpretable names for rows
 	   * @return
 	   */
-	  List<String> getRowNames();
+	  String[] getRowNames();
 	  
 	  default String getRowName(int row)
 	  {
-		  return getRowNames().get(row);
+		  return getRowNames()[row];
 	  }
 	  
 	  /**
@@ -53,7 +53,7 @@ public interface DataSeries<INDEX, DATA> extends CyIdentifiable {
 	   */
 	  int idToRow(int id); 
 	  
-	  int getDependentCount();
+	  int getRowCount();
 	  Class<DATA> getDataClass(); 
 	  
 	  /**

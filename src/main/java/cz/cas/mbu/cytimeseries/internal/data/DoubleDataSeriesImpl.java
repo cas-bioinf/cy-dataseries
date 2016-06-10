@@ -8,11 +8,15 @@ public class DoubleDataSeriesImpl<INDEX> extends AbstractListIndexDataSeries<IND
 
 	private double[][] dataArray;
 
-	public DoubleDataSeriesImpl(List<Long> rowSuids, List<String> rowNames, List<INDEX> indexData, Class<INDEX> indexClass,
-			double[][] dataArray) {
-		super(rowSuids, rowNames, indexData, indexClass);
+	
+
+	public DoubleDataSeriesImpl(Long suid, String name, int[] rowIds, String[] rowNames, List<INDEX> indexData,
+			Class<INDEX> indexClass, double[][] dataArray) {
+		super(suid, name, rowIds, rowNames, indexData, indexClass);
 		this.dataArray = dataArray;
 	}
+
+
 
 	@Override
 	public double[][] getDataArray() {

@@ -15,7 +15,7 @@ import org.cytoscape.work.util.ListMultipleSelection;
 import org.slf4j.LoggerFactory;
 
 import cz.cas.mbu.cytimeseries.DataSeriesStorageProvider;
-import cz.cas.mbu.cytimeseries.TimeSeriesException;
+import cz.cas.mbu.cytimeseries.DataSeriesException;
 
 public class TimeSeriesTunableParams implements TunableValidator{
 	@Tunable
@@ -36,7 +36,7 @@ public class TimeSeriesTunableParams implements TunableValidator{
 		network = applicationManager.getCurrentNetwork();
 		if(network == null)
 		{
-			throw new TimeSeriesException("No active network");
+			throw new DataSeriesException("No active network");
 		}
 
 		dataColumns = new ListMultipleSelection<>();

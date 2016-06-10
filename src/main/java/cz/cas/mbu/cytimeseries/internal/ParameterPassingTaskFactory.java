@@ -9,7 +9,7 @@ import org.cytoscape.work.AbstractTaskFactory;
 import org.cytoscape.work.Task;
 import org.cytoscape.work.TaskIterator;
 
-import cz.cas.mbu.cytimeseries.TimeSeriesException;
+import cz.cas.mbu.cytimeseries.DataSeriesException;
 import cz.cas.mbu.cytimeseries.DataSeriesManager;
 
 public class ParameterPassingTaskFactory<TASK extends Task> extends AbstractTaskFactory {
@@ -65,7 +65,7 @@ public class ParameterPassingTaskFactory<TASK extends Task> extends AbstractTask
 			return new TaskIterator(task);		
 		} catch (Exception ex)
 		{
-			throw new TimeSeriesException("Could not create task.", ex);
+			throw new DataSeriesException("Could not create task.", ex);
 		}
 	}
 

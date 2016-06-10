@@ -1,63 +1,79 @@
 package cz.cas.mbu.cytimeseries.internal.data;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import cz.cas.mbu.cytimeseries.DataSeries;
 
 public abstract class AbstractDataSeries<INDEX, DATA> implements DataSeries<INDEX, DATA>{
 
-	private List<Long> rowSuids;
-	private Map<Long, Integer> rowMap;
+	private int[] rowIds;
+	private Map<Integer, Integer> rowMap;
 	
-	private List<String> rowNames;
-	
-	protected AbstractDataSeries(List<Long> rowSuids, List<String> rowNames) {
-		rowMap = new HashMap<>();
-		setRowSUIDs(rowSuids);		
+	private String[] rowNames;
 		
-		this.rowNames = new ArrayList<>(rowNames);
+	private final Long suid;
+	private final String name;
+	
+	protected AbstractDataSeries(Long suid, String name, int[] rowIds, String[] rowNames) {
+		rowMap = new HashMap<>();
+		setRowIDs(rowIds);		
+		
+		this.rowNames = rowNames;
+		this.suid = suid;
+		this.name = name;
 	}
 	
 	
 	
 	@Override
-	public List<Long> getRowIDs() {
-		return Collections.unmodifiableList(rowSuids);
+	public Long getSUID() {
+		return suid;
+	}
+
+
+
+	@Override
+	public String getName() {
+		return name;
+	}
+
+
+
+	@Override
+	public int[] getRowIDs() {
+		return rowIds;
 	}
 
 	
 	
 	@Override
-	public Long getRowID(int row) {
-		return rowSuids.get(row);
+	public int getRowID(int row) {
+		return rowIds[row];
 	}
 
 
 
-	protected void setRowSUIDs(List<Long> rowSuids)
+	protected void setRowIDs(int[] rowIds)
 	{
-		this.rowSuids = new ArrayList<>(rowSuids);
+		this.rowIds = rowIds;
 		reconstructRowMap();
 	}
 	
 	protected void reconstructRowMap()
 	{
 		rowMap.clear();
-		for(int i = 0; i < rowSuids.size(); i++)
+		for(int i = 0; i < rowIds.length; i++)
 		{
-			rowMap.put(rowSuids.get(i), i);
+			rowMap.put(rowIds[i], i);
 		}
 	}
 
 	//TODO: functions to call when row added/deleted/suid changed, to update the suid map 
 	
 	@Override
-	public int idToRow(Long suid) {
-		Integer index = rowMap.get(suid);
+	public int idToRow(int id) {
+		Integer index = rowMap.get(id);
 		if(index == null)
 		{
 			return -1;
@@ -67,20 +83,15 @@ public abstract class AbstractDataSeries<INDEX, DATA> implements DataSeries<INDE
 
 	
 	@Override
-	public List<String> getRowNames() {
-		return Collections.unmodifiableList(rowNames);
+	public String[] getRowNames() {
+		return rowNames;
 	}
 
 
-	@Override
-	public String getRowName(int row) {
-		return rowNames.get(row);
-	}
-	
 
 	@Override
-	public int getDependentCount() {
-		return rowSuids.size();
+	public int getRowCount() {
+		return rowIds.length;
 	}
 
 }

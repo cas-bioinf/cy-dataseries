@@ -1,6 +1,7 @@
 package cz.cas.mbu.cytimeseries;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import org.cytoscape.model.CyIdentifiable;
@@ -15,9 +16,9 @@ import cz.cas.mbu.cytimeseries.internal.TimeSeriesSourceType;
  *
  * @param <TARGET_CLASS>
  */
-public interface DataSeriesStorageProvider<T extends DataSeries<?,?>> {
-	Class<T> getProvidedClass();
+public interface DataSeriesStorageProvider {
+	Class<? extends DataSeries<?,?>> getProvidedClass();
 
-	T loadDataSeries(File file, String name, long suid);
-	void saveDataSeries(T dataSeries, File file);
+	DataSeries<?,?> loadDataSeries(File file, String name, long suid) throws IOException;
+	public void saveDataSeries(DataSeries<?, ?> dataSeries, File file) throws IOException;
 }

@@ -36,7 +36,8 @@ public class DataSeriesStorageManager implements SessionAboutToBeSavedListener, 
 	private static final String SUID_COLUMN = "suid";
 	private static final String CLASS_COLUMN = "class";
 
-	private static final Logger logger = LoggerFactory.getLogger(DataSeriesStorageManager.class); 
+	public static final CSVFormat CSV_FORMAT = CSVFormat.TDF;
+	private final Logger logger = LoggerFactory.getLogger(DataSeriesStorageManager.class); 
 	
 	private final DataSeriesManagerImpl dataSeriesManager;
 	
@@ -51,15 +52,15 @@ public class DataSeriesStorageManager implements SessionAboutToBeSavedListener, 
 	 * Gathers all registered services of type {@link DataSeriesStorageProvider}.
 	 * @return
 	 */
-	private Map<String, DataSeriesStorageProvider<?>> getStorageProviders()
+	private Map<String, DataSeriesStorageProvider> getStorageProviders()
 	{
 		Object[] providerObjects = providerTracker.getServices();
-		 Map<String, DataSeriesStorageProvider<?>> providers = new HashMap<>();
+		 Map<String, DataSeriesStorageProvider> providers = new HashMap<>();
 		for(Object obj : providerObjects)
 		{
 			try
 			{
-				DataSeriesStorageProvider<?> p = (DataSeriesStorageProvider<?>)obj;
+				DataSeriesStorageProvider p = (DataSeriesStorageProvider)obj;
 				providers.put(p.getProvidedClass().getName(), p);				
 			}
 			catch(ClassCastException ex)
@@ -102,16 +103,16 @@ public class DataSeriesStorageManager implements SessionAboutToBeSavedListener, 
 			
 		}
 		
-		Map<String, DataSeriesStorageProvider<?>> providerMap = getStorageProviders();
+		Map<String, DataSeriesStorageProvider> providerMap = getStorageProviders();
 		
-		try (	CSVParser parser = new CSVParser(new FileReader(listFile.get()), CSVFormat.DEFAULT) )
+		try (	CSVParser parser = new CSVParser(new FileReader(listFile.get()), CSV_FORMAT) )
 		{
 			for(CSVRecord record : parser)
 			{
 				long suid = Long.parseLong(record.get(SUID_COLUMN));
 				String name = record.get(NAME_COLUMN);
 				String className = record.get(CLASS_COLUMN);
-				DataSeriesStorageProvider<?> provider = providerMap.get(className);
+				DataSeriesStorageProvider provider = providerMap.get(className);
 				if(provider == null)
 				{
 					logger.error("Could not find provider for DS name:" + name + " class: " + className);
@@ -162,7 +163,7 @@ public class DataSeriesStorageManager implements SessionAboutToBeSavedListener, 
 		String tmpDir = System.getProperty("java.io.tmpdir");
 		File listFile = new File(tmpDir, SERIES_LIST_FILENAME);		
 		
-		try (CSVPrinter listPrinter = new CSVPrinter(new FileWriter(listFile), CSVFormat.DEFAULT))
+		try (CSVPrinter listPrinter = new CSVPrinter(new FileWriter(listFile), CSV_FORMAT))
 		{
 			listPrinter.printRecord(SUID_COLUMN, NAME_COLUMN, CLASS_COLUMN); //header
 			
@@ -176,14 +177,14 @@ public class DataSeriesStorageManager implements SessionAboutToBeSavedListener, 
 			logger.error("Error writing DS list file", ex);
 		}
 		
-		Map<String, DataSeriesStorageProvider<?>> providers = getStorageProviders();
+		Map<String, DataSeriesStorageProvider> providers = getStorageProviders();
 		
 		List<File> dsFiles = new ArrayList<>();
 		dsFiles.add(listFile);
 		
 		for(DataSeries<?, ?> ds : dataSeriesManager.getAllDataSeries()) 
 		{
-			DataSeriesStorageProvider<?> provider = providers.get(ds.getClass().getName());
+			DataSeriesStorageProvider provider = providers.get(ds.getClass().getName());
 			if(provider == null)
 			{
 				logger.error("Could not find provider for DS name:" + ds.getName() + " class: " + ds.getClass().getName());
@@ -191,11 +192,23 @@ public class DataSeriesStorageManager implements SessionAboutToBeSavedListener, 
 			else
 			{
 				File dsFile = new File(getSeriesFileName(ds.getName(), ds.getSUID()));
-				provider.saveDataSeries(ds, dsFile);
-				dsFiles.add(dsFile);
+				try {
+					provider.saveDataSeries(ds, dsFile);
+					dsFiles.add(dsFile);
+				}
+				catch(IOException ex)
+				{
+					logger.error("Could not write DS name:" + ds.getName(), ex);
+				}
 			}
 		};
 		
-		e.addAppFiles(CyActivator.APP_NAME_FOR_STORAGE, dsFiles);
+		try {
+			e.addAppFiles(CyActivator.APP_NAME_FOR_STORAGE, dsFiles);
+		}
+		catch (Exception ex)
+		{
+			logger.error("Error adding DS files to session.", ex);			
+		}
 	}	
 }
