@@ -31,7 +31,7 @@ import cz.cas.mbu.cytimeseries.DataSeriesManager;
 import cz.cas.mbu.cytimeseries.DataSeriesStorageProvider;
 
 public class DataSeriesStorageManager implements SessionAboutToBeSavedListener, SessionLoadedListener {
-	private static final String SERIES_LIST_FILENAME = "_dataSeriesList.csv";
+	private static final String SERIES_LIST_FILENAME = "_dataSeriesList.tsv";
 	private static final String NAME_COLUMN = "name";
 	private static final String SUID_COLUMN = "suid";
 	private static final String CLASS_COLUMN = "class";
@@ -46,6 +46,7 @@ public class DataSeriesStorageManager implements SessionAboutToBeSavedListener, 
 	public DataSeriesStorageManager(BundleContext bc, DataSeriesManagerImpl dataSeriesManager) {
 		this.dataSeriesManager = dataSeriesManager;
 		providerTracker = new ServiceTracker(bc, DataSeriesStorageProvider.class.getName(), null);
+		providerTracker.open();
 	}
 	
 	/**
@@ -55,7 +56,13 @@ public class DataSeriesStorageManager implements SessionAboutToBeSavedListener, 
 	private Map<String, DataSeriesStorageProvider> getStorageProviders()
 	{
 		Object[] providerObjects = providerTracker.getServices();
-		 Map<String, DataSeriesStorageProvider> providers = new HashMap<>();
+		Map<String, DataSeriesStorageProvider> providers = new HashMap<>();
+		
+		if(providerObjects == null)
+		{
+			return providers;
+		}
+		
 		for(Object obj : providerObjects)
 		{
 			try
@@ -73,7 +80,7 @@ public class DataSeriesStorageManager implements SessionAboutToBeSavedListener, 
 	
 	private String getSeriesFileName(String name, long suid)
 	{
-		return "ds_" + suid + "_name";
+		return "ds_" + suid + "_" + name + ".tsv";
 	}
 	
 	@Override
@@ -105,7 +112,8 @@ public class DataSeriesStorageManager implements SessionAboutToBeSavedListener, 
 		
 		Map<String, DataSeriesStorageProvider> providerMap = getStorageProviders();
 		
-		try (	CSVParser parser = new CSVParser(new FileReader(listFile.get()), CSV_FORMAT) )
+		CSVFormat listFormat = CSV_FORMAT.withHeader();
+		try (	CSVParser parser = new CSVParser(new FileReader(listFile.get()), listFormat) )
 		{
 			for(CSVRecord record : parser)
 			{
@@ -121,7 +129,7 @@ public class DataSeriesStorageManager implements SessionAboutToBeSavedListener, 
 				{
 					try {
 						//Now, find the series file
-						String seriesFileName = getSeriesFileName(className, suid);
+						String seriesFileName = getSeriesFileName(name, suid);
 						Optional<File> seriesFile = files.stream()
 								.filter((f) -> f.getName().equals(seriesFileName))
 								.findAny();
@@ -191,7 +199,7 @@ public class DataSeriesStorageManager implements SessionAboutToBeSavedListener, 
 			}
 			else
 			{
-				File dsFile = new File(getSeriesFileName(ds.getName(), ds.getSUID()));
+				File dsFile = new File(tmpDir, getSeriesFileName(ds.getName(), ds.getSUID()));
 				try {
 					provider.saveDataSeries(ds, dsFile);
 					dsFiles.add(dsFile);

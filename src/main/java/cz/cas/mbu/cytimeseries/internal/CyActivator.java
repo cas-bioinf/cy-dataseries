@@ -4,7 +4,6 @@ import java.util.Properties;
 
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.CytoPanelComponent;
-import org.cytoscape.application.swing.CytoPanelComponent2;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyNetworkTableManager;
 import org.cytoscape.model.CyTableFactory;
@@ -15,7 +14,7 @@ import org.cytoscape.work.ServiceProperties;
 import org.cytoscape.work.TaskFactory;
 import org.osgi.framework.BundleContext;
 
-import cz.cas.mbu.cytimeseries.DataSeriesManager;
+import cz.cas.mbu.cytimeseries.DataSeriesMappingManager;
 import cz.cas.mbu.cytimeseries.DataSeriesStorageProvider;
 import cz.cas.mbu.cytimeseries.internal.data.TimeSeriesStorageProviderImpl;
 
@@ -32,12 +31,20 @@ public class CyActivator extends AbstractCyActivator {
 		CyTableFactory cyTableFactory = getService(bc, CyTableFactory.class);
 		CyNetworkTableManager cyNetworkTableManager = getService(bc, CyNetworkTableManager.class);
 
-		DataSeriesManagerImpl timeSeriesManager = new DataSeriesManagerImpl(cyTableManager, cyTableFactory, cyNetworkTableManager);
-		registerAllServices(bc, timeSeriesManager, new Properties());
+		DataSeriesManagerImpl dataSeriesManager = new DataSeriesManagerImpl();
+		registerAllServices(bc, dataSeriesManager, new Properties());
 		
-		registerService(bc,new TimeSeriesStorageProviderImpl(), DataSeriesStorageProvider.class, new Properties());
+		DataSeriesStorageManager storageManager = new DataSeriesStorageManager(bc, dataSeriesManager);
+		registerAllServices(bc, storageManager, new Properties());
 		
-		NetworkSelectedParameterPassingTaskFactory<AddTimeSeriesTask> addTaskFactory = new NetworkSelectedParameterPassingTaskFactory<>(AddTimeSeriesTask.class, cyApplicationManager, cyApplicationManager, timeSeriesManager);
+
+		DataSeriesMappingManager mappingManager = new DataSeriesMappingManagerImpl();
+		registerAllServices(bc, mappingManager, new Properties());
+	
+		DataSeriesStorageProvider timeSeriesProvider = new TimeSeriesStorageProviderImpl(); 
+		registerService(bc, timeSeriesProvider, DataSeriesStorageProvider.class, new Properties());
+		
+		ParameterPassingTaskFactory<AddTimeSeriesTask> addTaskFactory = new ParameterPassingTaskFactory<>(AddTimeSeriesTask.class, dataSeriesManager, timeSeriesProvider);
 		
 		Properties baseMenuProperties = new Properties();
 		baseMenuProperties.setProperty(ServiceProperties.PREFERRED_MENU,"Apps.Time Series");
@@ -54,7 +61,7 @@ public class CyActivator extends AbstractCyActivator {
 		modifyProperties.setProperty(ServiceProperties.TITLE, "Add Time Series...");
 		registerService(bc, addTaskFactory, TaskFactory.class, addProperties);
 		*/
-		TimeSeriesVisualPanel panel = new TimeSeriesVisualPanel(cyApplicationManager, timeSeriesManager);
+		DataSeriesVisualPanel panel = new DataSeriesVisualPanel(cyApplicationManager, dataSeriesManager, mappingManager);
 		registerService(bc, panel, CytoPanelComponent.class, new Properties());
 		registerService(bc, panel, RowsSetListener.class, new Properties());
 	}

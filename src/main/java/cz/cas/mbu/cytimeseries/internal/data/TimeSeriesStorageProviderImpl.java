@@ -20,13 +20,13 @@ public class TimeSeriesStorageProviderImpl extends AbstractDataSeriesStorageProv
 		return TimeSeriesImpl.class;
 	}
 
+	
 	@Override
-	protected Function<Object, String> getIndexWriteTransform() {
-		return (x) -> { return INDEX_PREFIX + Double.toString((Double)x); };	
+	protected String transformIndexForWrite(Object index) {
+		return INDEX_PREFIX + Double.toString((Double)index);
 	}
 
-	
-	
+
 	@Override
 	protected DataSeriesBuilder getSeriesBuilder() {
 		return new TimeSeriesBuilder();

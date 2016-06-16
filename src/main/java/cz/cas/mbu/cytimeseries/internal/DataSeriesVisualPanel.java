@@ -40,7 +40,7 @@ import cz.cas.mbu.cytimeseries.DataSeries;
 import cz.cas.mbu.cytimeseries.DataSeriesManager;
 import cz.cas.mbu.cytimeseries.DataSeriesMappingManager;
 
-public class TimeSeriesVisualPanel extends JPanel implements CytoPanelComponent2, RowsSetListener {
+public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2, RowsSetListener {
 
 	private boolean ignoreSelection = false;
 	
@@ -52,7 +52,7 @@ public class TimeSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 	private final TimeSeriesChartContainer chartContainer;
 	private final ChartPanel chartPanel;
 	
-	public TimeSeriesVisualPanel(CyApplicationManager cyApplicationManager, DataSeriesManager dataSeriesManager, DataSeriesMappingManager dataSeriesMappingManager) {
+	public DataSeriesVisualPanel(CyApplicationManager cyApplicationManager, DataSeriesManager dataSeriesManager, DataSeriesMappingManager dataSeriesMappingManager) {
 		this.cyApplicationManager = cyApplicationManager;
 		this.dataSeriesManager = dataSeriesManager;
 		this.dataSeriesMappingManager = dataSeriesMappingManager;

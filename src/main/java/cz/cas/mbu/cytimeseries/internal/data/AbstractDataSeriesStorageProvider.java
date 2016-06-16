@@ -35,51 +35,42 @@ public abstract class AbstractDataSeriesStorageProvider  implements DataSeriesSt
 	public DataSeries<?, ?> loadDataSeries(File file, String name, long suid) throws IOException {
 		try (CSVParser parser = new CSVParser(new FileReader(file), DataSeriesStorageManager.CSV_FORMAT))
 		{
-			int numIndex =	parser.getHeaderMap().size() - 2; //One column are the row names and one are ids
+			List<CSVRecord> recordList = parser.getRecords();
+
+			CSVRecord headerRecord = recordList.get(0);
+			
+			int numIndex =	headerRecord.size() - 2; //One column are the row names and one are ids
 			if(numIndex <= 0)
 			{
 				throw new DataSeriesException("Data series does not contain any values.");
 			}
 			List<String> index = new ArrayList<>(numIndex);
-			Iterator<Map.Entry<String, Integer>> headerIterator = parser.getHeaderMap().entrySet().iterator();
-			if(! headerIterator.next().getKey().equals("Id"))
+			if(!headerRecord.get(0).equals("Id"))
 			{
-				logger.error("Didn't find id column for DS.");
+				throw new DataSeriesException("Didn't find id column for DS.");
 			}
 			
-			if(! headerIterator.next().getKey().equals("RowName"))
+			if(! headerRecord.get(1).equals("RowName"))
 			{
-				logger.error("Didn't find row name column for DS.");
+				throw new DataSeriesException("Didn't find row name column for DS.");
 			}
 			
+			//Skipping the header row
 			for(int i = 0; i < numIndex; i++)
 			{
-				if(!headerIterator.hasNext())
-				{
-					logger.error("Inconsistent header");
-					break;
-				}
-				
-				Map.Entry<String,Integer> headerEntry = headerIterator.next();
-				
-				if(headerEntry.getValue().intValue() != i + 2)
-				{
-					logger.error("Inconsistent header indexing");
-					break;
-				}
-				
-				index.add(headerEntry.getKey());
+				String headerEntry = headerRecord.get(i + 2);				
+				index.add(headerEntry);
 			}
 			
 			int numRows = (int)parser.getRecordNumber();
-			String[] rowNames = new String[numRows];
-			int[] rowIds = new int[numRows];
+			//Note: the code below has to skip the header row!
+			String[] rowNames = new String[numRows - 1];
+			int[] rowIds = new int[numRows - 1];
 			
-			List<CSVRecord> recordList = parser.getRecords();
-			for(int row = 0; row < numRows; row++)
+			for(int row = 1; row < numRows; row++)
 			{
-				rowIds[row] = Integer.parseInt(recordList.get(row).get(0)); 
-				rowNames[row] = recordList.get(row).get(1); 
+				rowIds[row - 1] = Integer.parseInt(recordList.get(row).get(0)); 
+				rowNames[row - 1] = recordList.get(row).get(1); 
 			}
 			
 			DataSeriesBuilder builder = getSeriesBuilder();
@@ -87,11 +78,12 @@ public abstract class AbstractDataSeriesStorageProvider  implements DataSeriesSt
 			builder.name(name).suid(suid);
 			builder.parseIndex(index).rowIds(rowIds).rowNames(rowNames);
 			
-			for(int row = 0; row < numRows; row++)
+			//Skipping the header row
+			for(int row = 1; row < numRows; row++)
 			{
 				for(int col = 0; col < numIndex; col++)
 				{
-					builder.setDataPoint(row, col, recordList.get(row).get(col + 2));					
+					builder.setDataPoint(row - 1, col, recordList.get(row).get(col + 2));					
 				}
 			}
 			
@@ -100,14 +92,14 @@ public abstract class AbstractDataSeriesStorageProvider  implements DataSeriesSt
 		}
 	}
 	
-	protected Function<Object, String> getIndexWriteTransform()
+	protected String transformIndexForWrite(Object index)
 	{
-		return (x) -> x.toString();
+		return index.toString();
 	}
 	
-	protected Function<Object, String> getDataWriteTransform()
+	protected String transformDataForWrite(Object data)
 	{
-		return (x) -> x.toString();		
+		return data.toString();		
 	}
 
 	@Override
@@ -120,13 +112,22 @@ public abstract class AbstractDataSeriesStorageProvider  implements DataSeriesSt
 		{
 			printer.print("Id");
 			printer.print("RowName");
-			printer.printRecord(dataSeries.getIndex().stream().map(getIndexWriteTransform()));
+			
+			for(Object indexElement : dataSeries.getIndex())
+			{
+				printer.print(transformIndexForWrite(indexElement));
+			}
+			printer.println();
 			
 			for(int row = 0; row < dataSeries.getRowCount(); row++)
 			{
 				printer.print(dataSeries.getRowID(row));				
 				printer.print(dataSeries.getRowName(row));
-				printer.printRecord(dataSeries.getRowData(row).stream().map(getDataWriteTransform()));				
+				for(Object dataElement : dataSeries.getRowData(row))
+				{
+					printer.print(transformDataForWrite(dataElement));
+				}
+				printer.println();
 			}
 		}
 		
