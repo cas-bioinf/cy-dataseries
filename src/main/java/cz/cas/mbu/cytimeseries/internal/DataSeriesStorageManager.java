@@ -15,7 +15,9 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
+import org.cytoscape.application.CyUserLog;
 import org.cytoscape.io.util.StreamUtil;
+import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.session.events.SessionAboutToBeSavedEvent;
 import org.cytoscape.session.events.SessionAboutToBeSavedListener;
@@ -23,28 +25,37 @@ import org.cytoscape.session.events.SessionLoadedEvent;
 import org.cytoscape.session.events.SessionLoadedListener;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 
 import cz.cas.mbu.cytimeseries.DataSeries;
 import cz.cas.mbu.cytimeseries.DataSeriesManager;
+import cz.cas.mbu.cytimeseries.DataSeriesMappingManager;
 import cz.cas.mbu.cytimeseries.DataSeriesStorageProvider;
 
 public class DataSeriesStorageManager implements SessionAboutToBeSavedListener, SessionLoadedListener {
 	private static final String SERIES_LIST_FILENAME = "_dataSeriesList.tsv";
-	private static final String NAME_COLUMN = "name";
-	private static final String SUID_COLUMN = "suid";
-	private static final String CLASS_COLUMN = "class";
+	private static final String SERIES_NAME_COLUMN = "name";
+	private static final String SERIES_SUID_COLUMN = "suid";
+	private static final String SERIES_CLASS_COLUMN = "class";
 
+	private static final String MAPPING_FILENAME = "_dataSeriesMappings.tsv";
+	private static final String MAPPING_TARGET_CLASS_COLUMN = "targetClass";
+	private static final String MAPPING_COLUMN_NAME_COLUMN = "columnName";
+	private static final String MAPPING_SERIES_SUID_COLUMN = "seriesSUID";
+
+	
 	public static final CSVFormat CSV_FORMAT = CSVFormat.TDF;
-	private final Logger logger = LoggerFactory.getLogger(DataSeriesStorageManager.class); 
+	private final Logger userLogger = Logger.getLogger(CyUserLog.NAME); 
+	private final Logger logger = Logger.getLogger(DataSeriesStorageManager.class); 
 	
 	private final DataSeriesManagerImpl dataSeriesManager;
+	private final DataSeriesMappingManagerImpl mappingManager;
 	
 	private final ServiceTracker providerTracker;
 	
-	public DataSeriesStorageManager(BundleContext bc, DataSeriesManagerImpl dataSeriesManager) {
+	public DataSeriesStorageManager(BundleContext bc, DataSeriesManagerImpl dataSeriesManager, DataSeriesMappingManagerImpl mappingManager) {
 		this.dataSeriesManager = dataSeriesManager;
+		this.mappingManager = mappingManager;
 		providerTracker = new ServiceTracker(bc, DataSeriesStorageProvider.class.getName(), null);
 		providerTracker.open();
 	}
@@ -103,7 +114,7 @@ public class DataSeriesStorageManager implements SessionAboutToBeSavedListener, 
 		{
 			if(!files.isEmpty())
 			{
-				logger.error("Could not find list of data series ('" + SERIES_LIST_FILENAME + "'), although some data series are probably present.");
+				userLogger.error("Could not find list of data series ('" + SERIES_LIST_FILENAME + "'), although some data series are probably present.");
 			}
 			
 			return;
@@ -112,49 +123,104 @@ public class DataSeriesStorageManager implements SessionAboutToBeSavedListener, 
 		
 		Map<String, DataSeriesStorageProvider> providerMap = getStorageProviders();
 		
+		Map<Long, DataSeries<?, ?>> oldSuidMapping = new HashMap<>();
+		
 		CSVFormat listFormat = CSV_FORMAT.withHeader();
 		try (	CSVParser parser = new CSVParser(new FileReader(listFile.get()), listFormat) )
 		{
 			for(CSVRecord record : parser)
 			{
-				long suid = Long.parseLong(record.get(SUID_COLUMN));
-				String name = record.get(NAME_COLUMN);
-				String className = record.get(CLASS_COLUMN);
+				long oldsuid = Long.parseLong(record.get(SERIES_SUID_COLUMN));
+				String name = record.get(SERIES_NAME_COLUMN);
+				String className = record.get(SERIES_CLASS_COLUMN);
 				DataSeriesStorageProvider provider = providerMap.get(className);
 				if(provider == null)
 				{
-					logger.error("Could not find provider for DS name:" + name + " class: " + className);
+					userLogger.error("Could not find provider for DS name:" + name + " class: " + className);
 				}
 				else
 				{
 					try {
 						//Now, find the series file
-						String seriesFileName = getSeriesFileName(name, suid);
+						String seriesFileName = getSeriesFileName(name, oldsuid);
 						Optional<File> seriesFile = files.stream()
 								.filter((f) -> f.getName().equals(seriesFileName))
 								.findAny();
 						
 						if(seriesFile.isPresent())
 						{
-							DataSeries<?, ?> ds = provider.loadDataSeries(seriesFile.get(), name, suid);
+							DataSeries<?, ?> ds = provider.loadDataSeries(seriesFile.get(), name, oldsuid);
+							oldSuidMapping.put(oldsuid, ds);
 							dataSeriesManager.registerDataSeries(ds);
 						}
 						else
 						{
-							logger.error("Could not find session file for DS name:" + name + " file name: " + seriesFileName);							
+							userLogger.error("Could not find session file for DS name:" + name + " file name: " + seriesFileName);							
 						}
 					}
 					catch (RuntimeException ex)
 					{
-						logger.error("Error loading DS name:" + name, ex);													
+						userLogger.error("Error loading DS name:" + name, ex);													
 					}
 				}
 			}			
 		} 
 		catch (IOException ex)
 		{
-			logger.error("Error reading DS list files", ex);
+			userLogger.error("Error reading DS list files", ex);
 		}
+		
+		//Load mapping
+		mappingManager.removeAllMappings();
+		
+		
+		Optional<File> mappingFile = files.stream()
+				.filter((f) -> f.getName().equals(MAPPING_FILENAME))
+				.findAny();
+		
+		if(!mappingFile.isPresent())
+		{
+			userLogger.warn("Could not find data series mapping file ('" + MAPPING_FILENAME + "'), although some data series are present.");
+		}
+		else
+		{
+			CSVFormat mappingFormat = CSV_FORMAT.withHeader();
+			try (CSVParser parser = new CSVParser(new FileReader(mappingFile.get()), mappingFormat))
+			{
+				for(CSVRecord record: parser)
+				{
+					try {
+						String columnName = record.get(MAPPING_COLUMN_NAME_COLUMN);
+						long seriesSuid = Long.parseLong(record.get(MAPPING_SERIES_SUID_COLUMN));
+						if (!oldSuidMapping.containsKey(seriesSuid))
+						{
+							userLogger.error("Could not find DS with old SUID " + seriesSuid + " mentioned in mapping.");
+							continue;
+						}
+						
+						
+						String targetClassName = record.get(MAPPING_TARGET_CLASS_COLUMN);
+						Class<?> targetClassRaw = Class.forName(targetClassName);
+
+						if(CyIdentifiable.class.isAssignableFrom(targetClassRaw))
+						{
+							Class<? extends CyIdentifiable> classCast = (Class<? extends CyIdentifiable>)targetClassRaw; 
+							mappingManager.mapDataSeriesRowsToTableColumn(classCast, columnName, oldSuidMapping.get(seriesSuid));
+						}
+					}
+					catch(ClassNotFoundException ex)
+					{
+						userLogger.error("Could not find target class for mapping.", ex);						
+					}
+				}
+			}
+			catch (IOException ex)
+			{
+				userLogger.error("Error reading data series mapping file.");
+			}
+		}
+			
+		
 	}
 
 
@@ -173,7 +239,7 @@ public class DataSeriesStorageManager implements SessionAboutToBeSavedListener, 
 		
 		try (CSVPrinter listPrinter = new CSVPrinter(new FileWriter(listFile), CSV_FORMAT))
 		{
-			listPrinter.printRecord(SUID_COLUMN, NAME_COLUMN, CLASS_COLUMN); //header
+			listPrinter.printRecord(SERIES_SUID_COLUMN, SERIES_NAME_COLUMN, SERIES_CLASS_COLUMN); //header
 			
 			for(DataSeries<?, ?> ds : dataSeriesManager.getAllDataSeries()) 
 			{
@@ -182,7 +248,7 @@ public class DataSeriesStorageManager implements SessionAboutToBeSavedListener, 
 		}
 		catch (IOException ex)
 		{
-			logger.error("Error writing DS list file", ex);
+			userLogger.error("Error writing DS list file", ex);
 		}
 		
 		Map<String, DataSeriesStorageProvider> providers = getStorageProviders();
@@ -195,7 +261,7 @@ public class DataSeriesStorageManager implements SessionAboutToBeSavedListener, 
 			DataSeriesStorageProvider provider = providers.get(ds.getClass().getName());
 			if(provider == null)
 			{
-				logger.error("Could not find provider for DS name:" + ds.getName() + " class: " + ds.getClass().getName());
+				userLogger.error("Could not find provider for DS name:" + ds.getName() + " class: " + ds.getClass().getName());
 			}
 			else
 			{
@@ -206,17 +272,35 @@ public class DataSeriesStorageManager implements SessionAboutToBeSavedListener, 
 				}
 				catch(IOException ex)
 				{
-					logger.error("Could not write DS name:" + ds.getName(), ex);
+					userLogger.error("Could not write DS name:" + ds.getName(), ex);
 				}
 			}
 		};
+		
+		//Save mapping
+		File mappingFile = new File(tmpDir, MAPPING_FILENAME);
+		try (CSVPrinter mappingPrinter = new CSVPrinter(new FileWriter(mappingFile), CSV_FORMAT))
+		{
+			mappingPrinter.printRecord(MAPPING_TARGET_CLASS_COLUMN, MAPPING_COLUMN_NAME_COLUMN, MAPPING_SERIES_SUID_COLUMN);
+			for(Class<? extends CyIdentifiable> targetClass : mappingManager.getTargetsWithMappedDataSeries())
+			{
+				for(Map.Entry<String, DataSeries<?, ?>> entry : mappingManager.getAllMappings(targetClass).entrySet())
+				{
+					mappingPrinter.printRecord(targetClass.getName(), entry.getKey(), entry.getValue().getSUID());
+				}
+			}
+			dsFiles.add(mappingFile);
+		} catch (IOException ex)
+		{
+			userLogger.error("Error writing mapping file.", ex);
+		}		
 		
 		try {
 			e.addAppFiles(CyActivator.APP_NAME_FOR_STORAGE, dsFiles);
 		}
 		catch (Exception ex)
 		{
-			logger.error("Error adding DS files to session.", ex);			
+			userLogger.error("Error adding DS files to session.", ex);			
 		}
 	}	
 }

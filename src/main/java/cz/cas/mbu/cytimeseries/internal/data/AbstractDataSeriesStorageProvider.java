@@ -13,6 +13,7 @@ import java.util.function.Function;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
+import org.cytoscape.model.SUIDFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +33,7 @@ public abstract class AbstractDataSeriesStorageProvider  implements DataSeriesSt
 	protected abstract DataSeriesBuilder getSeriesBuilder();
 	
 	@Override
-	public DataSeries<?, ?> loadDataSeries(File file, String name, long suid) throws IOException {
+	public DataSeries<?, ?> loadDataSeries(File file, String name, long oldSuid) throws IOException {
 		try (CSVParser parser = new CSVParser(new FileReader(file), DataSeriesStorageManager.CSV_FORMAT))
 		{
 			List<CSVRecord> recordList = parser.getRecords();
@@ -75,7 +76,7 @@ public abstract class AbstractDataSeriesStorageProvider  implements DataSeriesSt
 			
 			DataSeriesBuilder builder = getSeriesBuilder();
 			
-			builder.name(name).suid(suid);
+			builder.name(name).suid(SUIDFactory.getNextSUID());
 			builder.parseIndex(index).rowIds(rowIds).rowNames(rowNames);
 			
 			//Skipping the header row

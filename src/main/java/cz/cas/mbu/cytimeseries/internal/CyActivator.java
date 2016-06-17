@@ -34,12 +34,13 @@ public class CyActivator extends AbstractCyActivator {
 		DataSeriesManagerImpl dataSeriesManager = new DataSeriesManagerImpl();
 		registerAllServices(bc, dataSeriesManager, new Properties());
 		
-		DataSeriesStorageManager storageManager = new DataSeriesStorageManager(bc, dataSeriesManager);
-		registerAllServices(bc, storageManager, new Properties());
 		
 
-		DataSeriesMappingManager mappingManager = new DataSeriesMappingManagerImpl();
+		DataSeriesMappingManagerImpl mappingManager = new DataSeriesMappingManagerImpl();
 		registerAllServices(bc, mappingManager, new Properties());
+
+		DataSeriesStorageManager storageManager = new DataSeriesStorageManager(bc, dataSeriesManager, mappingManager);
+		registerAllServices(bc, storageManager, new Properties());
 	
 		DataSeriesStorageProvider timeSeriesProvider = new TimeSeriesStorageProviderImpl(); 
 		registerService(bc, timeSeriesProvider, DataSeriesStorageProvider.class, new Properties());
@@ -47,15 +48,20 @@ public class CyActivator extends AbstractCyActivator {
 		ParameterPassingTaskFactory<AddTimeSeriesTask> addTaskFactory = new ParameterPassingTaskFactory<>(AddTimeSeriesTask.class, dataSeriesManager, timeSeriesProvider);
 		
 		Properties baseMenuProperties = new Properties();
-		baseMenuProperties.setProperty(ServiceProperties.PREFERRED_MENU,"Apps.Time Series");
+		baseMenuProperties.setProperty(ServiceProperties.PREFERRED_MENU,"Apps.Data Series");
 		baseMenuProperties.setProperty(ServiceProperties.IN_MENU_BAR,"true");
 		
-		Properties addProperties = new Properties(baseMenuProperties);
-		addProperties.setProperty(ServiceProperties.TITLE, "Add Time Series to Network");
-		addProperties.setProperty(ServiceProperties.PREFERRED_MENU,"Apps.Time Series");
-		addProperties.setProperty(ServiceProperties.IN_MENU_BAR,"true");
+		Properties addProperties = new Properties();
+		addProperties.putAll(baseMenuProperties);
+		addProperties.setProperty(ServiceProperties.TITLE, "Add data Series");
 		registerService(bc, addTaskFactory, TaskFactory.class, addProperties);
 
+		ParameterPassingTaskFactory<MapColumnTask> mapColumnTaskFactory = new ParameterPassingTaskFactory<>(MapColumnTask.class, dataSeriesManager, mappingManager);
+		Properties mapProperties = new Properties();
+		mapProperties.putAll(baseMenuProperties);
+		mapProperties.setProperty(ServiceProperties.TITLE, "Map column to series");
+		registerService(bc, mapColumnTaskFactory, TaskFactory.class, mapProperties);
+		
 		/*
 		Properties modifyProperties = new Properties(baseMenuProperties);
 		modifyProperties.setProperty(ServiceProperties.TITLE, "Add Time Series...");

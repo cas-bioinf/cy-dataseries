@@ -1,5 +1,6 @@
 package cz.cas.mbu.cytimeseries.internal;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +19,7 @@ public class DataSeriesMappingManagerImpl implements DataSeriesMappingManager{
 
 	private final Logger logger = LoggerFactory.getLogger(DataSeriesMappingManagerImpl.class); 
 	
-	Map<Class<CyIdentifiable>, Map<String, DataSeries<?,?>>> mappings;
+	Map<Class<? extends CyIdentifiable>, Map<String, DataSeries<?,?>>> mappings;
 	
 	public  DataSeriesMappingManagerImpl()
 	{
@@ -27,7 +28,7 @@ public class DataSeriesMappingManagerImpl implements DataSeriesMappingManager{
 	
 	
 	@Override
-	public void mapDataSeriesRowsToTableColumn(Class<CyIdentifiable> targetClass, String columnName,
+	public void mapDataSeriesRowsToTableColumn(Class<? extends CyIdentifiable> targetClass, String columnName,
 			DataSeries<?, ?> ds) {
 		Map<String, DataSeries<?, ?>> localMap = mappings.get(targetClass);
 		if(localMap == null)
@@ -44,7 +45,7 @@ public class DataSeriesMappingManagerImpl implements DataSeriesMappingManager{
 	}
 
 	@Override
-	public void unmapTableColumn(Class<CyIdentifiable> targetClass, String columnName) {
+	public void unmapTableColumn(Class<? extends CyIdentifiable> targetClass, String columnName) {
 		Map<String, DataSeries<?, ?>> localMap = mappings.get(targetClass);
 		if(localMap == null)
 		{
@@ -61,7 +62,7 @@ public class DataSeriesMappingManagerImpl implements DataSeriesMappingManager{
 	}
 
 	@Override
-	public DataSeries<?, ?> getMappedDataSeries(Class<CyIdentifiable> targetClass, String columnName) {
+	public DataSeries<?, ?> getMappedDataSeries(Class<? extends CyIdentifiable> targetClass, String columnName) {
 		Map<String, DataSeries<?, ?>> localMap = mappings.get(targetClass);
 		if(localMap == null)
 		{
@@ -72,7 +73,7 @@ public class DataSeriesMappingManagerImpl implements DataSeriesMappingManager{
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Map<String, DataSeries<?, ?>> getAllMappings(Class<CyIdentifiable> targetClass) {
+	public Map<String, DataSeries<?, ?>> getAllMappings(Class<? extends CyIdentifiable> targetClass) {
 		Map<String, DataSeries<?, ?>> localMap = mappings.get(targetClass);
 		if(localMap == null)
 		{
@@ -91,6 +92,18 @@ public class DataSeriesMappingManagerImpl implements DataSeriesMappingManager{
 			return Collections.EMPTY_MAP;
 		}
 		return  (Map<String, T>)Maps.filterEntries(localMap, e -> dataSeriesClass.isAssignableFrom(e.getValue().getClass()));
+	}
+
+
+	@Override
+	public Collection<Class<? extends CyIdentifiable>> getTargetsWithMappedDataSeries() {
+		return mappings.keySet();
+	}
+	
+	
+	public void removeAllMappings()
+	{
+		mappings.clear();
 	}
 
 }

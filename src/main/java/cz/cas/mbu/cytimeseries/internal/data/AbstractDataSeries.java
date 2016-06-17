@@ -94,4 +94,9 @@ public abstract class AbstractDataSeries<INDEX, DATA> implements DataSeries<INDE
 		return rowIds.length;
 	}
 
+	@Override
+	public String toString()
+	{
+		return name;
+	}
 }
