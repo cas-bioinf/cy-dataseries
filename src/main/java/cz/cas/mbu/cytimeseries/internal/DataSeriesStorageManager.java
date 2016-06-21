@@ -104,6 +104,10 @@ public class DataSeriesStorageManager implements SessionAboutToBeSavedListener, 
 		}
 		
 		List<File> files = e.getLoadedSession().getAppFileListMap().get(CyActivator.APP_NAME_FOR_STORAGE);
+		if(files == null || files.size() == 0)
+		{
+			return;
+		}
 
 		//First, find the list file
 		Optional<File> listFile = files.stream()

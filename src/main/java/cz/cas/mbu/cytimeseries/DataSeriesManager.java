@@ -7,8 +7,6 @@ import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyTable;
 
 public interface DataSeriesManager {
-	public static final String TIME_SERIES_TABLE_CONTEXT = "cz.cas.mbu.cytimeseries";
-	
 	
 	List<DataSeries<?,?>> getAllDataSeries();
 	<T extends DataSeries<?, ?>> List<T> getDataSeriesByType(Class<T> type); 

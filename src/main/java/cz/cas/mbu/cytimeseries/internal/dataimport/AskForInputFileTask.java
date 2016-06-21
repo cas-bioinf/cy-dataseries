@@ -1,4 +1,4 @@
-package cz.cas.mbu.cytimeseries.internal;
+package cz.cas.mbu.cytimeseries.internal.dataimport;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,45 +25,28 @@ import cz.cas.mbu.cytimeseries.DataSeriesStorageProvider;
 import cz.cas.mbu.cytimeseries.DataSeries;
 import cz.cas.mbu.cytimeseries.DataSeriesManager;
 
-public class AddTimeSeriesTask extends AbstractTask implements TunableValidator{
+public class AskForInputFileTask extends AbstractTask implements TunableValidator{
 
-	@Tunable(description="Name", required = true)
-	public String name = "";
-	
 	@Tunable(description="Data file", required = true, params="input=true;fileCategory=table")
 	public File inputFile = null;
 	
-	private final DataSeriesManager dataSeriesManager;
-	private final DataSeriesStorageProvider storageProvider;
+	private final String title;
 	
-
-
-
-	public AddTimeSeriesTask(DataSeriesManager dataSeriesManager, DataSeriesStorageProvider storageProvider) {
+	public AskForInputFileTask(String title) {
 		super();
-		this.dataSeriesManager = dataSeriesManager;
-		this.storageProvider = storageProvider;
+		this.title = title;
 	}
 
 
 	@ProvidesTitle
 	public String getTitle()
 	{
-		return "Adding time series."; 
+		return title; 
 	}
 	
 
 	@Override
 	public void run(TaskMonitor tm) throws Exception {
-		try {
-			DataSeries<?, ?> ds = storageProvider.loadDataSeries(inputFile, name, SUIDFactory.getNextSUID());
-			dataSeriesManager.registerDataSeries(ds);
-		}
-		catch (Exception ex)
-		{
-			tm.showMessage(Level.ERROR, ex.getMessage());
-			throw ex;
-		}
 	}
 
 	
@@ -75,11 +58,6 @@ public class AddTimeSeriesTask extends AbstractTask implements TunableValidator{
 			{
 				errMsg.append("You have to select an input file");
 				return ValidationState.INVALID;
-			}
-			if(name.length() < 3)
-			{
-				errMsg.append("Are you sure you do not want to provide a name?");
-				return ValidationState.REQUEST_CONFIRMATION;
 			}
 		} catch (IOException ex)
 		{

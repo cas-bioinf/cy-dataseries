@@ -37,7 +37,7 @@ public abstract class AbstractDataSeriesStorageProvider  implements DataSeriesSt
 		try (CSVParser parser = new CSVParser(new FileReader(file), DataSeriesStorageManager.CSV_FORMAT))
 		{
 			List<CSVRecord> recordList = parser.getRecords();
-
+			
 			CSVRecord headerRecord = recordList.get(0);
 			
 			int numIndex =	headerRecord.size() - 2; //One column are the row names and one are ids

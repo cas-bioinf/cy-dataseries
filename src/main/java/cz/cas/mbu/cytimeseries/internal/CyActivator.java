@@ -12,11 +12,15 @@ import org.cytoscape.model.events.RowsSetListener;
 import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.work.ServiceProperties;
 import org.cytoscape.work.TaskFactory;
+import org.cytoscape.work.swing.GUITunableHandlerFactory;
 import org.osgi.framework.BundleContext;
 
 import cz.cas.mbu.cytimeseries.DataSeriesMappingManager;
 import cz.cas.mbu.cytimeseries.DataSeriesStorageProvider;
 import cz.cas.mbu.cytimeseries.internal.data.TimeSeriesStorageProviderImpl;
+import cz.cas.mbu.cytimeseries.internal.dataimport.ImportDataSeriesTask;
+import cz.cas.mbu.cytimeseries.internal.dataimport.ImportDataSeriesTaskFactory;
+import cz.cas.mbu.cytimeseries.internal.dataimport.ImportParametersGuiHandleFactory;
 
 public class CyActivator extends AbstractCyActivator {
 
@@ -45,16 +49,19 @@ public class CyActivator extends AbstractCyActivator {
 		DataSeriesStorageProvider timeSeriesProvider = new TimeSeriesStorageProviderImpl(); 
 		registerService(bc, timeSeriesProvider, DataSeriesStorageProvider.class, new Properties());
 		
-		ParameterPassingTaskFactory<AddTimeSeriesTask> addTaskFactory = new ParameterPassingTaskFactory<>(AddTimeSeriesTask.class, dataSeriesManager, timeSeriesProvider);
+		
+		registerService(bc, new ImportParametersGuiHandleFactory(), GUITunableHandlerFactory.class, new Properties());
+		
 		
 		Properties baseMenuProperties = new Properties();
 		baseMenuProperties.setProperty(ServiceProperties.PREFERRED_MENU,"Apps.Data Series");
 		baseMenuProperties.setProperty(ServiceProperties.IN_MENU_BAR,"true");
 		
-		Properties addProperties = new Properties();
-		addProperties.putAll(baseMenuProperties);
-		addProperties.setProperty(ServiceProperties.TITLE, "Add data Series");
-		registerService(bc, addTaskFactory, TaskFactory.class, addProperties);
+		Properties importProperties = new Properties();
+		importProperties.putAll(baseMenuProperties);
+		importProperties.setProperty(ServiceProperties.TITLE, "Import data Series");
+		ImportDataSeriesTaskFactory importTaskFactory = new ImportDataSeriesTaskFactory(dataSeriesManager, storageProvider)
+		registerService(bc, addTaskFactory, TaskFactory.class, importProperties);
 
 		ParameterPassingTaskFactory<MapColumnTask> mapColumnTaskFactory = new ParameterPassingTaskFactory<>(MapColumnTask.class, dataSeriesManager, mappingManager);
 		Properties mapProperties = new Properties();
