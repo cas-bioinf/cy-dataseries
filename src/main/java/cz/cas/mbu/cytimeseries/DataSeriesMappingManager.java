@@ -6,6 +6,8 @@ import java.util.Map;
 import org.cytoscape.model.CyIdentifiable;
 
 public interface DataSeriesMappingManager {
+	static final Class<Integer> MAPPING_COLUMN_CLASS = Integer.class;
+	
 	void mapDataSeriesRowsToTableColumn(Class<? extends CyIdentifiable> targetClass, String columnName, DataSeries<?, ?> ds);
 	void unmapTableColumn(Class<? extends CyIdentifiable> targetClass, String columnName);
 	

@@ -85,7 +85,7 @@ public class ImportDataSeriesTask extends AbstractTask implements TunableValidat
 			{		
 				PreImportResults preImportResults = ImportHelper.preImport(inputReader, importParameters, true /* strict */);
 				DataSeries<?, ?> ds = provider.getSelectedValue().getProvider().importDataDataSeries(name, SUIDFactory.getNextSUID(), preImportResults);
-				dataSeriesManager.registerDataSeries(ds);
+				importedDS = ds;
 			}
 			catch (Exception ex)
 			{

@@ -1,4 +1,4 @@
-package cz.cas.mbu.cytimeseries.internal;
+package cz.cas.mbu.cytimeseries.internal.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -36,6 +36,7 @@ import org.jfree.util.ArrayUtilities;
 
 import cz.cas.mbu.cytimeseries.DataSeriesStorageProvider;
 import cz.cas.mbu.cytimeseries.TimeSeries;
+import cz.cas.mbu.cytimeseries.internal.TimeSeriesChartContainer;
 import cz.cas.mbu.cytimeseries.DataSeries;
 import cz.cas.mbu.cytimeseries.DataSeriesManager;
 import cz.cas.mbu.cytimeseries.DataSeriesMappingManager;
@@ -111,7 +112,7 @@ public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 			
 			dataSeriesMappingManager.getAllMappings(CyNode.class, TimeSeries.class).entrySet().forEach(
 					(entry) -> {
-						Integer id = row.get(entry.getKey(), Integer.class);
+						Integer id = row.get(entry.getKey(), DataSeriesMappingManager.MAPPING_COLUMN_CLASS);
 						if(id != null)
 						{
 							allSeries.add(entry.getValue());

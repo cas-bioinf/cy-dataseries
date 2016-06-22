@@ -74,7 +74,7 @@ public class DataSeriesImportOptionsPanel extends JPanel implements TunableValid
 		buttonGroupTranspose.add(rdbtnColumnsAsIndex);
 		add(rdbtnColumnsAsIndex, "2, 2");
 		
-		rdbtnRowsAsIndex = new JRadioButton("Rows as indices");
+		rdbtnRowsAsIndex = new JRadioButton("Rows as indices (transpose)");
 		rdbtnRowsAsIndex.setSelected(true);
 		buttonGroupTranspose.add(rdbtnRowsAsIndex);
 		add(rdbtnRowsAsIndex, "4, 2");

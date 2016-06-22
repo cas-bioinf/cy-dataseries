@@ -88,6 +88,10 @@ public class DataSeriesManagerImpl implements DataSeriesManager {
 
 	@Override
 	public void registerDataSeries(DataSeries<?, ?> ds) {
+		if(ds == null)
+		{
+			throw new NullPointerException("Data series cannot be null");
+		}
 		dataSeries.add(ds);		
 	}
 

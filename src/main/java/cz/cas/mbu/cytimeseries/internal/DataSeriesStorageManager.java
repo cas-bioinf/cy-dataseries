@@ -250,7 +250,7 @@ public class DataSeriesStorageManager implements SessionAboutToBeSavedListener, 
 				listPrinter.printRecord(ds.getSUID(), ds.getName(), ds.getClass().getName());
 			};
 		}
-		catch (IOException ex)
+		catch (Exception ex)
 		{
 			userLogger.error("Error writing DS list file", ex);
 		}

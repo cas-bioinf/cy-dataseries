@@ -25,6 +25,7 @@ import cz.cas.mbu.cytimeseries.internal.dataimport.ImportDataSeriesTask;
 import cz.cas.mbu.cytimeseries.internal.dataimport.ImportDataSeriesTaskFactory;
 import cz.cas.mbu.cytimeseries.internal.dataimport.ImportParametersGuiHandleFactory;
 import cz.cas.mbu.cytimeseries.internal.dataimport.TimeSeriesImportProviderImpl;
+import cz.cas.mbu.cytimeseries.internal.ui.DataSeriesVisualPanel;
 
 public class CyActivator extends AbstractCyActivator {
 
@@ -67,7 +68,7 @@ public class CyActivator extends AbstractCyActivator {
 		ImportDataSeriesTaskFactory importTaskFactory = new ImportDataSeriesTaskFactory(dataSeriesManager, importManager);
 		registerService(bc, importTaskFactory, TaskFactory.class, importProperties);
 
-		ParameterPassingTaskFactory<MapColumnTask> mapColumnTaskFactory = new ParameterPassingTaskFactory<>(MapColumnTask.class, dataSeriesManager, mappingManager);
+		NetworkSelectedParameterPassingTaskFactory<MapColumnTask> mapColumnTaskFactory = new NetworkSelectedParameterPassingTaskFactory<>(MapColumnTask.class, cyApplicationManager, dataSeriesManager, mappingManager, cyApplicationManager);
 		Properties mapProperties = new Properties();
 		mapProperties.putAll(baseMenuProperties);
 		mapProperties.setProperty(ServiceProperties.TITLE, "Map column to series");
