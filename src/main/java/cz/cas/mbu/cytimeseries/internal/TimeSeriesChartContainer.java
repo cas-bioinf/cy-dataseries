@@ -37,7 +37,11 @@ public class TimeSeriesChartContainer {
 	
 	public void setSeriesData(List<TimeSeries> allSeries, List<Integer> rowIds)
 	{
-		//TODO this does not handle series deletion
+		for(int series = 0; series < dataset.getSeriesCount(); series++)
+		{
+			dataset.removeSeries(dataset.getSeriesKey(series));
+		}
+		
 		for(int i = 0; i < allSeries.size(); i++)
 		{
 			TimeSeries series = allSeries.get(i);
@@ -48,6 +52,7 @@ public class TimeSeriesChartContainer {
 				dataset.addSeries(series.getName(), data);
 			}			
 		}		
+		
 	}
 	
 	public void resetSeriesVisible()

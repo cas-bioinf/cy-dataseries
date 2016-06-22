@@ -121,12 +121,26 @@ public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 			
 			chartContainer.setSeriesData(allSeries, rowIds);			
 		}
+		else
+		{
+			chartContainer.setSeriesData(Collections.EMPTY_LIST, Collections.EMPTY_LIST);			
+		}
 	}
 	
 	@Override
 	public void handleEvent(RowsSetEvent e) {
 		if (!e.containsColumn(CyNetwork.SELECTED) || ignoreSelection)
 			return;
+		if(e.getSource().equals(cyApplicationManager.getCurrentNetwork().getTable(CyNode.class, CyNetwork.LOCAL_ATTRS)) )
+		{
+			updateCharts();
+	
+			//TODO the above is very inefficient, replace with maintaining the list of selected nodes with
+//			 for (RowSetRecord record: e.getColumnRecords(CyNetwork.SELECTED)) {
+//		          Long suid = record.getRow().get(CyIdentifiable.SUID, Long.class);
+//		          Boolean value = (Boolean)record.getValue();
+			
+		}
 	}
 
 }
