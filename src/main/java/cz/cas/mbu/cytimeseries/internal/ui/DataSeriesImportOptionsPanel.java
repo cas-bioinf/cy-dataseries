@@ -95,6 +95,7 @@ public class DataSeriesImportOptionsPanel extends JPanel implements TunableValid
 		add(rdbtnManualIndexValues, "4, 6");
 		
 		textFieldIndexValues = new JTextField();
+		textFieldIndexValues.setEnabled(false);
 		add(textFieldIndexValues, "4, 8, fill, default");
 		textFieldIndexValues.setColumns(10);
 		
