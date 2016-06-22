@@ -1,30 +1,25 @@
 package cz.cas.mbu.cytimeseries.internal.dataimport;
 
-import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.StringReader;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import org.cytoscape.application.CyApplicationManager;
-import org.cytoscape.model.CyEdge;
-import org.cytoscape.model.CyIdentifiable;
-import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyNode;
 import org.cytoscape.model.SUIDFactory;
-import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.AbstractTask;
-import org.cytoscape.work.ContainsTunables;
 import org.cytoscape.work.ProvidesTitle;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.TaskMonitor.Level;
 import org.cytoscape.work.Tunable;
 import org.cytoscape.work.TunableValidator;
-import org.cytoscape.work.TunableValidator.ValidationState;
 import org.cytoscape.work.util.ListSingleSelection;
-import org.osgi.framework.BundleContext;
 
-import cz.cas.mbu.cytimeseries.DataSeriesStorageProvider;
-import cz.cas.mbu.cytimeseries.dataimport.DataSeriesImportProvider;
 import cz.cas.mbu.cytimeseries.DataSeries;
 import cz.cas.mbu.cytimeseries.DataSeriesManager;
+import cz.cas.mbu.cytimeseries.dataimport.DataSeriesImportManager;
+import cz.cas.mbu.cytimeseries.dataimport.DataSeriesImportProvider;
+import cz.cas.mbu.cytimeseries.dataimport.PreImportResults;
 
 public class ImportDataSeriesTask extends AbstractTask implements TunableValidator{
 
@@ -32,19 +27,23 @@ public class ImportDataSeriesTask extends AbstractTask implements TunableValidat
 	public String name = "";
 	
 	@Tunable(description="Series Type", required = true)
-	public ListSingleSelection<DataSeriesImportProvider> provider;
+	public ListSingleSelection<ProviderDisplay> provider;
 	
 	@Tunable
 	public ImportParameters importParameters;
 	
 	private final DataSeriesManager dataSeriesManager;
-	private final DataSeriesImportProvider importProvider;
+		
+	private DataSeries<?,?> importedDS;
 	
-	public ImportDataSeriesTask(AskForInputFileTask inputFileTask, DataSeriesManager dataSeriesManager, DataSeriesImportProvider importProvider) {
+	public ImportDataSeriesTask(DataSeriesManager dataSeriesManager, DataSeriesImportManager importManager) {
 		super();
-		this.importParameters.setFile(inputFileTask.inputFile);
+		this.importParameters = new ImportParameters();
 		this.dataSeriesManager = dataSeriesManager;
-		this.importProvider = importProvider;
+		
+		this.provider = new ListSingleSelection<>(importManager.getAllImportProviders().stream()
+				.map(x -> new ProviderDisplay(x))
+				.collect(Collectors.toList()));
 	}
 
 
@@ -57,15 +56,8 @@ public class ImportDataSeriesTask extends AbstractTask implements TunableValidat
 
 	@Override
 	public void run(TaskMonitor tm) throws Exception {
-		try {
-			DataSeries<?, ?> ds = importProvider.loadDataSeries(inputFile, name, SUIDFactory.getNextSUID());
-			dataSeriesManager.registerDataSeries(ds);
-		}
-		catch (Exception ex)
-		{
-			tm.showMessage(Level.ERROR, ex.getMessage());
-			throw ex;
-		}
+		//DS is loaded during validation to let the user modify the options immediately
+		dataSeriesManager.registerDataSeries(importedDS);
 	}
 
 	
@@ -88,6 +80,18 @@ public class ImportDataSeriesTask extends AbstractTask implements TunableValidat
 				errMsg.append("Are you sure you want to use such a short name?");
 				return ValidationState.REQUEST_CONFIRMATION;
 			}
+
+			try (FileReader inputReader = new FileReader(importParameters.getFile())) 
+			{		
+				PreImportResults preImportResults = ImportHelper.preImport(inputReader, importParameters, true /* strict */);
+				DataSeries<?, ?> ds = provider.getSelectedValue().getProvider().importDataDataSeries(name, SUIDFactory.getNextSUID(), preImportResults);
+				dataSeriesManager.registerDataSeries(ds);
+			}
+			catch (Exception ex)
+			{
+				errMsg.append(ex.getMessage());
+				return ValidationState.INVALID;
+			}			
 		} catch (IOException ex)
 		{
 			return ValidationState.INVALID;
@@ -95,7 +99,30 @@ public class ImportDataSeriesTask extends AbstractTask implements TunableValidat
 		return ValidationState.OK;
 	}
 
+	public static class ProviderDisplay
+	{
+		private final DataSeriesImportProvider provider;
 
+		public ProviderDisplay(DataSeriesImportProvider provider) {
+			super();
+			this.provider = provider;
+		}
+		
+		
+
+		public DataSeriesImportProvider getProvider() {
+			return provider;
+		}
+
+
+
+		@Override
+		public String toString() {
+			return provider.getDescription();
+		}
+		
+		
+	}
 
 
 }

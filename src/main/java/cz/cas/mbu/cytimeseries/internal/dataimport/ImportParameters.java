@@ -5,6 +5,7 @@ import java.util.List;
 
 public class ImportParameters {
 	private File file;
+	private String previewData;
 	
 	private char separator;
 	private Character commentCharacter = null;
@@ -19,6 +20,14 @@ public class ImportParameters {
 	public void setFile(File file) {
 		this.file = file;
 	}
+	
+	public String getPreviewData() {
+		return previewData;
+	}
+	public void setPreviewData(String previewData) {
+		this.previewData = previewData;
+	}
+	
 	public char getSeparator() {
 		return separator;
 	}

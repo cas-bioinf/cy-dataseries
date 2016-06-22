@@ -1,28 +1,27 @@
 package cz.cas.mbu.cytimeseries.internal.ui;
 
-import javax.swing.JPanel;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
+import java.io.File;
 import java.io.StringReader;
 
-import com.jgoodies.forms.layout.FormLayout;
+import javax.swing.JPanel;
+import javax.swing.JSeparator;
+
+import org.apache.log4j.Logger;
+import org.cytoscape.application.CyUserLog;
+
 import com.jgoodies.forms.layout.ColumnSpec;
+import com.jgoodies.forms.layout.FormLayout;
+import com.jgoodies.forms.layout.FormSpecs;
 import com.jgoodies.forms.layout.RowSpec;
 
 import cz.cas.mbu.cytimeseries.dataimport.PreImportResults;
 import cz.cas.mbu.cytimeseries.internal.dataimport.ImportHelper;
 import cz.cas.mbu.cytimeseries.internal.dataimport.ImportParameters;
 
-import com.jgoodies.forms.layout.FormSpecs;
-import javax.swing.JSeparator;
-import javax.swing.SwingConstants;
-
-import org.apache.log4j.Logger;
-import org.cytoscape.application.CyUserLog;
-
-public class ImportDataSeriesPanel extends JPanel {
+public class AllImportParametersPanel extends JPanel {
 
 	private String rawPreviewData;
+	private File inputFile;
 	
 	private FileImportOptionsPanel fileImportOptionsPanel;
 	private DataSeriesImportOptionsPanel dataSeriesImportOptionsPanel;
@@ -34,7 +33,7 @@ public class ImportDataSeriesPanel extends JPanel {
 	/**
 	 * Create the panel.
 	 */
-	public ImportDataSeriesPanel() {
+	public AllImportParametersPanel() {
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormSpecs.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
@@ -73,22 +72,29 @@ public class ImportDataSeriesPanel extends JPanel {
 		updatePreview();
 	}
 	
+	public void setInputfile(File inputFile)
+	{
+		this.inputFile = inputFile;
+	}
+	
 	protected void updatePreview()
 	{
 		try {
-			PreImportResults preImportResults = ImportHelper.preImport(new StringReader(rawPreviewData), getImportParameters());
+			PreImportResults preImportResults = ImportHelper.preImport(new StringReader(rawPreviewData), getImportParameters(), false /*strict*/);
 			importPreviewPanel.updatePreview(preImportResults);
 		}
 		catch (Exception ex)
 		{
 			userLogger.error("Error creating import preview", ex);
-			importPreviewPanel.showError(ex.getMessage());			
+			importPreviewPanel.showError(ex.getClass().getSimpleName() + ": " + ex.getMessage());			
 		}
 	}
 	
 	public ImportParameters getImportParameters()
 	{
 		ImportParameters value = new ImportParameters();
+		value.setFile(inputFile);
+		value.setPreviewData(rawPreviewData);
 		value.setSeparator(fileImportOptionsPanel.getSeparator());
 		value.setCommentCharacter(fileImportOptionsPanel.getCommentCharacter());
 		value.setTransposeBeforeImport(dataSeriesImportOptionsPanel.isTransposeBeforeImport());

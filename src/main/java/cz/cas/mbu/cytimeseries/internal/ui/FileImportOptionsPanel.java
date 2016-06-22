@@ -74,6 +74,7 @@ public class FileImportOptionsPanel extends JPanel {
 		add(lblNewLabel, "2, 2");
 		
 		rdbtnComma = new JRadioButton(", (Comma)");
+		rdbtnComma.setSelected(true);
 		separatorButtonGroup.add(rdbtnComma);
 		add(rdbtnComma, "4, 2");
 		

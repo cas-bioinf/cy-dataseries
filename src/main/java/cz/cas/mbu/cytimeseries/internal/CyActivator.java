@@ -17,10 +17,14 @@ import org.osgi.framework.BundleContext;
 
 import cz.cas.mbu.cytimeseries.DataSeriesMappingManager;
 import cz.cas.mbu.cytimeseries.DataSeriesStorageProvider;
+import cz.cas.mbu.cytimeseries.dataimport.DataSeriesImportManager;
+import cz.cas.mbu.cytimeseries.dataimport.DataSeriesImportProvider;
 import cz.cas.mbu.cytimeseries.internal.data.TimeSeriesStorageProviderImpl;
+import cz.cas.mbu.cytimeseries.internal.dataimport.DataSeriesImportManagerImpl;
 import cz.cas.mbu.cytimeseries.internal.dataimport.ImportDataSeriesTask;
 import cz.cas.mbu.cytimeseries.internal.dataimport.ImportDataSeriesTaskFactory;
 import cz.cas.mbu.cytimeseries.internal.dataimport.ImportParametersGuiHandleFactory;
+import cz.cas.mbu.cytimeseries.internal.dataimport.TimeSeriesImportProviderImpl;
 
 public class CyActivator extends AbstractCyActivator {
 
@@ -29,11 +33,7 @@ public class CyActivator extends AbstractCyActivator {
 	@Override
 	public void start(BundleContext bc) throws Exception {
 		
-		CyNetworkManager cyNetworkManager = getService(bc,CyNetworkManager.class);
 		CyApplicationManager cyApplicationManager = getService(bc,CyApplicationManager.class);
-		CyTableManager cyTableManager = getService(bc, CyTableManager.class);
-		CyTableFactory cyTableFactory = getService(bc, CyTableFactory.class);
-		CyNetworkTableManager cyNetworkTableManager = getService(bc, CyNetworkTableManager.class);
 
 		DataSeriesManagerImpl dataSeriesManager = new DataSeriesManagerImpl();
 		registerAllServices(bc, dataSeriesManager, new Properties());
@@ -52,6 +52,10 @@ public class CyActivator extends AbstractCyActivator {
 		
 		registerService(bc, new ImportParametersGuiHandleFactory(), GUITunableHandlerFactory.class, new Properties());
 		
+		registerService(bc, new TimeSeriesImportProviderImpl(), DataSeriesImportProvider.class, new Properties());
+		
+		DataSeriesImportManager importManager = new DataSeriesImportManagerImpl(bc);
+		registerService(bc, importManager, DataSeriesImportManager.class, new Properties());
 		
 		Properties baseMenuProperties = new Properties();
 		baseMenuProperties.setProperty(ServiceProperties.PREFERRED_MENU,"Apps.Data Series");
@@ -60,8 +64,8 @@ public class CyActivator extends AbstractCyActivator {
 		Properties importProperties = new Properties();
 		importProperties.putAll(baseMenuProperties);
 		importProperties.setProperty(ServiceProperties.TITLE, "Import data Series");
-		ImportDataSeriesTaskFactory importTaskFactory = new ImportDataSeriesTaskFactory(dataSeriesManager, storageProvider)
-		registerService(bc, addTaskFactory, TaskFactory.class, importProperties);
+		ImportDataSeriesTaskFactory importTaskFactory = new ImportDataSeriesTaskFactory(dataSeriesManager, importManager);
+		registerService(bc, importTaskFactory, TaskFactory.class, importProperties);
 
 		ParameterPassingTaskFactory<MapColumnTask> mapColumnTaskFactory = new ParameterPassingTaskFactory<>(MapColumnTask.class, dataSeriesManager, mappingManager);
 		Properties mapProperties = new Properties();

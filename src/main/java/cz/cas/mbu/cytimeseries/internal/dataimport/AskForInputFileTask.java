@@ -2,6 +2,7 @@ package cz.cas.mbu.cytimeseries.internal.dataimport;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.function.Consumer;
 
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.model.CyEdge;
@@ -31,10 +32,12 @@ public class AskForInputFileTask extends AbstractTask implements TunableValidato
 	public File inputFile = null;
 	
 	private final String title;
+	private final Consumer<File> fileTarget;
 	
-	public AskForInputFileTask(String title) {
+	public AskForInputFileTask(String title, Consumer<File> fileTarget) {
 		super();
 		this.title = title;
+		this.fileTarget = fileTarget;
 	}
 
 
@@ -47,6 +50,7 @@ public class AskForInputFileTask extends AbstractTask implements TunableValidato
 
 	@Override
 	public void run(TaskMonitor tm) throws Exception {
+		fileTarget.accept(inputFile);		
 	}
 
 	

@@ -10,13 +10,14 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
+import cz.cas.mbu.cytimeseries.dataimport.DataSeriesImportException;
 import cz.cas.mbu.cytimeseries.dataimport.PreImportResults;
 
 public class ImportHelper {
-	public static PreImportResults preImport(Reader reader, ImportParameters params) throws IOException
+	public static PreImportResults preImport(Reader reader, ImportParameters params, boolean strict) throws IOException
 	{
 		CSVFormat format = CSVFormat.DEFAULT
-								.withRecordSeparator(params.getSeparator())
+								.withDelimiter(params.getSeparator())
 								.withCommentMarker(params.getCommentCharacter());
 		
 		try (CSVParser parser = new CSVParser(reader, format))		
@@ -53,7 +54,7 @@ public class ImportHelper {
 						index = new ArrayList<String>(records.get(0).size() - 1); 
 						for(int column = 1; column < records.get(0).size(); column++)
 						{
-							index.set(column - 1,  records.get(0).get(column));
+							index.add(records.get(0).get(column));
 						}
 					}
 					else
@@ -66,7 +67,7 @@ public class ImportHelper {
 				
 				rowNames = new ArrayList<>(records.size() - dataStartIndex);
 				
-				int maxColumns = index.size();
+				int maxColumns = 0;
 				for(int row = dataStartIndex; row < records.size(); row++)
 				{
 					int numColumns = records.get(row).size();
@@ -74,8 +75,15 @@ public class ImportHelper {
 					{
 						numColumns -= 1; //skip the column for row names
 					}
+					if(strict && numColumns > index.size())
+					{
+						throw new DataSeriesImportException("Row " + row + " has more columns (" + numColumns + ") than there are index values (" + index.size() + ")"); 
+					}
 					maxColumns = Math.max(maxColumns, numColumns);
 				}
+				
+				
+				maxColumns = Math.max(maxColumns, index.size());
 				
 				cellData = new String[records.size() - dataStartIndex][maxColumns];
 	
@@ -95,7 +103,7 @@ public class ImportHelper {
 							
 					for(int column = firstColumn; column < currentRecord.size(); column ++)
 					{
-						cellData[row][column - firstColumn] = currentRecord.get(column);
+						cellData[row - dataStartIndex][column - firstColumn] = currentRecord.get(column);
 					}
 				}
 			}

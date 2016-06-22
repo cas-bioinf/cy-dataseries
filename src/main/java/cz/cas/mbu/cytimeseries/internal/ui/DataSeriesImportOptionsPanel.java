@@ -162,7 +162,7 @@ public class DataSeriesImportOptionsPanel extends JPanel implements TunableValid
 	
 	public boolean isTransposeBeforeImport()
 	{
-		return getRdbtnColumnsAsIndex().isSelected();
+		return getRdbtnRowsAsIndex().isSelected();
 	}
 	
 	public boolean isManualIndexData()

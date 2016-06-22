@@ -16,7 +16,7 @@ import org.cytoscape.application.CyUserLog;
 import org.cytoscape.work.Tunable;
 import org.cytoscape.work.swing.AbstractGUITunableHandler;
 
-import cz.cas.mbu.cytimeseries.internal.ui.ImportDataSeriesPanel;
+import cz.cas.mbu.cytimeseries.internal.ui.AllImportParametersPanel;
 
 public class ImportParametersGUIHandler extends AbstractGUITunableHandler {
 
@@ -24,7 +24,7 @@ public class ImportParametersGUIHandler extends AbstractGUITunableHandler {
 	
 	private static final int NUM_LINES_FOR_PREVIEW = 100;
 	
-	private ImportDataSeriesPanel dataSeriesImportOptionsPanel;
+	private AllImportParametersPanel dataSeriesImportOptionsPanel;
 		
 	public ImportParametersGUIHandler(Field field, Object instance, Tunable tunable) {
 		super(field, instance, tunable);
@@ -44,8 +44,9 @@ public class ImportParametersGUIHandler extends AbstractGUITunableHandler {
 			Stream<String> lines = Files.lines(params.getFile().toPath());
 			String firstLines = lines.limit(NUM_LINES_FOR_PREVIEW).collect(Collectors.joining("\r\n"));
 			
-			dataSeriesImportOptionsPanel = new ImportDataSeriesPanel();
+			dataSeriesImportOptionsPanel = new AllImportParametersPanel();
 			dataSeriesImportOptionsPanel.setPreviewData(firstLines);
+			dataSeriesImportOptionsPanel.setInputfile(params.getFile());			
 			
 			panel = dataSeriesImportOptionsPanel;
 		} catch (Exception ex) {
