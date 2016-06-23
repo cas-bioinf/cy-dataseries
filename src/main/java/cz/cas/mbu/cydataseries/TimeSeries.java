@@ -1,4 +1,4 @@
-package cz.cas.mbu.cytimeseries;
+package cz.cas.mbu.cydataseries;
 
 public interface TimeSeries extends DoubleDataSeries<Double>, DoubleIndexDataSeries<Double> {
 }

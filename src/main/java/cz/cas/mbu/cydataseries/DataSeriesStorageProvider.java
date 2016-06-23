@@ -1,4 +1,4 @@
-package cz.cas.mbu.cytimeseries;
+package cz.cas.mbu.cydataseries;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,7 +9,7 @@ import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
 
-import cz.cas.mbu.cytimeseries.internal.TimeSeriesSourceType;
+import cz.cas.mbu.cydataeseries.internal.TimeSeriesSourceType;
 
 /**
  * @author MBU

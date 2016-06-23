@@ -1,4 +1,4 @@
-package cz.cas.mbu.cytimeseries.internal;
+package cz.cas.mbu.cydataeseries.internal;
 
 import java.io.IOException;
 
@@ -8,8 +8,8 @@ import org.cytoscape.work.Tunable;
 import org.cytoscape.work.TunableValidator;
 import org.cytoscape.work.util.ListSingleSelection;
 
-import cz.cas.mbu.cytimeseries.DataSeriesMappingManager;
-import cz.cas.mbu.cytimeseries.DataSeriesMappingManager.MappingDescriptor;
+import cz.cas.mbu.cydataseries.DataSeriesMappingManager;
+import cz.cas.mbu.cydataseries.DataSeriesMappingManager.MappingDescriptor;
 
 public class RemoveColumnMappingTask extends AbstractTask implements TunableValidator{
 

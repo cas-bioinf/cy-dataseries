@@ -1,4 +1,4 @@
-package cz.cas.mbu.cytimeseries.internal;
+package cz.cas.mbu.cydataeseries.internal;
 
 import java.awt.BorderLayout;
 
@@ -12,7 +12,7 @@ import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
 
-import cz.cas.mbu.cytimeseries.internal.ui.MappingManagerPanel;
+import cz.cas.mbu.cydataseries.internal.ui.MappingManagerPanel;
 
 public class ManageMappingsTask extends AbstractTask {
 

@@ -1,4 +1,4 @@
-package cz.cas.mbu.cytimeseries.internal;
+package cz.cas.mbu.cydataeseries.internal;
 
 import java.util.Collection;
 import java.util.List;
@@ -12,8 +12,8 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.DefaultXYDataset;
 
-import cz.cas.mbu.cytimeseries.DataSeriesStorageProvider;
-import cz.cas.mbu.cytimeseries.TimeSeries;
+import cz.cas.mbu.cydataseries.DataSeriesStorageProvider;
+import cz.cas.mbu.cydataseries.TimeSeries;
 
 public class TimeSeriesChartContainer {
 	private JFreeChart chart;

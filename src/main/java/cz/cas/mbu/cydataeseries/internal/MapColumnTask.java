@@ -1,4 +1,4 @@
-package cz.cas.mbu.cytimeseries.internal;
+package cz.cas.mbu.cydataeseries.internal;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,10 +24,10 @@ import org.cytoscape.work.util.ListSingleSelection;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 
-import cz.cas.mbu.cytimeseries.DataSeries;
-import cz.cas.mbu.cytimeseries.DataSeriesException;
-import cz.cas.mbu.cytimeseries.DataSeriesManager;
-import cz.cas.mbu.cytimeseries.DataSeriesMappingManager;
+import cz.cas.mbu.cydataseries.DataSeries;
+import cz.cas.mbu.cydataseries.DataSeriesException;
+import cz.cas.mbu.cydataseries.DataSeriesManager;
+import cz.cas.mbu.cydataseries.DataSeriesMappingManager;
 
 public class MapColumnTask extends AbstractTask implements TunableValidator{
 	

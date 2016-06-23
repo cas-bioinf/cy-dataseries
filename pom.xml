@@ -4,13 +4,13 @@
 
 
 	<properties>
-		<bundle.symbolicName>cz.cas.mbu.cytimeseries</bundle.symbolicName>
-		<bundle.namespace>cz.cas.mbu.cytimeseries</bundle.namespace>
+		<bundle.symbolicName>cz.cas.mbu.cydataseries</bundle.symbolicName>
+		<bundle.namespace>cz.cas.mbu.cydataseries</bundle.namespace>
 	</properties>
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>cz.cas.mbu.gn</groupId>
-	<artifactId>cy-timeseries</artifactId>
+	<artifactId>cy-dataseries</artifactId>
 	<version>1.0-SNAPSHOT</version>
 
 	<name>${bundle.symbolicName}</name>

@@ -1,4 +1,4 @@
-package cz.cas.mbu.cytimeseries.internal;
+package cz.cas.mbu.cydataeseries.internal;
 
 import java.util.Properties;
 
@@ -16,17 +16,17 @@ import org.cytoscape.work.TaskFactory;
 import org.cytoscape.work.swing.GUITunableHandlerFactory;
 import org.osgi.framework.BundleContext;
 
-import cz.cas.mbu.cytimeseries.DataSeriesMappingManager;
-import cz.cas.mbu.cytimeseries.DataSeriesStorageProvider;
-import cz.cas.mbu.cytimeseries.dataimport.DataSeriesImportManager;
-import cz.cas.mbu.cytimeseries.dataimport.DataSeriesImportProvider;
-import cz.cas.mbu.cytimeseries.internal.data.TimeSeriesStorageProviderImpl;
-import cz.cas.mbu.cytimeseries.internal.dataimport.DataSeriesImportManagerImpl;
-import cz.cas.mbu.cytimeseries.internal.dataimport.ImportDataSeriesTask;
-import cz.cas.mbu.cytimeseries.internal.dataimport.ImportDataSeriesTaskFactory;
-import cz.cas.mbu.cytimeseries.internal.dataimport.ImportParametersGuiHandleFactory;
-import cz.cas.mbu.cytimeseries.internal.dataimport.TimeSeriesImportProviderImpl;
-import cz.cas.mbu.cytimeseries.internal.ui.DataSeriesVisualPanel;
+import cz.cas.mbu.cydataseries.DataSeriesMappingManager;
+import cz.cas.mbu.cydataseries.DataSeriesStorageProvider;
+import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportManager;
+import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportProvider;
+import cz.cas.mbu.cydataseries.internal.data.TimeSeriesStorageProviderImpl;
+import cz.cas.mbu.cydataseries.internal.dataimport.DataSeriesImportManagerImpl;
+import cz.cas.mbu.cydataseries.internal.dataimport.ImportDataSeriesTask;
+import cz.cas.mbu.cydataseries.internal.dataimport.ImportDataSeriesTaskFactory;
+import cz.cas.mbu.cydataseries.internal.dataimport.ImportParametersGuiHandleFactory;
+import cz.cas.mbu.cydataseries.internal.dataimport.TimeSeriesImportProviderImpl;
+import cz.cas.mbu.cydataseries.internal.ui.DataSeriesVisualPanel;
 
 public class CyActivator extends AbstractCyActivator {
 

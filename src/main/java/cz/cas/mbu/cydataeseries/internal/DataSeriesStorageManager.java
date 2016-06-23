@@ -1,4 +1,4 @@
-package cz.cas.mbu.cytimeseries.internal;
+package cz.cas.mbu.cydataeseries.internal;
 
 import java.io.File;
 import java.io.FileReader;
@@ -25,12 +25,13 @@ import org.cytoscape.session.events.SessionLoadedEvent;
 import org.cytoscape.session.events.SessionLoadedListener;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
-import org.apache.log4j.Logger;
 
-import cz.cas.mbu.cytimeseries.DataSeries;
-import cz.cas.mbu.cytimeseries.DataSeriesManager;
-import cz.cas.mbu.cytimeseries.DataSeriesMappingManager;
-import cz.cas.mbu.cytimeseries.DataSeriesStorageProvider;
+import cz.cas.mbu.cydataseries.DataSeries;
+import cz.cas.mbu.cydataseries.DataSeriesManager;
+import cz.cas.mbu.cydataseries.DataSeriesMappingManager;
+import cz.cas.mbu.cydataseries.DataSeriesStorageProvider;
+
+import org.apache.log4j.Logger;
 
 public class DataSeriesStorageManager implements SessionAboutToBeSavedListener, SessionLoadedListener {
 	private static final String SERIES_LIST_FILENAME = "_dataSeriesList.tsv";

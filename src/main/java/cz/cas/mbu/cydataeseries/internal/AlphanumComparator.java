@@ -1,4 +1,4 @@
-package cz.cas.mbu.cytimeseries.internal;
+package cz.cas.mbu.cydataeseries.internal;
 
 /*
  * The Alphanum Algorithm is an improved sorting algorithm for strings

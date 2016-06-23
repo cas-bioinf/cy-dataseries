@@ -1,4 +1,4 @@
-package cz.cas.mbu.cytimeseries;
+package cz.cas.mbu.cydataseries;
 
 import java.util.Arrays;
 import java.util.List;

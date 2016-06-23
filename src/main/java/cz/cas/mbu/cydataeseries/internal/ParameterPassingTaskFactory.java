@@ -1,4 +1,4 @@
-package cz.cas.mbu.cytimeseries.internal;
+package cz.cas.mbu.cydataeseries.internal;
 
 import java.lang.reflect.Constructor;
 
@@ -9,8 +9,8 @@ import org.cytoscape.work.AbstractTaskFactory;
 import org.cytoscape.work.Task;
 import org.cytoscape.work.TaskIterator;
 
-import cz.cas.mbu.cytimeseries.DataSeriesException;
-import cz.cas.mbu.cytimeseries.DataSeriesManager;
+import cz.cas.mbu.cydataseries.DataSeriesException;
+import cz.cas.mbu.cydataseries.DataSeriesManager;
 
 public class ParameterPassingTaskFactory<TASK extends Task> extends AbstractTaskFactory {
 	

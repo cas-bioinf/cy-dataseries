@@ -1,4 +1,4 @@
-package cz.cas.mbu.cytimeseries.internal;
+package cz.cas.mbu.cydataeseries.internal;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,9 +14,9 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Maps;
 
-import cz.cas.mbu.cytimeseries.DataSeries;
-import cz.cas.mbu.cytimeseries.DataSeriesMappingManager;
-import cz.cas.mbu.cytimeseries.DataSeriesMappingManager.MappingDescriptor;
+import cz.cas.mbu.cydataseries.DataSeries;
+import cz.cas.mbu.cydataseries.DataSeriesMappingManager;
+import cz.cas.mbu.cydataseries.DataSeriesMappingManager.MappingDescriptor;
 
 public class DataSeriesMappingManagerImpl implements DataSeriesMappingManager{
 
