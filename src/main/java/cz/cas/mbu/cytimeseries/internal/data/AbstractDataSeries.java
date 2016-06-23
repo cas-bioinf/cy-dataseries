@@ -1,6 +1,8 @@
 package cz.cas.mbu.cytimeseries.internal.data;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import cz.cas.mbu.cytimeseries.DataSeries;
@@ -10,16 +12,16 @@ public abstract class AbstractDataSeries<INDEX, DATA> implements DataSeries<INDE
 	private int[] rowIds;
 	private Map<Integer, Integer> rowMap;
 	
-	private String[] rowNames;
+	private List<String> rowNames;
 		
 	private final Long suid;
 	private final String name;
 	
-	protected AbstractDataSeries(Long suid, String name, int[] rowIds, String[] rowNames) {
+	protected AbstractDataSeries(Long suid, String name, int[] rowIds, List<String> rowNames) {
 		rowMap = new HashMap<>();
 		setRowIDs(rowIds);		
 		
-		this.rowNames = rowNames;
+		this.rowNames = new ArrayList<>(rowNames);
 		this.suid = suid;
 		this.name = name;
 	}
@@ -83,7 +85,7 @@ public abstract class AbstractDataSeries<INDEX, DATA> implements DataSeries<INDE
 
 	
 	@Override
-	public String[] getRowNames() {
+	public List<String> getRowNames() {
 		return rowNames;
 	}
 

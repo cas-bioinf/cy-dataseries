@@ -10,7 +10,7 @@ public class DoubleDataSeriesImpl<INDEX> extends AbstractListIndexDataSeries<IND
 
 	
 
-	public DoubleDataSeriesImpl(Long suid, String name, int[] rowIds, String[] rowNames, List<INDEX> indexData,
+	public DoubleDataSeriesImpl(Long suid, String name, int[] rowIds, List<String> rowNames, List<INDEX> indexData,
 			Class<INDEX> indexClass, double[][] dataArray) {
 		super(suid, name, rowIds, rowNames, indexData, indexClass);
 		this.dataArray = dataArray;

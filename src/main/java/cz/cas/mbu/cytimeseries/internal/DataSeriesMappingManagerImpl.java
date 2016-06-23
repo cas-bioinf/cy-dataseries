@@ -1,8 +1,10 @@
 package cz.cas.mbu.cytimeseries.internal;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -14,6 +16,7 @@ import com.google.common.collect.Maps;
 
 import cz.cas.mbu.cytimeseries.DataSeries;
 import cz.cas.mbu.cytimeseries.DataSeriesMappingManager;
+import cz.cas.mbu.cytimeseries.DataSeriesMappingManager.MappingDescriptor;
 
 public class DataSeriesMappingManagerImpl implements DataSeriesMappingManager{
 
@@ -70,6 +73,28 @@ public class DataSeriesMappingManagerImpl implements DataSeriesMappingManager{
 		}
 		return localMap.get(columnName);
 	}
+
+	
+	@Override
+	public Map<Class<? extends CyIdentifiable>, Map<String, DataSeries<?,?>>> getAllMappings()
+	{
+		return mappings;
+	}
+	
+	
+	
+	@Override
+	public List<MappingDescriptor> getAllMappingDescriptors() {
+		List<MappingDescriptor> descriptors = new ArrayList<>();
+		mappings.entrySet().forEach(entry -> {
+			entry.getValue().entrySet().forEach(perClassEntry ->
+			{
+				descriptors.add(new MappingDescriptor(entry.getKey(), perClassEntry.getKey(), perClassEntry.getValue()));
+			});
+		});
+		return descriptors;
+	}	
+
 
 	@Override
 	@SuppressWarnings("unchecked")

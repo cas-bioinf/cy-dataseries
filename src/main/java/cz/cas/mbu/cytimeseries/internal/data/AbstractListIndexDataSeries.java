@@ -10,7 +10,7 @@ public abstract class AbstractListIndexDataSeries<INDEX,DATA> extends AbstractDa
 
 	
 
-	public AbstractListIndexDataSeries(Long suid, String name, int[] rowIds, String[] rowNames, List<INDEX> indexData,
+	public AbstractListIndexDataSeries(Long suid, String name, int[] rowIds, List<String> rowNames, List<INDEX> indexData,
 			Class<INDEX> indexClass) {
 		super(suid, name, rowIds, rowNames);
 		this.indexData = indexData;

@@ -8,7 +8,7 @@ public class ObjectDataSeriesImpl<INDEX, DATA> extends AbstractListIndexDataSeri
 	DATA [][] data;
 	Class<DATA> dataClass;
 	
-	public ObjectDataSeriesImpl(Long suid, String name, int[] rowIds, String[] rowNames, List<INDEX> indexData,
+	public ObjectDataSeriesImpl(Long suid, String name, int[] rowIds, List<String> rowNames, List<INDEX> indexData,
 			Class<INDEX> indexClass, DATA[][] data, Class<DATA> dataClass) {
 		super(suid, name, rowIds, rowNames, indexData, indexClass);
 		this.data = data;

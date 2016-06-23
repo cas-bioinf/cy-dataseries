@@ -1,6 +1,6 @@
 package cz.cas.mbu.cytimeseries.internal.dataimport;
 
-import org.cytoscape.model.SUIDFactory;
+import java.util.List;
 
 import cz.cas.mbu.cytimeseries.DataSeries;
 import cz.cas.mbu.cytimeseries.dataimport.DataSeriesImportException;
@@ -19,8 +19,7 @@ public class TimeSeriesImportProviderImpl implements DataSeriesImportProvider{
 		{
 			rowIDs[i] = i;
 		}
-		String[] rowNames = new String[preImportResults.getRowNames().size()];
-		rowNames = preImportResults.getRowNames().toArray(rowNames);
+		List<String> rowNames = preImportResults.getRowNames();
 		
 		double[] indexArray = new double[preImportResults.getIndexValues().size()];
 		for(int index = 0; index < indexArray.length; index++)

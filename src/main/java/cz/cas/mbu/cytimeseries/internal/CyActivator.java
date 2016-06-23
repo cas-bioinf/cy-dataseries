@@ -10,6 +10,7 @@ import org.cytoscape.model.CyTableFactory;
 import org.cytoscape.model.CyTableManager;
 import org.cytoscape.model.events.RowsSetListener;
 import org.cytoscape.service.util.AbstractCyActivator;
+import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.ServiceProperties;
 import org.cytoscape.work.TaskFactory;
 import org.cytoscape.work.swing.GUITunableHandlerFactory;
@@ -73,6 +74,18 @@ public class CyActivator extends AbstractCyActivator {
 		mapProperties.putAll(baseMenuProperties);
 		mapProperties.setProperty(ServiceProperties.TITLE, "Map column to series");
 		registerService(bc, mapColumnTaskFactory, TaskFactory.class, mapProperties);
+
+		ParameterPassingTaskFactory<RemoveColumnMappingTask> removeMappingTaskFactory = new ParameterPassingTaskFactory<>(RemoveColumnMappingTask.class, mappingManager);
+		Properties removeMappingProperties = new Properties();
+		removeMappingProperties.putAll(baseMenuProperties);
+		removeMappingProperties.setProperty(ServiceProperties.TITLE, "Remove column mapping");
+		registerService(bc, removeMappingTaskFactory, TaskFactory.class, removeMappingProperties);
+
+		ParameterPassingTaskFactory<ManageMappingsTask> manageMappingTaskFactory = new ParameterPassingTaskFactory<>(ManageMappingsTask.class, getService(bc, CyServiceRegistrar.class));
+		Properties manageMappingProperties = new Properties();
+		manageMappingProperties.putAll(baseMenuProperties);
+		manageMappingProperties.setProperty(ServiceProperties.TITLE, "Manage column mappings");
+		registerService(bc, manageMappingTaskFactory, TaskFactory.class, manageMappingProperties);
 		
 		/*
 		Properties modifyProperties = new Properties(baseMenuProperties);

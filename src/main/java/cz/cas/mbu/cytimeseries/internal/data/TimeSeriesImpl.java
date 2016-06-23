@@ -9,7 +9,7 @@ public class TimeSeriesImpl extends AbstractDataSeries<Double, Double> implement
 	private double[] indexArray;
 	private double[][] dataArray;
 	
-	public TimeSeriesImpl(Long suid, String name, int[] rowIDs, String[] rowNames, double[] indexArray, double[][] dataArray) {
+	public TimeSeriesImpl(Long suid, String name, int[] rowIDs, List<String> rowNames, double[] indexArray, double[][] dataArray) {
 		super(suid, name, rowIDs, rowNames);
 		this.indexArray = indexArray;
 		this.dataArray = dataArray;

@@ -65,13 +65,13 @@ public abstract class AbstractDataSeriesStorageProvider  implements DataSeriesSt
 			
 			int numRows = (int)parser.getRecordNumber();
 			//Note: the code below has to skip the header row!
-			String[] rowNames = new String[numRows - 1];
+			List<String> rowNames = new ArrayList<>(numRows - 1);
 			int[] rowIds = new int[numRows - 1];
 			
 			for(int row = 1; row < numRows; row++)
 			{
 				rowIds[row - 1] = Integer.parseInt(recordList.get(row).get(0)); 
-				rowNames[row - 1] = recordList.get(row).get(1); 
+				rowNames.add(recordList.get(row).get(1)); 
 			}
 			
 			DataSeriesBuilder builder = getSeriesBuilder();
@@ -136,12 +136,12 @@ public abstract class AbstractDataSeriesStorageProvider  implements DataSeriesSt
 
 	protected abstract static class DataSeriesBuilder 
 	{
-		protected String[] _rowNames;
+		protected List<String> _rowNames;
 		protected int[] _rowIds;
 		protected String _name;
 		protected Long _suid;
 		
-		public DataSeriesBuilder rowNames(String[] rowNames)
+		public DataSeriesBuilder rowNames(List<String> rowNames)
 		{
 			_rowNames = rowNames;
 			return this;

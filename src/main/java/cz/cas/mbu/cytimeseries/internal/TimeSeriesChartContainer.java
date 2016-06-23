@@ -49,7 +49,7 @@ public class TimeSeriesChartContainer {
 			if(row >= 0)
 			{
 				double [][] data = new double[][] { series.getIndexArray(), series.getRowDataArray(row) };
-				dataset.addSeries(series.getName(), data);
+				dataset.addSeries(series.getRowName(row) + " (ID " + rowIds.get(i) + " in " + series.getName() + ")", data);
 			}			
 		}		
 		
