@@ -86,7 +86,7 @@ public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 
 	@Override
 	public String getTitle() {
-		return "Time Series Visual";
+		return "Data Series Visual";
 	}
 
 	@Override
@@ -96,7 +96,7 @@ public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 
 	@Override
 	public String getIdentifier() {
-		return "cz.cas.mbu.gn.timeSeriesVisual";
+		return "cz.cas.mbu.gn.dataSeriesVisual";
 	}
 
 	private void updateCharts()

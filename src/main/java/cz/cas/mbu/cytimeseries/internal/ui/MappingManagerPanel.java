@@ -28,6 +28,7 @@ import org.cytoscape.work.TaskMonitor;
 import java.awt.Dimension;
 import java.util.List;
 import javax.swing.JScrollPane;
+import javax.swing.ListSelectionModel;
 
 public class MappingManagerPanel extends JPanel {
 	private JTable table;
@@ -57,6 +58,7 @@ public class MappingManagerPanel extends JPanel {
 		add(scrollPane, "2, 2, 3, 1, fill, fill");
 		
 		table = new JTable();
+		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		scrollPane.setViewportView(table);
 		table.setMinimumSize(new Dimension(100, 100));
 		
