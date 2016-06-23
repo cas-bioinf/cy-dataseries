@@ -1,4 +1,4 @@
-package cz.cas.mbu.cydataeseries.internal;
+package cz.cas.mbu.cydataseries.internal;
 
 import java.lang.reflect.Constructor;
 

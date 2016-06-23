@@ -17,10 +17,10 @@ import org.cytoscape.model.SUIDFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cz.cas.mbu.cydataeseries.internal.DataSeriesStorageManager;
 import cz.cas.mbu.cydataseries.DataSeries;
 import cz.cas.mbu.cydataseries.DataSeriesException;
 import cz.cas.mbu.cydataseries.DataSeriesStorageProvider;
+import cz.cas.mbu.cydataseries.internal.DataSeriesStorageManager;
 
 public abstract class AbstractDataSeriesStorageProvider  implements DataSeriesStorageProvider {
 

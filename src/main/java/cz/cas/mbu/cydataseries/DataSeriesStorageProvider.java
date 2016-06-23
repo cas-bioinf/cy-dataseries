@@ -9,7 +9,7 @@ import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
 
-import cz.cas.mbu.cydataeseries.internal.TimeSeriesSourceType;
+import cz.cas.mbu.cydataseries.internal.TimeSeriesSourceType;
 
 /**
  * @author MBU

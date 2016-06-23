@@ -1,4 +1,4 @@
-package cz.cas.mbu.cydataeseries.internal;
+package cz.cas.mbu.cydataseries.internal;
 
 public enum TimeSeriesSourceType {
 	SeparateColumns("Separate columns"), ListInAColumn("A single column of list type.");
