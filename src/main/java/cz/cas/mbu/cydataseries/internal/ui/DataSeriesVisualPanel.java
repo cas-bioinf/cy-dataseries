@@ -1,4 +1,4 @@
-package cz.cas.mbu.cytimeseries.internal.ui;
+package cz.cas.mbu.cydataseries.internal.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -34,12 +34,12 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.util.ArrayUtilities;
 
-import cz.cas.mbu.cytimeseries.DataSeriesStorageProvider;
-import cz.cas.mbu.cytimeseries.TimeSeries;
-import cz.cas.mbu.cytimeseries.internal.TimeSeriesChartContainer;
-import cz.cas.mbu.cytimeseries.DataSeries;
-import cz.cas.mbu.cytimeseries.DataSeriesManager;
-import cz.cas.mbu.cytimeseries.DataSeriesMappingManager;
+import cz.cas.mbu.cydataeseries.internal.TimeSeriesChartContainer;
+import cz.cas.mbu.cydataseries.DataSeries;
+import cz.cas.mbu.cydataseries.DataSeriesManager;
+import cz.cas.mbu.cydataseries.DataSeriesMappingManager;
+import cz.cas.mbu.cydataseries.DataSeriesStorageProvider;
+import cz.cas.mbu.cydataseries.TimeSeries;
 
 public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2, RowsSetListener {
 

@@ -1,12 +1,12 @@
-package cz.cas.mbu.cytimeseries.internal.dataimport;
+package cz.cas.mbu.cydataseries.internal.dataimport;
 
 import java.util.List;
 
-import cz.cas.mbu.cytimeseries.DataSeries;
-import cz.cas.mbu.cytimeseries.dataimport.DataSeriesImportException;
-import cz.cas.mbu.cytimeseries.dataimport.DataSeriesImportProvider;
-import cz.cas.mbu.cytimeseries.dataimport.PreImportResults;
-import cz.cas.mbu.cytimeseries.internal.data.TimeSeriesImpl;
+import cz.cas.mbu.cydataseries.DataSeries;
+import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportException;
+import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportProvider;
+import cz.cas.mbu.cydataseries.dataimport.PreImportResults;
+import cz.cas.mbu.cydataseries.internal.data.TimeSeriesImpl;
 
 public class TimeSeriesImportProviderImpl implements DataSeriesImportProvider{
 

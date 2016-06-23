@@ -1,4 +1,4 @@
-package cz.cas.mbu.cytimeseries.internal.ui;
+package cz.cas.mbu.cydataseries.internal.ui;
 
 import java.io.File;
 import java.io.StringReader;
@@ -14,9 +14,9 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.FormSpecs;
 import com.jgoodies.forms.layout.RowSpec;
 
-import cz.cas.mbu.cytimeseries.dataimport.PreImportResults;
-import cz.cas.mbu.cytimeseries.internal.dataimport.ImportHelper;
-import cz.cas.mbu.cytimeseries.internal.dataimport.ImportParameters;
+import cz.cas.mbu.cydataseries.dataimport.PreImportResults;
+import cz.cas.mbu.cydataseries.internal.dataimport.ImportHelper;
+import cz.cas.mbu.cydataseries.internal.dataimport.ImportParameters;
 
 public class AllImportParametersPanel extends JPanel {
 

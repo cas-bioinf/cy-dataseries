@@ -1,4 +1,4 @@
-package cz.cas.mbu.cytimeseries.internal.ui;
+package cz.cas.mbu.cydataseries.internal.ui;
 
 import javax.swing.JPanel;
 import com.jgoodies.forms.layout.FormLayout;

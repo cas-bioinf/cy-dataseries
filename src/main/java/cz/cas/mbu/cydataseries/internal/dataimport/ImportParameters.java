@@ -1,4 +1,4 @@
-package cz.cas.mbu.cytimeseries.internal.dataimport;
+package cz.cas.mbu.cydataseries.internal.dataimport;
 
 import java.io.File;
 import java.util.List;

@@ -1,8 +1,8 @@
-package cz.cas.mbu.cytimeseries.internal.data;
+package cz.cas.mbu.cydataseries.internal.data;
 
 import java.util.List;
 
-import cz.cas.mbu.cytimeseries.DoubleDataSeries;
+import cz.cas.mbu.cydataseries.DoubleDataSeries;
 
 public class DoubleDataSeriesImpl<INDEX> extends AbstractListIndexDataSeries<INDEX, Double> implements DoubleDataSeries<INDEX> {
 

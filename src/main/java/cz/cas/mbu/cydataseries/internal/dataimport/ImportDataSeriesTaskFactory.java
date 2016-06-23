@@ -1,11 +1,11 @@
-package cz.cas.mbu.cytimeseries.internal.dataimport;
+package cz.cas.mbu.cydataseries.internal.dataimport;
 
 import org.cytoscape.work.AbstractTaskFactory;
 import org.cytoscape.work.TaskIterator;
 
-import cz.cas.mbu.cytimeseries.DataSeriesManager;
-import cz.cas.mbu.cytimeseries.DataSeriesStorageProvider;
-import cz.cas.mbu.cytimeseries.dataimport.DataSeriesImportManager;
+import cz.cas.mbu.cydataseries.DataSeriesManager;
+import cz.cas.mbu.cydataseries.DataSeriesStorageProvider;
+import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportManager;
 
 public class ImportDataSeriesTaskFactory extends AbstractTaskFactory {
 

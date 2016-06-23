@@ -1,4 +1,4 @@
-package cz.cas.mbu.cytimeseries.internal.dataimport;
+package cz.cas.mbu.cydataseries.internal.dataimport;
 
 import java.awt.BorderLayout;
 import java.lang.reflect.Field;
@@ -16,7 +16,7 @@ import org.cytoscape.application.CyUserLog;
 import org.cytoscape.work.Tunable;
 import org.cytoscape.work.swing.AbstractGUITunableHandler;
 
-import cz.cas.mbu.cytimeseries.internal.ui.AllImportParametersPanel;
+import cz.cas.mbu.cydataseries.internal.ui.AllImportParametersPanel;
 
 public class ImportParametersGUIHandler extends AbstractGUITunableHandler {
 

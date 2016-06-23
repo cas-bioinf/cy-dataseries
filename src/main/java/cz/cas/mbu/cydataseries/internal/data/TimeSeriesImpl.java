@@ -1,8 +1,8 @@
-package cz.cas.mbu.cytimeseries.internal.data;
+package cz.cas.mbu.cydataseries.internal.data;
 
 import java.util.List;
 
-import cz.cas.mbu.cytimeseries.TimeSeries;
+import cz.cas.mbu.cydataseries.TimeSeries;
 
 public class TimeSeriesImpl extends AbstractDataSeries<Double, Double> implements TimeSeries {
 

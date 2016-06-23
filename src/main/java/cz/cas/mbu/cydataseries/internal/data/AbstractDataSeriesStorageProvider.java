@@ -1,4 +1,4 @@
-package cz.cas.mbu.cytimeseries.internal.data;
+package cz.cas.mbu.cydataseries.internal.data;
 
 import java.io.File;
 import java.io.FileReader;
@@ -17,10 +17,10 @@ import org.cytoscape.model.SUIDFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cz.cas.mbu.cytimeseries.DataSeries;
-import cz.cas.mbu.cytimeseries.DataSeriesException;
-import cz.cas.mbu.cytimeseries.DataSeriesStorageProvider;
-import cz.cas.mbu.cytimeseries.internal.DataSeriesStorageManager;
+import cz.cas.mbu.cydataeseries.internal.DataSeriesStorageManager;
+import cz.cas.mbu.cydataseries.DataSeries;
+import cz.cas.mbu.cydataseries.DataSeriesException;
+import cz.cas.mbu.cydataseries.DataSeriesStorageProvider;
 
 public abstract class AbstractDataSeriesStorageProvider  implements DataSeriesStorageProvider {
 

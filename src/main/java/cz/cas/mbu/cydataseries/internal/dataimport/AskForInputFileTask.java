@@ -1,4 +1,4 @@
-package cz.cas.mbu.cytimeseries.internal.dataimport;
+package cz.cas.mbu.cydataseries.internal.dataimport;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,9 +22,9 @@ import org.cytoscape.work.TunableValidator.ValidationState;
 import org.cytoscape.work.util.ListSingleSelection;
 import org.osgi.framework.BundleContext;
 
-import cz.cas.mbu.cytimeseries.DataSeriesStorageProvider;
-import cz.cas.mbu.cytimeseries.DataSeries;
-import cz.cas.mbu.cytimeseries.DataSeriesManager;
+import cz.cas.mbu.cydataseries.DataSeries;
+import cz.cas.mbu.cydataseries.DataSeriesManager;
+import cz.cas.mbu.cydataseries.DataSeriesStorageProvider;
 
 public class AskForInputFileTask extends AbstractTask implements TunableValidator{
 

@@ -1,10 +1,10 @@
-package cz.cas.mbu.cytimeseries.internal.ui;
+package cz.cas.mbu.cydataseries.internal.ui;
 
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
-import cz.cas.mbu.cytimeseries.dataimport.PreImportResults;
+import cz.cas.mbu.cydataseries.dataimport.PreImportResults;
 
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;

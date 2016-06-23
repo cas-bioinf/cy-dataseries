@@ -1,11 +1,11 @@
-package cz.cas.mbu.cytimeseries.internal.data;
+package cz.cas.mbu.cydataseries.internal.data;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import cz.cas.mbu.cytimeseries.DataSeries;
+import cz.cas.mbu.cydataseries.DataSeries;
 
 public abstract class AbstractDataSeries<INDEX, DATA> implements DataSeries<INDEX, DATA>{
 

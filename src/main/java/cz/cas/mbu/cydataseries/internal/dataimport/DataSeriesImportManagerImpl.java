@@ -1,4 +1,4 @@
-package cz.cas.mbu.cytimeseries.internal.dataimport;
+package cz.cas.mbu.cydataseries.internal.dataimport;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,8 +7,8 @@ import org.apache.log4j.Logger;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
-import cz.cas.mbu.cytimeseries.dataimport.DataSeriesImportManager;
-import cz.cas.mbu.cytimeseries.dataimport.DataSeriesImportProvider;
+import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportManager;
+import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportProvider;
 
 
 

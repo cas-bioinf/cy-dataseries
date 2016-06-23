@@ -1,4 +1,4 @@
-package cz.cas.mbu.cytimeseries.internal.dataimport;
+package cz.cas.mbu.cydataseries.internal.dataimport;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -15,11 +15,11 @@ import org.cytoscape.work.Tunable;
 import org.cytoscape.work.TunableValidator;
 import org.cytoscape.work.util.ListSingleSelection;
 
-import cz.cas.mbu.cytimeseries.DataSeries;
-import cz.cas.mbu.cytimeseries.DataSeriesManager;
-import cz.cas.mbu.cytimeseries.dataimport.DataSeriesImportManager;
-import cz.cas.mbu.cytimeseries.dataimport.DataSeriesImportProvider;
-import cz.cas.mbu.cytimeseries.dataimport.PreImportResults;
+import cz.cas.mbu.cydataseries.DataSeries;
+import cz.cas.mbu.cydataseries.DataSeriesManager;
+import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportManager;
+import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportProvider;
+import cz.cas.mbu.cydataseries.dataimport.PreImportResults;
 
 public class ImportDataSeriesTask extends AbstractTask implements TunableValidator{
 

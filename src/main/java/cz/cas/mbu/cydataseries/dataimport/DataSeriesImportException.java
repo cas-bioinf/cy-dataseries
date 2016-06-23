@@ -1,6 +1,6 @@
-package cz.cas.mbu.cytimeseries.dataimport;
+package cz.cas.mbu.cydataseries.dataimport;
 
-import cz.cas.mbu.cytimeseries.DataSeriesException;
+import cz.cas.mbu.cydataseries.DataSeriesException;
 
 public class DataSeriesImportException extends DataSeriesException {
 

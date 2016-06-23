@@ -1,6 +1,6 @@
-package cz.cas.mbu.cytimeseries.dataimport;
+package cz.cas.mbu.cydataseries.dataimport;
 
-import cz.cas.mbu.cytimeseries.DataSeries;
+import cz.cas.mbu.cydataseries.DataSeries;
 
 public interface DataSeriesImportProvider {
 	DataSeries<?, ?> importDataDataSeries(String name, Long suid, PreImportResults preImportResults);

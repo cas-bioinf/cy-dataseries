@@ -1,4 +1,4 @@
-package cz.cas.mbu.cytimeseries.internal.dataimport;
+package cz.cas.mbu.cydataseries.internal.dataimport;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -10,8 +10,8 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
-import cz.cas.mbu.cytimeseries.dataimport.DataSeriesImportException;
-import cz.cas.mbu.cytimeseries.dataimport.PreImportResults;
+import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportException;
+import cz.cas.mbu.cydataseries.dataimport.PreImportResults;
 
 public class ImportHelper {
 	

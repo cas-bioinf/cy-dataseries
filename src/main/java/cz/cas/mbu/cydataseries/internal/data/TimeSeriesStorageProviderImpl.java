@@ -1,4 +1,4 @@
-package cz.cas.mbu.cytimeseries.internal.data;
+package cz.cas.mbu.cydataseries.internal.data;
 
 import java.util.List;
 import java.util.function.Function;
@@ -6,7 +6,7 @@ import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cz.cas.mbu.cytimeseries.DataSeries;
+import cz.cas.mbu.cydataseries.DataSeries;
 
 public class TimeSeriesStorageProviderImpl extends AbstractDataSeriesStorageProvider {
 

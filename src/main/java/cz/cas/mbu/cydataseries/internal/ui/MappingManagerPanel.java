@@ -1,15 +1,15 @@
-package cz.cas.mbu.cytimeseries.internal.ui;
+package cz.cas.mbu.cydataseries.internal.ui;
 
 import javax.swing.JPanel;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.RowSpec;
 
-import cz.cas.mbu.cytimeseries.DataSeriesManager;
-import cz.cas.mbu.cytimeseries.DataSeriesMappingManager;
-import cz.cas.mbu.cytimeseries.DataSeriesMappingManager.MappingDescriptor;
-import cz.cas.mbu.cytimeseries.internal.MapColumnTask;
-import cz.cas.mbu.cytimeseries.internal.RemoveColumnMappingTask;
+import cz.cas.mbu.cydataeseries.internal.MapColumnTask;
+import cz.cas.mbu.cydataeseries.internal.RemoveColumnMappingTask;
+import cz.cas.mbu.cydataseries.DataSeriesManager;
+import cz.cas.mbu.cydataseries.DataSeriesMappingManager;
+import cz.cas.mbu.cydataseries.DataSeriesMappingManager.MappingDescriptor;
 
 import com.jgoodies.forms.layout.FormSpecs;
 import javax.swing.JButton;
