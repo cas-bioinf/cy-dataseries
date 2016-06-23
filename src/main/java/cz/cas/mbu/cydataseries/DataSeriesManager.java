@@ -17,8 +17,14 @@ public interface DataSeriesManager {
 	 * Register a newly created DS, from know on, it will be saved and loaded.
 	 * @param ds
 	 */
-	public void registerDataSeries(DataSeries<?,?> ds);
-
-	public void unregisterDataSeries(DataSeries<?,?> ds);
+	void registerDataSeries(DataSeries<?,?> ds);
+	
+	/**
+	 * Register a list of data series (only one event is created)
+	 * @param ds
+	 */
+	void registerDataSeries(List<? extends DataSeries<?, ?>> ds);
+	
+	void unregisterDataSeries(DataSeries<?,?> ds);
 	
 }

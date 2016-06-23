@@ -4,10 +4,6 @@ import java.util.Properties;
 
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.CytoPanelComponent;
-import org.cytoscape.model.CyNetworkManager;
-import org.cytoscape.model.CyNetworkTableManager;
-import org.cytoscape.model.CyTableFactory;
-import org.cytoscape.model.CyTableManager;
 import org.cytoscape.model.events.RowsSetListener;
 import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.service.util.CyServiceRegistrar;
@@ -16,16 +12,16 @@ import org.cytoscape.work.TaskFactory;
 import org.cytoscape.work.swing.GUITunableHandlerFactory;
 import org.osgi.framework.BundleContext;
 
-import cz.cas.mbu.cydataseries.DataSeriesMappingManager;
+import cz.cas.mbu.cydataseries.DataSeriesListener;
 import cz.cas.mbu.cydataseries.DataSeriesStorageProvider;
 import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportManager;
 import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportProvider;
 import cz.cas.mbu.cydataseries.internal.data.TimeSeriesStorageProviderImpl;
 import cz.cas.mbu.cydataseries.internal.dataimport.DataSeriesImportManagerImpl;
-import cz.cas.mbu.cydataseries.internal.dataimport.ImportDataSeriesTask;
 import cz.cas.mbu.cydataseries.internal.dataimport.ImportDataSeriesTaskFactory;
 import cz.cas.mbu.cydataseries.internal.dataimport.ImportParametersGuiHandleFactory;
 import cz.cas.mbu.cydataseries.internal.dataimport.TimeSeriesImportProviderImpl;
+import cz.cas.mbu.cydataseries.internal.ui.DataSeriesPanel;
 import cz.cas.mbu.cydataseries.internal.ui.DataSeriesVisualPanel;
 
 public class CyActivator extends AbstractCyActivator {
@@ -37,7 +33,9 @@ public class CyActivator extends AbstractCyActivator {
 		
 		CyApplicationManager cyApplicationManager = getService(bc,CyApplicationManager.class);
 
-		DataSeriesManagerImpl dataSeriesManager = new DataSeriesManagerImpl();
+		CyServiceRegistrar serviceRegistrar = getService(bc, CyServiceRegistrar.class);		
+		
+		DataSeriesManagerImpl dataSeriesManager = new DataSeriesManagerImpl(bc);
 		registerAllServices(bc, dataSeriesManager, new Properties());
 		
 		
@@ -81,7 +79,7 @@ public class CyActivator extends AbstractCyActivator {
 		removeMappingProperties.setProperty(ServiceProperties.TITLE, "Remove column mapping");
 		registerService(bc, removeMappingTaskFactory, TaskFactory.class, removeMappingProperties);
 
-		ParameterPassingTaskFactory<ManageMappingsTask> manageMappingTaskFactory = new ParameterPassingTaskFactory<>(ManageMappingsTask.class, getService(bc, CyServiceRegistrar.class));
+		ParameterPassingTaskFactory<ManageMappingsTask> manageMappingTaskFactory = new ParameterPassingTaskFactory<>(ManageMappingsTask.class, serviceRegistrar);
 		Properties manageMappingProperties = new Properties();
 		manageMappingProperties.putAll(baseMenuProperties);
 		manageMappingProperties.setProperty(ServiceProperties.TITLE, "Manage column mappings");
@@ -92,9 +90,13 @@ public class CyActivator extends AbstractCyActivator {
 		modifyProperties.setProperty(ServiceProperties.TITLE, "Add Time Series...");
 		registerService(bc, addTaskFactory, TaskFactory.class, addProperties);
 		*/
-		DataSeriesVisualPanel panel = new DataSeriesVisualPanel(cyApplicationManager, dataSeriesManager, mappingManager);
+		DataSeriesPanel panel = new DataSeriesPanel(serviceRegistrar);
 		registerService(bc, panel, CytoPanelComponent.class, new Properties());
-		registerService(bc, panel, RowsSetListener.class, new Properties());
+		registerService(bc, panel, DataSeriesListener.class, new Properties());
+		
+		DataSeriesVisualPanel visualPanel = new DataSeriesVisualPanel(cyApplicationManager, dataSeriesManager, mappingManager);
+		registerService(bc, visualPanel, CytoPanelComponent.class, new Properties());
+		registerService(bc, visualPanel, RowsSetListener.class, new Properties());
 	}
 
 }

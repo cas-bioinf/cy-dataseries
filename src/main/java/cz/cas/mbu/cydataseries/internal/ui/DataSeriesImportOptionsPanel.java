@@ -25,7 +25,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.FormSpecs;
 import com.jgoodies.forms.layout.RowSpec;
 
-import cz.cas.mbu.cydataseries.internal.MatlabSyntaxNumberList;
+import cz.cas.mbu.cydataseries.internal.dataimport.MatlabSyntaxNumberList;
 
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;

@@ -96,7 +96,7 @@ public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 
 	@Override
 	public String getIdentifier() {
-		return "cz.cas.mbu.gn.dataSeriesVisual";
+		return "cz.cas.mbu.cydataseries.dataSeriesVisual";
 	}
 
 	private void updateCharts()

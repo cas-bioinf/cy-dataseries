@@ -1,4 +1,4 @@
-package cz.cas.mbu.cydataseries.internal;
+package cz.cas.mbu.cydataseries.internal.dataimport;
 
 import java.util.ArrayList;
 import java.util.List;

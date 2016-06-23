@@ -19,6 +19,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cz.cas.mbu.cydataseries.DataSeries;
+import cz.cas.mbu.cydataseries.DataSeriesEvent;
+import cz.cas.mbu.cydataseries.DataSeriesListener;
 import cz.cas.mbu.cydataseries.DataSeriesManager;
 import cz.cas.mbu.cydataseries.DataSeriesStorageProvider;
 
@@ -27,12 +29,16 @@ public class DataSeriesManagerImpl implements DataSeriesManager {
 	
 	private final Logger logger = LoggerFactory.getLogger(DataSeriesManagerImpl.class); 
 	
+	private final ServiceTracker listenerTracker;
+	
 	
 	private final List<DataSeries<?, ?>> dataSeries;
 	
-	public DataSeriesManagerImpl() {
+	public DataSeriesManagerImpl(BundleContext bc) {
 		super();
 		dataSeries = new ArrayList<>();
+		listenerTracker = new ServiceTracker(bc, DataSeriesListener.class.getName(), null);
+		listenerTracker.open();		
 	}
 	
 	
@@ -44,7 +50,9 @@ public class DataSeriesManagerImpl implements DataSeriesManager {
 
 	public void removeAllDataSeries()
 	{
+		List<DataSeries<?, ?>> seriesCopy = new ArrayList<>(dataSeries);
 		dataSeries.clear();
+		fireEvent(new DataSeriesEvent(this, DataSeriesEvent.EventType.DS_REMOVED, seriesCopy));
 	}
 
 
@@ -85,6 +93,21 @@ public class DataSeriesManagerImpl implements DataSeriesManager {
 				.collect(Collectors.toList());		
 	}
 
+	
+	protected void fireEvent(DataSeriesEvent event)
+	{
+		for(Object service : listenerTracker.getServices())
+		{
+			if(service instanceof DataSeriesListener)
+			{
+				((DataSeriesListener)service).dataSeriesEvent(event);				
+			}
+			else
+			{
+				logger.error("Listener is not of correct class");
+			}
+		}
+	}
 
 	@Override
 	public void registerDataSeries(DataSeries<?, ?> ds) {
@@ -92,13 +115,24 @@ public class DataSeriesManagerImpl implements DataSeriesManager {
 		{
 			throw new NullPointerException("Data series cannot be null");
 		}
-		dataSeries.add(ds);		
+		dataSeries.add(ds);
+		fireEvent(new DataSeriesEvent(this, DataSeriesEvent.EventType.DS_ADDED, Collections.singletonList(ds)));
 	}
 
+	@Override
+	public void registerDataSeries(List<? extends DataSeries<?, ?>> ds) {
+		if(ds == null)
+		{
+			throw new NullPointerException("Data series cannot be null");
+		}
+		dataSeries.addAll(ds);
+		fireEvent(new DataSeriesEvent(this, DataSeriesEvent.EventType.DS_ADDED, ds));
+	}
 
 	@Override
 	public void unregisterDataSeries(DataSeries<?, ?> ds) {
 		dataSeries.remove(ds);
+		fireEvent(new DataSeriesEvent(this, DataSeriesEvent.EventType.DS_REMOVED, Collections.singletonList(ds)));
 	}
 
 
