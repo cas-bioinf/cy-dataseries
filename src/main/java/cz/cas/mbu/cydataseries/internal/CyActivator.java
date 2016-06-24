@@ -12,6 +12,7 @@ import org.cytoscape.work.TaskFactory;
 import org.cytoscape.work.swing.GUITunableHandlerFactory;
 import org.osgi.framework.BundleContext;
 
+import cz.cas.mbu.cydataseries.DataSeriesFactory;
 import cz.cas.mbu.cydataseries.DataSeriesListener;
 import cz.cas.mbu.cydataseries.DataSeriesStorageProvider;
 import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportManager;
@@ -53,6 +54,8 @@ public class CyActivator extends AbstractCyActivator {
 		registerService(bc, new ImportParametersGuiHandleFactory(), GUITunableHandlerFactory.class, new Properties());
 		
 		registerService(bc, new TimeSeriesImportProviderImpl(), DataSeriesImportProvider.class, new Properties());
+
+		registerService(bc, new DataSeriesFactoryImpl(), DataSeriesFactory.class, new Properties());
 		
 		DataSeriesImportManager importManager = new DataSeriesImportManagerImpl(bc);
 		registerService(bc, importManager, DataSeriesImportManager.class, new Properties());
