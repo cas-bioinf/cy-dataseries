@@ -37,9 +37,9 @@ public class TimeSeriesChartContainer {
 	
 	public void setSeriesData(List<TimeSeries> allSeries, List<Integer> rowIds)
 	{
-		for(int series = 0; series < dataset.getSeriesCount(); series++)
+		while(dataset.getSeriesCount() > 0)
 		{
-			dataset.removeSeries(dataset.getSeriesKey(series));
+			dataset.removeSeries(dataset.getSeriesKey(0));
 		}
 		
 		for(int i = 0; i < allSeries.size(); i++)

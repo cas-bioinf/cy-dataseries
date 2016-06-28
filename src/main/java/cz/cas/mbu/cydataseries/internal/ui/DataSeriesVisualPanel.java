@@ -28,6 +28,13 @@ import cz.cas.mbu.cydataseries.DataSeriesManager;
 import cz.cas.mbu.cydataseries.DataSeriesMappingManager;
 import cz.cas.mbu.cydataseries.TimeSeries;
 import cz.cas.mbu.cydataseries.internal.TimeSeriesChartContainer;
+import javax.swing.JCheckBox;
+import com.jgoodies.forms.layout.FormLayout;
+import com.jgoodies.forms.layout.ColumnSpec;
+import com.jgoodies.forms.layout.RowSpec;
+import com.jgoodies.forms.layout.FormSpecs;
+import javax.swing.JLabel;
+import javax.swing.JSeparator;
 
 public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2, RowsSetListener {
 
@@ -40,6 +47,7 @@ public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 	
 	private final TimeSeriesChartContainer chartContainer;
 	private final ChartPanel chartPanel;
+	private JCheckBox showAdjacentCheckbox;
 	
 	public DataSeriesVisualPanel(CyApplicationManager cyApplicationManager, DataSeriesManager dataSeriesManager, DataSeriesMappingManager dataSeriesMappingManager) {
 		this.cyApplicationManager = cyApplicationManager;
@@ -52,14 +60,29 @@ public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 
 		
 		this.add(chartPanel, BorderLayout.CENTER);
-		chartPanel.addMouseListener(new MouseAdapter() {
-
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				updateCharts();
-			}
-			
-		});
+		
+		JPanel panel = new JPanel();
+		add(panel, BorderLayout.EAST);
+		panel.setLayout(new FormLayout(new ColumnSpec[] {
+				FormSpecs.RELATED_GAP_COLSPEC,
+				FormSpecs.DEFAULT_COLSPEC,
+				FormSpecs.RELATED_GAP_COLSPEC,},
+			new RowSpec[] {
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,}));
+		
+		showAdjacentCheckbox = new JCheckBox("Show adjacent series");
+		panel.add(showAdjacentCheckbox, "2, 2");
+		showAdjacentCheckbox.setSelected(true);
+		
+		JSeparator separator = new JSeparator();
+		panel.add(separator, "1, 3, 3, 1");
+		
+		showAdjacentCheckbox.addItemListener(e -> updateCharts());
 	}
 
 	@Override
@@ -87,19 +110,22 @@ public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 		return "cz.cas.mbu.cydataseries.dataSeriesVisual";
 	}
 	
-	private void updateChartsWithRow(Class<? extends CyIdentifiable> targetClass, CyRow row)
+	private void updateChartsWithRows(List<ChartSource> rowSources)
 	{
 		List<TimeSeries> allSeries = new ArrayList<>();
 		List<Integer> rowIds = new ArrayList<>();
 		
-		dataSeriesMappingManager.getAllMappings(targetClass, TimeSeries.class).entrySet().forEach(
-				(entry) -> {
-					Integer id = row.get(entry.getKey(), DataSeriesMappingManager.MAPPING_COLUMN_CLASS);
-					if(id != null)
-					{
-						allSeries.add(entry.getValue());
-						rowIds.add(id);							
-					}
+		rowSources.forEach(
+				source -> {
+					dataSeriesMappingManager.getAllMappings(source.getTargetClass(), TimeSeries.class).entrySet().forEach(
+							(entry) -> {
+								Integer id = source.getRow().get(entry.getKey(), DataSeriesMappingManager.MAPPING_COLUMN_CLASS);
+								if(id != null)
+								{
+									allSeries.add(entry.getValue());
+									rowIds.add(id);							
+								}
+							});
 				});
 		
 		chartContainer.setSeriesData(allSeries, rowIds);			
@@ -110,24 +136,41 @@ public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 	{
 		CyNetwork network = cyApplicationManager.getCurrentNetwork();
 		List<CyNode> nodes = CyTableUtil.getNodesInState(network,"selected",true);
-		if(!nodes.isEmpty())
-		{
-			CyNode node = nodes.get(0);
+		List<ChartSource> sources = new ArrayList<>();
+		
+		
+		
+		nodes.forEach(node -> {
 			CyRow row = network.getRow(node);
-			updateChartsWithRow(CyNode.class, row);			
+			sources.add(new ChartSource(CyNode.class, row));
+			
+			if(getShowAdjacentCheckbox().isSelected())
+			{
+				network.getAdjacentEdgeList(node, CyEdge.Type.ANY).forEach( edge ->
+				{
+					sources.add(new ChartSource(CyEdge.class, network.getRow(edge)));
+				});
+			}			
+		});
+		
+		List<CyEdge> edges = CyTableUtil.getEdgesInState(network, "selected", true);
+		edges.forEach(edge -> {
+			CyRow row = network.getRow(edge);
+			sources.add(new ChartSource(CyEdge.class, row));
+			
+			if(getShowAdjacentCheckbox().isSelected())
+			{
+				sources.add(new ChartSource(CyNode.class, network.getRow(edge.getSource())));
+				sources.add(new ChartSource(CyNode.class, network.getRow(edge.getTarget())));
+			}			
+		});
+		if(!sources.isEmpty())
+		{
+			updateChartsWithRows(sources);			
 		}
 		else
 		{
-			List<CyEdge> edges = CyTableUtil.getEdgesInState(network, "selected", true);
-			if(!edges.isEmpty())
-			{
-				CyRow row = network.getRow(edges.get(0));
-				updateChartsWithRow(CyEdge.class, row);				
-			}
-			else
-			{
-				chartContainer.setSeriesData(Collections.EMPTY_LIST, Collections.EMPTY_LIST);
-			}
+			chartContainer.setSeriesData(Collections.EMPTY_LIST, Collections.EMPTY_LIST);
 		}
 	}
 	
@@ -148,4 +191,29 @@ public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 		}
 	}
 
+	protected JCheckBox getShowAdjacentCheckbox() {
+		return showAdjacentCheckbox;
+	}
+	
+	private static class ChartSource
+	{
+		private final Class<? extends CyIdentifiable> targetClass;
+		private final CyRow row;
+		
+		public ChartSource(Class<? extends CyIdentifiable> targetClass, CyRow row) {
+			super();
+			this.targetClass = targetClass;
+			this.row = row;
+		}
+		
+		public Class<? extends CyIdentifiable> getTargetClass() {
+			return targetClass;
+		}
+		
+		public CyRow getRow() {
+			return row;
+		}
+		
+		
+	}
 }

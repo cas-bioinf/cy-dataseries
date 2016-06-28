@@ -23,7 +23,7 @@ public class MatlabSyntaxNumberList {
 				{
 					throw new NumberFormatException("Sequnce format has too many ':'s - " + element);
 				}
-				if(concatenationParts.length < 1)
+				if(concatenationParts.length <= 1)
 				{
 					throw new NumberFormatException("Invalid sequnce format - " + element);
 				}
