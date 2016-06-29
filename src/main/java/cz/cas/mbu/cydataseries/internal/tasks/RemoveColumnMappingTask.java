@@ -1,4 +1,4 @@
-package cz.cas.mbu.cydataseries.internal;
+package cz.cas.mbu.cydataseries.internal.tasks;
 
 import java.io.IOException;
 
@@ -11,7 +11,7 @@ import org.cytoscape.work.util.ListSingleSelection;
 import cz.cas.mbu.cydataseries.DataSeriesMappingManager;
 import cz.cas.mbu.cydataseries.DataSeriesMappingManager.MappingDescriptor;
 
-public class RemoveColumnMappingTask extends AbstractTask implements TunableValidator{
+public class RemoveColumnMappingTask extends AbstractValidatedTask {
 
 	@Tunable(description="Mapping to remove")
 	public ListSingleSelection<MappingDescriptor> targetMapping;
@@ -33,16 +33,10 @@ public class RemoveColumnMappingTask extends AbstractTask implements TunableVali
 	}
 
 	@Override
-	public ValidationState getValidationState(Appendable errMsg) {
-		try {
-			if(targetMapping.getSelectedValue() == null)
-			{
-				errMsg.append("There is no mapping present.");
-				return ValidationState.INVALID;
-			}
-		}
-		catch(IOException ex)
+	public ValidationState getValidationState(StringBuilder errMsg) {
+		if(targetMapping.getSelectedValue() == null)
 		{
+			errMsg.append("There is no mapping present.");
 			return ValidationState.INVALID;
 		}
 			

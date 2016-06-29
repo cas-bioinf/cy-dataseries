@@ -25,8 +25,9 @@ import org.osgi.framework.BundleContext;
 import cz.cas.mbu.cydataseries.DataSeries;
 import cz.cas.mbu.cydataseries.DataSeriesManager;
 import cz.cas.mbu.cydataseries.DataSeriesStorageProvider;
+import cz.cas.mbu.cydataseries.internal.tasks.AbstractValidatedTask;
 
-public class AskForInputFileTask extends AbstractTask implements TunableValidator{
+public class AskForInputFileTask extends AbstractValidatedTask {
 
 	@Tunable(description="Data file", required = true, params="input=true;fileCategory=table")
 	public File inputFile = null;
@@ -56,15 +57,10 @@ public class AskForInputFileTask extends AbstractTask implements TunableValidato
 	
 	
 	@Override
-	public ValidationState getValidationState(Appendable errMsg) {
-		try{
-			if(inputFile == null || !inputFile.exists())
-			{
-				errMsg.append("You have to select an input file");
-				return ValidationState.INVALID;
-			}
-		} catch (IOException ex)
+	public ValidationState getValidationState(StringBuilder errMsg) {
+		if(inputFile == null || !inputFile.exists())
 		{
+			errMsg.append("You have to select an input file");
 			return ValidationState.INVALID;
 		}
 		return ValidationState.OK;

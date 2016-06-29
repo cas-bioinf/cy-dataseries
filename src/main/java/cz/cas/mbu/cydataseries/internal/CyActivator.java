@@ -3,6 +3,7 @@ package cz.cas.mbu.cydataseries.internal;
 import java.util.Properties;
 
 import org.cytoscape.application.CyApplicationManager;
+import org.cytoscape.application.swing.AbstractCyAction;
 import org.cytoscape.application.swing.CytoPanelComponent;
 import org.cytoscape.model.events.RowsSetListener;
 import org.cytoscape.service.util.AbstractCyActivator;
@@ -14,6 +15,7 @@ import org.osgi.framework.BundleContext;
 
 import cz.cas.mbu.cydataseries.DataSeriesFactory;
 import cz.cas.mbu.cydataseries.DataSeriesListener;
+import cz.cas.mbu.cydataseries.DataSeriesStorageManager;
 import cz.cas.mbu.cydataseries.DataSeriesStorageProvider;
 import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportManager;
 import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportProvider;
@@ -22,6 +24,14 @@ import cz.cas.mbu.cydataseries.internal.dataimport.DataSeriesImportManagerImpl;
 import cz.cas.mbu.cydataseries.internal.dataimport.ImportDataSeriesTaskFactory;
 import cz.cas.mbu.cydataseries.internal.dataimport.ImportParametersGuiHandleFactory;
 import cz.cas.mbu.cydataseries.internal.dataimport.TimeSeriesImportProviderImpl;
+import cz.cas.mbu.cydataseries.internal.tasks.ExportDataSeriesTaskFactory;
+import cz.cas.mbu.cydataseries.internal.tasks.ManageMappingsTask;
+import cz.cas.mbu.cydataseries.internal.tasks.NetworkSelectedParameterPassingTaskFactory;
+import cz.cas.mbu.cydataseries.internal.tasks.ParameterPassingTaskFactory;
+import cz.cas.mbu.cydataseries.internal.tasks.RemoveColumnMappingTask;
+import cz.cas.mbu.cydataseries.internal.tasks.RemoveColumnMappingTaskFactory;
+import cz.cas.mbu.cydataseries.internal.tasks.RemoveDataSeriesTask;
+import cz.cas.mbu.cydataseries.internal.tasks.RemoveDataSeriesTaskFactory;
 import cz.cas.mbu.cydataseries.internal.ui.DataSeriesPanel;
 import cz.cas.mbu.cydataseries.internal.ui.DataSeriesVisualPanel;
 
@@ -35,16 +45,18 @@ public class CyActivator extends AbstractCyActivator {
 		CyApplicationManager cyApplicationManager = getService(bc,CyApplicationManager.class);
 
 		CyServiceRegistrar serviceRegistrar = getService(bc, CyServiceRegistrar.class);		
+
+		DataSeriesMappingManagerImpl mappingManager = new DataSeriesMappingManagerImpl();
+		registerAllServices(bc, mappingManager, new Properties());
 		
-		DataSeriesManagerImpl dataSeriesManager = new DataSeriesManagerImpl(bc);
+		
+		DataSeriesManagerImpl dataSeriesManager = new DataSeriesManagerImpl(bc, mappingManager);
 		registerAllServices(bc, dataSeriesManager, new Properties());
 		
 		
 
-		DataSeriesMappingManagerImpl mappingManager = new DataSeriesMappingManagerImpl();
-		registerAllServices(bc, mappingManager, new Properties());
 
-		DataSeriesStorageManager storageManager = new DataSeriesStorageManager(bc, dataSeriesManager, mappingManager);
+		DataSeriesStorageManager storageManager = new DataSeriesStorageManagerImpl(bc, dataSeriesManager, mappingManager);
 		registerAllServices(bc, storageManager, new Properties());
 	
 		DataSeriesStorageProvider timeSeriesProvider = new TimeSeriesStorageProviderImpl(); 
@@ -70,13 +82,27 @@ public class CyActivator extends AbstractCyActivator {
 		ImportDataSeriesTaskFactory importTaskFactory = new ImportDataSeriesTaskFactory(dataSeriesManager, importManager);
 		registerService(bc, importTaskFactory, TaskFactory.class, importProperties);
 
+		Properties exportProperties = new Properties();
+		exportProperties.putAll(baseMenuProperties);
+		exportProperties.setProperty(ServiceProperties.TITLE, "Export data Series");
+		TaskFactory exportTaskFactory = new ExportDataSeriesTaskFactory(dataSeriesManager, storageManager);
+		registerService(bc, exportTaskFactory, TaskFactory.class, exportProperties);
+
+		Properties removeDataSeriesProperties = new Properties();
+		removeDataSeriesProperties.putAll(baseMenuProperties);
+		removeDataSeriesProperties.setProperty(ServiceProperties.TITLE, "Remove data Series");
+		removeDataSeriesProperties.setProperty("insertSeparatorAfter", Boolean.toString(true));
+		TaskFactory removeDataSeriesTaskFactory = new RemoveDataSeriesTaskFactory(dataSeriesManager);
+		registerService(bc, removeDataSeriesTaskFactory, TaskFactory.class, removeDataSeriesProperties);
+
+		
 		NetworkSelectedParameterPassingTaskFactory<MapColumnTask> mapColumnTaskFactory = new NetworkSelectedParameterPassingTaskFactory<>(MapColumnTask.class, cyApplicationManager, dataSeriesManager, mappingManager, cyApplicationManager);
 		Properties mapProperties = new Properties();
 		mapProperties.putAll(baseMenuProperties);
 		mapProperties.setProperty(ServiceProperties.TITLE, "Map column to series");
 		registerService(bc, mapColumnTaskFactory, TaskFactory.class, mapProperties);
 
-		ParameterPassingTaskFactory<RemoveColumnMappingTask> removeMappingTaskFactory = new ParameterPassingTaskFactory<>(RemoveColumnMappingTask.class, mappingManager);
+		TaskFactory removeMappingTaskFactory = new RemoveColumnMappingTaskFactory(mappingManager);
 		Properties removeMappingProperties = new Properties();
 		removeMappingProperties.putAll(baseMenuProperties);
 		removeMappingProperties.setProperty(ServiceProperties.TITLE, "Remove column mapping");

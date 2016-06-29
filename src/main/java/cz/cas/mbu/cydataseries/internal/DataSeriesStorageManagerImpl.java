@@ -29,11 +29,12 @@ import org.osgi.util.tracker.ServiceTracker;
 import cz.cas.mbu.cydataseries.DataSeries;
 import cz.cas.mbu.cydataseries.DataSeriesManager;
 import cz.cas.mbu.cydataseries.DataSeriesMappingManager;
+import cz.cas.mbu.cydataseries.DataSeriesStorageManager;
 import cz.cas.mbu.cydataseries.DataSeriesStorageProvider;
 
 import org.apache.log4j.Logger;
 
-public class DataSeriesStorageManager implements SessionAboutToBeSavedListener, SessionLoadedListener {
+public class DataSeriesStorageManagerImpl implements DataSeriesStorageManager, SessionAboutToBeSavedListener, SessionLoadedListener {
 	private static final String SERIES_LIST_FILENAME = "_dataSeriesList.tsv";
 	private static final String SERIES_NAME_COLUMN = "name";
 	private static final String SERIES_SUID_COLUMN = "suid";
@@ -47,14 +48,14 @@ public class DataSeriesStorageManager implements SessionAboutToBeSavedListener, 
 	
 	public static final CSVFormat CSV_FORMAT = CSVFormat.TDF;
 	private final Logger userLogger = Logger.getLogger(CyUserLog.NAME); 
-	private final Logger logger = Logger.getLogger(DataSeriesStorageManager.class); 
+	private final Logger logger = Logger.getLogger(DataSeriesStorageManagerImpl.class); 
 	
 	private final DataSeriesManagerImpl dataSeriesManager;
 	private final DataSeriesMappingManagerImpl mappingManager;
 	
 	private final ServiceTracker providerTracker;
 	
-	public DataSeriesStorageManager(BundleContext bc, DataSeriesManagerImpl dataSeriesManager, DataSeriesMappingManagerImpl mappingManager) {
+	public DataSeriesStorageManagerImpl(BundleContext bc, DataSeriesManagerImpl dataSeriesManager, DataSeriesMappingManagerImpl mappingManager) {
 		this.dataSeriesManager = dataSeriesManager;
 		this.mappingManager = mappingManager;
 		providerTracker = new ServiceTracker(bc, DataSeriesStorageProvider.class.getName(), null);
@@ -95,6 +96,13 @@ public class DataSeriesStorageManager implements SessionAboutToBeSavedListener, 
 		return "ds_" + suid + "_" + name + ".tsv";
 	}
 	
+	
+	
+	@Override
+	public DataSeriesStorageProvider getStorageProvider(Class<?> seriesClass) {
+		return getStorageProviders().get(seriesClass.getName());
+	}
+
 	@Override
 	public void handleEvent(SessionLoadedEvent e) {
 		

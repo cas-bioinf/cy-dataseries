@@ -22,6 +22,7 @@ import cz.cas.mbu.cydataseries.DataSeries;
 import cz.cas.mbu.cydataseries.DataSeriesEvent;
 import cz.cas.mbu.cydataseries.DataSeriesListener;
 import cz.cas.mbu.cydataseries.DataSeriesManager;
+import cz.cas.mbu.cydataseries.DataSeriesMappingManager;
 import cz.cas.mbu.cydataseries.DataSeriesStorageProvider;
 
 public class DataSeriesManagerImpl implements DataSeriesManager {
@@ -31,11 +32,13 @@ public class DataSeriesManagerImpl implements DataSeriesManager {
 	
 	private final ServiceTracker listenerTracker;
 	
+	private final DataSeriesMappingManager mappingManager;
 	
 	private final List<DataSeries<?, ?>> dataSeries;
 	
-	public DataSeriesManagerImpl(BundleContext bc) {
+	public DataSeriesManagerImpl(BundleContext bc, DataSeriesMappingManager mappingManager) {
 		super();
+		this.mappingManager = mappingManager;
 		dataSeries = new ArrayList<>();
 		listenerTracker = new ServiceTracker(bc, DataSeriesListener.class.getName(), null);
 		listenerTracker.open();		
@@ -132,6 +135,11 @@ public class DataSeriesManagerImpl implements DataSeriesManager {
 	@Override
 	public void unregisterDataSeries(DataSeries<?, ?> ds) {
 		dataSeries.remove(ds);
+		mappingManager.getAllMappingDescriptors().stream()
+			.filter( descriptor -> (descriptor.getDataSeries() == ds)) //get all descriptors that match the removed DS
+			.forEach( descriptor -> { 
+				mappingManager.unmapTableColumn(descriptor.getTargetClass(), descriptor.getColumnName()); //and unmap them
+			});
 		fireEvent(new DataSeriesEvent(this, DataSeriesEvent.EventType.DS_REMOVED, Collections.singletonList(ds)));
 	}
 

@@ -20,6 +20,8 @@ public interface DataSeriesMappingManager {
 	Map<String, DataSeries<?,?>> getAllMappings(Class<? extends CyIdentifiable> targetClass);	
 	<T extends DataSeries<?,?>> Map<String, T> getAllMappings(Class<? extends CyIdentifiable> targetClass, Class<T> dataSeriesClass);
 	
+	boolean isMappingsEmpty();
+	
 	/**
 	 * Get all classes with at least one DS mapped.
 	 * @return

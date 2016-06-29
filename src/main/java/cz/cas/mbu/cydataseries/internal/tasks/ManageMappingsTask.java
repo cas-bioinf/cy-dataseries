@@ -1,4 +1,4 @@
-package cz.cas.mbu.cydataseries.internal;
+package cz.cas.mbu.cydataseries.internal.tasks;
 
 import java.awt.BorderLayout;
 

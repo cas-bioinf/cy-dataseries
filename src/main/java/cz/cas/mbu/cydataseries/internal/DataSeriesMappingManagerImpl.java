@@ -119,6 +119,20 @@ public class DataSeriesMappingManagerImpl implements DataSeriesMappingManager{
 		return  (Map<String, T>)Maps.filterEntries(localMap, e -> dataSeriesClass.isAssignableFrom(e.getValue().getClass()));
 	}
 
+	
+
+	@Override
+	public boolean isMappingsEmpty() {
+		for(Map<String, DataSeries<?,?>> classMapping: mappings.values())
+		{
+			if(!classMapping.isEmpty())
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
 
 	@Override
 	public Collection<Class<? extends CyIdentifiable>> getTargetsWithMappedDataSeries() {

@@ -75,7 +75,7 @@ public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 				FormSpecs.RELATED_GAP_ROWSPEC,
 				FormSpecs.DEFAULT_ROWSPEC,}));
 		
-		showAdjacentCheckbox = new JCheckBox("Show adjacent series");
+		showAdjacentCheckbox = new JCheckBox("Show series from neighbourhood");
 		panel.add(showAdjacentCheckbox, "2, 2");
 		showAdjacentCheckbox.setSelected(true);
 		
@@ -114,18 +114,31 @@ public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 	{
 		List<TimeSeries> allSeries = new ArrayList<>();
 		List<Integer> rowIds = new ArrayList<>();
-		
+
 		rowSources.forEach(
 				source -> {
-					dataSeriesMappingManager.getAllMappings(source.getTargetClass(), TimeSeries.class).entrySet().forEach(
-							(entry) -> {
-								Integer id = source.getRow().get(entry.getKey(), DataSeriesMappingManager.MAPPING_COLUMN_CLASS);
-								if(id != null)
+					dataSeriesMappingManager.getAllMappings(source.getTargetClass(), TimeSeries.class).entrySet()
+						.forEach((entry) -> {
+							Integer id = source.getRow().get(entry.getKey(), DataSeriesMappingManager.MAPPING_COLUMN_CLASS);
+							if(id != null)
+							{
+								//Ignore duplicate series+id pairs
+								boolean alreadyPresent = false;
+								for(int idx = 0; idx < allSeries.size();idx++)
+								{
+									if(allSeries.get(idx) == entry.getValue() && rowIds.get(idx).equals(id))
+									{
+										alreadyPresent = true;
+										break;
+									}
+								}
+								if(!alreadyPresent)
 								{
 									allSeries.add(entry.getValue());
-									rowIds.add(id);							
+									rowIds.add(id);
 								}
-							});
+							}
+						});
 				});
 		
 		chartContainer.setSeriesData(allSeries, rowIds);			

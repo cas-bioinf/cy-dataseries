@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import cz.cas.mbu.cydataseries.DataSeries;
 import cz.cas.mbu.cydataseries.DataSeriesException;
 import cz.cas.mbu.cydataseries.DataSeriesStorageProvider;
-import cz.cas.mbu.cydataseries.internal.DataSeriesStorageManager;
+import cz.cas.mbu.cydataseries.internal.DataSeriesStorageManagerImpl;
 
 public abstract class AbstractDataSeriesStorageProvider  implements DataSeriesStorageProvider {
 
@@ -34,7 +34,7 @@ public abstract class AbstractDataSeriesStorageProvider  implements DataSeriesSt
 	
 	@Override
 	public DataSeries<?, ?> loadDataSeries(File file, String name, long oldSuid) throws IOException {
-		try (CSVParser parser = new CSVParser(new FileReader(file), DataSeriesStorageManager.CSV_FORMAT))
+		try (CSVParser parser = new CSVParser(new FileReader(file), DataSeriesStorageManagerImpl.CSV_FORMAT))
 		{
 			List<CSVRecord> recordList = parser.getRecords();
 			
@@ -109,7 +109,7 @@ public abstract class AbstractDataSeriesStorageProvider  implements DataSeriesSt
 		{
 			throw new IllegalArgumentException("Invalid type passed to saveDataSeries. Expected " + getProvidedClass().getName() + " got: " + dataSeries.getClass().getName());
 		}
-		try (CSVPrinter printer = new CSVPrinter(new FileWriter(file), DataSeriesStorageManager.CSV_FORMAT))
+		try (CSVPrinter printer = new CSVPrinter(new FileWriter(file), DataSeriesStorageManagerImpl.CSV_FORMAT))
 		{
 			printer.print("Id");
 			printer.print("RowName");

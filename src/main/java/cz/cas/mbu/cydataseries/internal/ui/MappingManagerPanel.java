@@ -9,7 +9,7 @@ import cz.cas.mbu.cydataseries.DataSeriesManager;
 import cz.cas.mbu.cydataseries.DataSeriesMappingManager;
 import cz.cas.mbu.cydataseries.DataSeriesMappingManager.MappingDescriptor;
 import cz.cas.mbu.cydataseries.internal.MapColumnTask;
-import cz.cas.mbu.cydataseries.internal.RemoveColumnMappingTask;
+import cz.cas.mbu.cydataseries.internal.tasks.RemoveColumnMappingTask;
 
 import com.jgoodies.forms.layout.FormSpecs;
 import javax.swing.JButton;
