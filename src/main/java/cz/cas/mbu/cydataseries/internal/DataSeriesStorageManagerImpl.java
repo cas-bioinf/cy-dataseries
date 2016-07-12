@@ -138,6 +138,7 @@ public class DataSeriesStorageManagerImpl implements DataSeriesStorageManager, S
 		
 		Map<Long, DataSeries<?, ?>> oldSuidMapping = new HashMap<>();
 		
+		//Parsing the list file
 		CSVFormat listFormat = CSV_FORMAT.withHeader();
 		try (	CSVParser parser = new CSVParser(new FileReader(listFile.get()), listFormat) )
 		{

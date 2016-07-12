@@ -1,8 +1,26 @@
 package cz.cas.mbu.cydataseries.internal.ui;
 
+import java.awt.Dimension;
+import java.util.List;
+
+import javax.swing.JButton;
 import javax.swing.JPanel;
-import com.jgoodies.forms.layout.FormLayout;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+import javax.swing.table.DefaultTableModel;
+
+import org.cytoscape.application.CyApplicationManager;
+import org.cytoscape.service.util.CyServiceRegistrar;
+import org.cytoscape.work.AbstractTask;
+import org.cytoscape.work.Task;
+import org.cytoscape.work.TaskIterator;
+import org.cytoscape.work.TaskManager;
+import org.cytoscape.work.TaskMonitor;
+
 import com.jgoodies.forms.layout.ColumnSpec;
+import com.jgoodies.forms.layout.FormLayout;
+import com.jgoodies.forms.layout.FormSpecs;
 import com.jgoodies.forms.layout.RowSpec;
 
 import cz.cas.mbu.cydataseries.DataSeriesManager;
@@ -10,25 +28,6 @@ import cz.cas.mbu.cydataseries.DataSeriesMappingManager;
 import cz.cas.mbu.cydataseries.DataSeriesMappingManager.MappingDescriptor;
 import cz.cas.mbu.cydataseries.internal.MapColumnTask;
 import cz.cas.mbu.cydataseries.internal.tasks.RemoveColumnMappingTask;
-
-import com.jgoodies.forms.layout.FormSpecs;
-import javax.swing.JButton;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableModel;
-
-import org.cytoscape.application.CyApplicationManager;
-import org.cytoscape.service.util.CyServiceRegistrar;
-import org.cytoscape.work.AbstractTask;
-import org.cytoscape.work.SynchronousTaskManager;
-import org.cytoscape.work.Task;
-import org.cytoscape.work.TaskIterator;
-import org.cytoscape.work.TaskManager;
-import org.cytoscape.work.TaskMonitor;
-
-import java.awt.Dimension;
-import java.util.List;
-import javax.swing.JScrollPane;
-import javax.swing.ListSelectionModel;
 
 public class MappingManagerPanel extends JPanel {
 	private JTable table;
