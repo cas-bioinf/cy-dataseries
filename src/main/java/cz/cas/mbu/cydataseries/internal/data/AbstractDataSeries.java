@@ -25,48 +25,36 @@ public abstract class AbstractDataSeries<INDEX, DATA> implements DataSeries<INDE
 		this.suid = suid;
 		this.name = name;
 	}
-	
-	
-	
+
 	@Override
 	public Long getSUID() {
 		return suid;
 	}
-
-
 
 	@Override
 	public String getName() {
 		return name;
 	}
 
-
-
 	@Override
 	public int[] getRowIDs() {
 		return rowIds;
 	}
 
-	
-	
 	@Override
 	public int getRowID(int row) {
 		return rowIds[row];
 	}
 
 
-
-	protected void setRowIDs(int[] rowIds)
-	{
+	protected void setRowIDs(int[] rowIds) {
 		this.rowIds = rowIds;
 		reconstructRowMap();
 	}
 	
-	protected void reconstructRowMap()
-	{
+	protected void reconstructRowMap() {
 		rowMap.clear();
-		for(int i = 0; i < rowIds.length; i++)
-		{
+		for(int i = 0; i < rowIds.length; i++) {
 			rowMap.put(rowIds[i], i);
 		}
 	}
@@ -76,20 +64,16 @@ public abstract class AbstractDataSeries<INDEX, DATA> implements DataSeries<INDE
 	@Override
 	public int idToRow(int id) {
 		Integer index = rowMap.get(id);
-		if(index == null)
-		{
+		if(index == null) {
 			return -1;
 		}
 		return index;
 	}
 
-	
 	@Override
 	public List<String> getRowNames() {
 		return rowNames;
 	}
-
-
 
 	@Override
 	public int getRowCount() {
@@ -101,4 +85,5 @@ public abstract class AbstractDataSeries<INDEX, DATA> implements DataSeries<INDE
 	{
 		return name;
 	}
+
 }

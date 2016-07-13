@@ -8,7 +8,6 @@ import org.cytoscape.work.swing.GUITunableHandlerFactory;
 
 public class ImportParametersGuiHandleFactory implements GUITunableHandlerFactory<ImportParametersGUIHandler> {
 
-	    
 		@Override
 		public ImportParametersGUIHandler createTunableHandler(Field field, Object instance, Tunable t) {
 			if (!ImportParameters.class.isAssignableFrom(field.getType()))

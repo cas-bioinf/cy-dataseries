@@ -21,11 +21,11 @@ public class MatlabSyntaxNumberList {
 				String[] concatenationParts = element.split(":");
 				if(concatenationParts.length > 3)
 				{
-					throw new NumberFormatException("Sequnce format has too many ':'s - " + element);
+					throw new NumberFormatException("Sequence format has too many ':'s - " + element);
 				}
 				if(concatenationParts.length <= 1)
 				{
-					throw new NumberFormatException("Invalid sequnce format - " + element);
+					throw new NumberFormatException("Invalid sequence format - " + element);
 				}
 				double first = Double.parseDouble(concatenationParts[0]);
 				double step;
@@ -93,7 +93,7 @@ public class MatlabSyntaxNumberList {
 						numConcatenationSteps++;
 					}
 			
-					//first element of the seqeunce (currentIndex) already added at the beginning of the loop.
+					//first element of the sequence (currentIndex) already added at the beginning of the loop.
 					
 					//Check if I need to specify step (step size 1 is implicit)
 					if(Math.abs(firstDifference - 1) >= concatenationEpsilon)

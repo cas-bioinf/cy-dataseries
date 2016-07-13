@@ -3,6 +3,11 @@ package cz.cas.mbu.cydataseries.internal.data;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Data series for object data.
+ *
+ * @param <INDEX>
+ */
 public class ObjectDataSeriesImpl<INDEX, DATA> extends AbstractListIndexDataSeries<INDEX, DATA> {
 	
 	DATA [][] data;

@@ -4,11 +4,14 @@ import java.util.List;
 
 import cz.cas.mbu.cydataseries.DoubleDataSeries;
 
+/**
+ * Data series for double data.
+ *
+ * @param <INDEX>
+ */
 public class DoubleDataSeriesImpl<INDEX> extends AbstractListIndexDataSeries<INDEX, Double> implements DoubleDataSeries<INDEX> {
 
 	private double[][] dataArray;
-
-	
 
 	public DoubleDataSeriesImpl(Long suid, String name, int[] rowIds, List<String> rowNames, List<INDEX> indexData,
 			Class<INDEX> indexClass, double[][] dataArray) {
@@ -16,12 +19,9 @@ public class DoubleDataSeriesImpl<INDEX> extends AbstractListIndexDataSeries<IND
 		this.dataArray = dataArray;
 	}
 
-
-
 	@Override
 	public double[][] getDataArray() {
 		return dataArray;
 	}
 
-	
 }

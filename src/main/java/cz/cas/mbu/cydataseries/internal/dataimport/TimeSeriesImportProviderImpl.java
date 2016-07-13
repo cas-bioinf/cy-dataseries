@@ -63,5 +63,4 @@ public class TimeSeriesImportProviderImpl implements DataSeriesImportProvider{
 		return "Time Series";
 	}
 
-	
 }

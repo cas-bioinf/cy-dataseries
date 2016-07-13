@@ -6,9 +6,6 @@ public abstract class AbstractListIndexDataSeries<INDEX,DATA> extends AbstractDa
 
 	private List<INDEX> indexData;
 	private Class<INDEX> indexClass;
-	
-
-	
 
 	public AbstractListIndexDataSeries(Long suid, String name, int[] rowIds, List<String> rowNames, List<INDEX> indexData,
 			Class<INDEX> indexClass) {
@@ -26,6 +23,5 @@ public abstract class AbstractListIndexDataSeries<INDEX,DATA> extends AbstractDa
 	public List<INDEX> getIndex() {
 		return indexData;
 	}
-	
-	
+
 }

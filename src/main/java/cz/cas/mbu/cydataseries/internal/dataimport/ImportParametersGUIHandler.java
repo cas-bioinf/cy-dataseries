@@ -36,8 +36,7 @@ public class ImportParametersGUIHandler extends AbstractGUITunableHandler {
 		init();
 	}
 
-	private void init()
-	{
+	private void init() {
 		
 		try {
 			ImportParameters params = (ImportParameters) getValue();

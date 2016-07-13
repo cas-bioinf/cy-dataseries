@@ -11,36 +11,30 @@ import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportManager;
 import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportProvider;
 
 
-
 public class DataSeriesImportManagerImpl implements DataSeriesImportManager {
 
+	private final Logger logger = Logger.getLogger(DataSeriesImportManager.class);
 	private final ServiceTracker providerTracker;
 
-	private final Logger logger = Logger.getLogger(DataSeriesImportManager.class);
-	
 	public DataSeriesImportManagerImpl(BundleContext bc) {
 		providerTracker = new ServiceTracker(bc, DataSeriesImportProvider.class.getName(), null);
-		providerTracker.open();	}
+		providerTracker.open();
+	}
 	
 	@Override
 	public List<DataSeriesImportProvider> getAllImportProviders() {
 		Object[] providerObjects = providerTracker.getServices();
 		List<DataSeriesImportProvider> providers = new ArrayList<>();
 		
-		if(providerObjects == null)
-		{
+		if(providerObjects == null) {
 			return providers;
 		}
 		
-		for(Object obj : providerObjects)
-		{
-			try
-			{
+		for(Object obj : providerObjects) {
+			try {
 				DataSeriesImportProvider p = (DataSeriesImportProvider)obj;
 				providers.add(p);				
-			}
-			catch(ClassCastException ex)
-			{
+			} catch(ClassCastException ex) {
 				logger.error("Provider service cannot be cast to correct type.", ex);				
 			}
 		}

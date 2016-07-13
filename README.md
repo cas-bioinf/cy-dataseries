@@ -20,3 +20,5 @@ and the mapping
 * `map column series`
 * `remove column mapping`
 * `manage column mapping`
+
+The import and export of `csv` files is supported.

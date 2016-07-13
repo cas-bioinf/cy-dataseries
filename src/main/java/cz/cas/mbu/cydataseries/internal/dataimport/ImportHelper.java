@@ -13,12 +13,13 @@ import org.apache.commons.csv.CSVRecord;
 import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportException;
 import cz.cas.mbu.cydataseries.dataimport.PreImportResults;
 
+/**
+ * Helper functions for import.
+ */
 public class ImportHelper {
 	
-	private static PreImportResults preImportFromArray(List<List<String>> records, ImportParameters params, boolean strict)
-	{		
-		if(records.isEmpty())
-		{
+	private static PreImportResults preImportFromArray(List<List<String>> records, ImportParameters params, boolean strict) {
+		if(records.isEmpty()) {
 			return new PreImportResults(Collections.EMPTY_LIST, Collections.EMPTY_LIST, new String[][]{});
 		}
 		
@@ -26,16 +27,12 @@ public class ImportHelper {
 		List<String> rowNames;
 		String[][] cellData;
 		int dataStartIndex;
-		if(params.isManualIndexData())
-		{
+		if(params.isManualIndexData()) {
 			index = params.getManualIndexValues();
 			dataStartIndex = 0;
-		}
-		else
-		{
+		} else {
 			
-			if(params.isImportRowNames())
-			{
+			if(params.isImportRowNames()) {
 				//skip the first column dedicated to row names
 				index = new ArrayList<String>(records.get(0).size() - 1); 
 				for(int column = 1; column < records.get(0).size(); column++)
@@ -54,11 +51,9 @@ public class ImportHelper {
 		rowNames = new ArrayList<>(records.size() - dataStartIndex);
 		
 		int maxColumns = 0;
-		for(int row = dataStartIndex; row < records.size(); row++)
-		{
+		for(int row = dataStartIndex; row < records.size(); row++) {
 			int numColumns = records.get(row).size();
-			if(params.isImportRowNames())
-			{
+			if(params.isImportRowNames()) {
 				numColumns -= 1; //skip the column for row names
 			}
 			if(strict && numColumns > index.size())
@@ -97,16 +92,12 @@ public class ImportHelper {
 	}
 	
 		
-	public static PreImportResults preImport(Reader reader, ImportParameters params, boolean strict) throws IOException
-	{
+	public static PreImportResults preImport(Reader reader, ImportParameters params, boolean strict) throws IOException {
 		CSVFormat format = CSVFormat.DEFAULT
 								.withDelimiter(params.getSeparator())
 								.withCommentMarker(params.getCommentCharacter());
 		
-		try (CSVParser parser = new CSVParser(reader, format))		
-		{			
-			
-			
+		try (CSVParser parser = new CSVParser(reader, format)) {
 			List<List<String>> recordsList = new ArrayList<>();
 			
 			parser.forEach(record -> {

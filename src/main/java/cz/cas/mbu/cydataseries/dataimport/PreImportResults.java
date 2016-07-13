@@ -25,17 +25,13 @@ public class PreImportResults {
 		return cellData;
 	}
 	
-	public void checkConsistentcy()
-	{
-		if(rowNames.size() != cellData.length)
-		{
+	public void checkConsistentcy() {
+		if(rowNames.size() != cellData.length) {
 			throw new DataSeriesImportException("The size of row names (" + rowNames.size() + ") is different from the size of the data (" + cellData.length + ").");
 		}
 		
-		for(int row = 0; row < cellData.length; row++)
-		{
-			if(indexValues.size() != cellData[row].length)
-			{
+		for(int row = 0; row < cellData.length; row++) {
+			if(indexValues.size() != cellData[row].length) {
 				throw new DataSeriesImportException("The size of the index (" + indexValues.size() + ") is different from the size of row " + row + " (" + cellData[row].length + ")");
 			}
 		}

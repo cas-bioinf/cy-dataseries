@@ -4,23 +4,19 @@ import org.cytoscape.work.AbstractTaskFactory;
 import org.cytoscape.work.TaskIterator;
 
 import cz.cas.mbu.cydataseries.DataSeriesManager;
-import cz.cas.mbu.cydataseries.DataSeriesStorageProvider;
 import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportManager;
+
 
 public class ImportDataSeriesTaskFactory extends AbstractTaskFactory {
 
 	private final DataSeriesManager dataSeriesManager;
 	private final DataSeriesImportManager importManager;
 
-	
-	
 	public ImportDataSeriesTaskFactory(DataSeriesManager dataSeriesManager, DataSeriesImportManager importManager) {
 		super();
 		this.dataSeriesManager = dataSeriesManager;
 		this.importManager = importManager;
 	}
-
-
 
 	@Override
 	public TaskIterator createTaskIterator() {

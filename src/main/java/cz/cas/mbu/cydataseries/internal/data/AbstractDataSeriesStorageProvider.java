@@ -134,33 +134,28 @@ public abstract class AbstractDataSeriesStorageProvider  implements DataSeriesSt
 		
 	}
 
-	protected abstract static class DataSeriesBuilder 
-	{
+	protected abstract static class DataSeriesBuilder {
 		protected List<String> _rowNames;
 		protected int[] _rowIds;
 		protected String _name;
 		protected Long _suid;
 		
-		public DataSeriesBuilder rowNames(List<String> rowNames)
-		{
+		public DataSeriesBuilder rowNames(List<String> rowNames) {
 			_rowNames = rowNames;
 			return this;
 		}
 		
-		public DataSeriesBuilder rowIds(int[] rowIds)
-		{
+		public DataSeriesBuilder rowIds(int[] rowIds) {
 			_rowIds = rowIds;
 			return this;
 		}
 		
-		public DataSeriesBuilder name(String name)
-		{
+		public DataSeriesBuilder name(String name) {
 			_name = name;
 			return this;
 		}
 		
-		public DataSeriesBuilder suid(Long suid)
-		{
+		public DataSeriesBuilder suid(Long suid) {
 			_suid = suid;
 			return this;
 		}

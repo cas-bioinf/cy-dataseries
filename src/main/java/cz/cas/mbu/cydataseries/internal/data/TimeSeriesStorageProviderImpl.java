@@ -1,31 +1,27 @@
 package cz.cas.mbu.cydataseries.internal.data;
 
 import java.util.List;
-import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cz.cas.mbu.cydataseries.DataSeries;
 
+
 public class TimeSeriesStorageProviderImpl extends AbstractDataSeriesStorageProvider {
 
-	private final Logger logger = LoggerFactory.getLogger(TimeSeriesStorageProviderImpl.class); 
-	
+	private final Logger logger = LoggerFactory.getLogger(TimeSeriesStorageProviderImpl.class);
 	private static final String INDEX_PREFIX = "Time_";
-	
-	
+
 	@Override
 	public Class<? extends DataSeries<?, ?>> getProvidedClass() {
-		return TimeSeriesImpl.class;
+	    return TimeSeriesImpl.class;
 	}
 
-	
 	@Override
-	protected String transformIndexForWrite(Object index) {
-		return INDEX_PREFIX + Double.toString((Double)index);
+	protected String transformIndexForWrite(Object index){
+	    return INDEX_PREFIX + Double.toString((Double)index);
 	}
-
 
 	@Override
 	protected DataSeriesBuilder getSeriesBuilder() {
@@ -33,13 +29,9 @@ public class TimeSeriesStorageProviderImpl extends AbstractDataSeriesStorageProv
 	}
 
 
-
-	private class TimeSeriesBuilder extends DataSeriesBuilder
-	{
+	private class TimeSeriesBuilder extends DataSeriesBuilder {
 		double[] indexArray;
-		double [][] dataArray;
-		
-		
+		double[][] dataArray;
 
 		@Override
 		public DataSeriesBuilder parseIndex(List<String> indexStrings) {
@@ -67,17 +59,15 @@ public class TimeSeriesStorageProviderImpl extends AbstractDataSeriesStorageProv
 			{
 				dataArray = new double[_rowIds.length][indexArray.length];
 			}
-			
 			dataArray[index][row] = Double.parseDouble(data);
-			
-			return this;
+
+            return this;
 		}
 
 		@Override
 		public DataSeries<?, ?> build() {
 			return new TimeSeriesImpl(_suid, _name, _rowIds, _rowNames, indexArray, dataArray);
 		}
-		
 	}
 	
 }
