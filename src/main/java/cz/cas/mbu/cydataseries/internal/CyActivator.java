@@ -35,6 +35,7 @@ import cz.cas.mbu.cydataseries.internal.tasks.RemoveDataSeriesTaskFactory;
 import cz.cas.mbu.cydataseries.internal.ui.DataSeriesPanel;
 import cz.cas.mbu.cydataseries.internal.ui.DataSeriesVisualPanel;
 
+/** Entry point for bundle. */
 public class CyActivator extends AbstractCyActivator {
 
 	public static final String APP_NAME_FOR_STORAGE = CyActivator.class.getPackage().getName();
@@ -48,13 +49,9 @@ public class CyActivator extends AbstractCyActivator {
 
 		DataSeriesMappingManagerImpl mappingManager = new DataSeriesMappingManagerImpl();
 		registerAllServices(bc, mappingManager, new Properties());
-		
-		
+
 		DataSeriesManagerImpl dataSeriesManager = new DataSeriesManagerImpl(bc, mappingManager);
 		registerAllServices(bc, dataSeriesManager, new Properties());
-		
-		
-
 
 		DataSeriesStorageManager storageManager = new DataSeriesStorageManagerImpl(bc, dataSeriesManager, mappingManager);
 		registerAllServices(bc, storageManager, new Properties());
@@ -73,45 +70,44 @@ public class CyActivator extends AbstractCyActivator {
 		registerService(bc, importManager, DataSeriesImportManager.class, new Properties());
 		
 		Properties baseMenuProperties = new Properties();
-		baseMenuProperties.setProperty(ServiceProperties.PREFERRED_MENU,"Apps.Data Series");
-		baseMenuProperties.setProperty(ServiceProperties.IN_MENU_BAR,"true");
+		baseMenuProperties.setProperty(ServiceProperties.PREFERRED_MENU, "Apps.Data Series");
+		baseMenuProperties.setProperty(ServiceProperties.IN_MENU_BAR, "true");
 		
 		Properties importProperties = new Properties();
 		importProperties.putAll(baseMenuProperties);
-		importProperties.setProperty(ServiceProperties.TITLE, "Import data Series");
+		importProperties.setProperty(ServiceProperties.TITLE, "Import Data Series");
 		ImportDataSeriesTaskFactory importTaskFactory = new ImportDataSeriesTaskFactory(dataSeriesManager, importManager);
 		registerService(bc, importTaskFactory, TaskFactory.class, importProperties);
 
 		Properties exportProperties = new Properties();
 		exportProperties.putAll(baseMenuProperties);
-		exportProperties.setProperty(ServiceProperties.TITLE, "Export data Series");
+		exportProperties.setProperty(ServiceProperties.TITLE, "Export Data Series");
 		TaskFactory exportTaskFactory = new ExportDataSeriesTaskFactory(dataSeriesManager, storageManager);
 		registerService(bc, exportTaskFactory, TaskFactory.class, exportProperties);
 
 		Properties removeDataSeriesProperties = new Properties();
 		removeDataSeriesProperties.putAll(baseMenuProperties);
-		removeDataSeriesProperties.setProperty(ServiceProperties.TITLE, "Remove data Series");
+		removeDataSeriesProperties.setProperty(ServiceProperties.TITLE, "Remove Data Series");
 		removeDataSeriesProperties.setProperty("insertSeparatorAfter", Boolean.toString(true));
 		TaskFactory removeDataSeriesTaskFactory = new RemoveDataSeriesTaskFactory(dataSeriesManager);
 		registerService(bc, removeDataSeriesTaskFactory, TaskFactory.class, removeDataSeriesProperties);
 
-		
 		NetworkSelectedParameterPassingTaskFactory<MapColumnTask> mapColumnTaskFactory = new NetworkSelectedParameterPassingTaskFactory<>(MapColumnTask.class, cyApplicationManager, dataSeriesManager, mappingManager, cyApplicationManager);
 		Properties mapProperties = new Properties();
 		mapProperties.putAll(baseMenuProperties);
-		mapProperties.setProperty(ServiceProperties.TITLE, "Map column to series");
+		mapProperties.setProperty(ServiceProperties.TITLE, "Map Column to Series");
 		registerService(bc, mapColumnTaskFactory, TaskFactory.class, mapProperties);
 
 		TaskFactory removeMappingTaskFactory = new RemoveColumnMappingTaskFactory(mappingManager);
 		Properties removeMappingProperties = new Properties();
 		removeMappingProperties.putAll(baseMenuProperties);
-		removeMappingProperties.setProperty(ServiceProperties.TITLE, "Remove column mapping");
+		removeMappingProperties.setProperty(ServiceProperties.TITLE, "Remove Column Mapping");
 		registerService(bc, removeMappingTaskFactory, TaskFactory.class, removeMappingProperties);
 
 		ParameterPassingTaskFactory<ManageMappingsTask> manageMappingTaskFactory = new ParameterPassingTaskFactory<>(ManageMappingsTask.class, serviceRegistrar);
 		Properties manageMappingProperties = new Properties();
 		manageMappingProperties.putAll(baseMenuProperties);
-		manageMappingProperties.setProperty(ServiceProperties.TITLE, "Manage column mappings");
+		manageMappingProperties.setProperty(ServiceProperties.TITLE, "Manage Column Mappings");
 		registerService(bc, manageMappingTaskFactory, TaskFactory.class, manageMappingProperties);
 		
 		/*
