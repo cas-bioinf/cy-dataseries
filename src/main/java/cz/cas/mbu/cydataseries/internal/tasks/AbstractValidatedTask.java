@@ -9,8 +9,6 @@ import org.cytoscape.work.TunableValidator;
 
 public abstract class AbstractValidatedTask extends AbstractTask implements TunableValidator {
 
-	
-	
 	protected abstract ValidationState getValidationState(StringBuilder messageBuilder);
 
 	@Override
@@ -20,13 +18,11 @@ public abstract class AbstractValidatedTask extends AbstractTask implements Tuna
 		try {
 			errMsg.append(messageBuilder.toString());
 		}
-		catch(IOException ex)
-		{
+		catch(IOException ex) {
 			Logger.getLogger(CyUserLog.NAME).error("Could not append validation message", ex); 
 			Logger.getLogger(CyUserLog.NAME).error("The validation message was: " + messageBuilder.toString(), ex); 
 		}
 		return returnValue;
 	}
-	
-	
+
 }

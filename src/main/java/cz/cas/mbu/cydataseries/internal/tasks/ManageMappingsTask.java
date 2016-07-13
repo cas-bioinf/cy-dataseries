@@ -14,16 +14,17 @@ import org.cytoscape.work.TaskMonitor;
 
 import cz.cas.mbu.cydataseries.internal.ui.MappingManagerPanel;
 
+/**
+ * Dialog for managing mappings.
+ */
 public class ManageMappingsTask extends AbstractTask {
 
 	private final CyServiceRegistrar registrar;
-	
-		
+
 	public ManageMappingsTask(CyServiceRegistrar registrar) {
 		super();
 		this.registrar = registrar;
 	}
-
 
 	@Override
 	public void run(TaskMonitor taskMonitor) throws Exception {

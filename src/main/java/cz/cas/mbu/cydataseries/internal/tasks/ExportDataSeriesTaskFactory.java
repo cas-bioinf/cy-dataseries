@@ -6,13 +6,12 @@ import org.cytoscape.work.TaskIterator;
 import cz.cas.mbu.cydataseries.DataSeriesManager;
 import cz.cas.mbu.cydataseries.DataSeriesStorageManager;
 
+
 public class ExportDataSeriesTaskFactory extends AbstractTaskFactory {
 
 	private final DataSeriesManager dataSeriesManager;
 	private final DataSeriesStorageManager dataSeriesStorageManager;
-	
-	
-	
+
 	public ExportDataSeriesTaskFactory(DataSeriesManager dataSeriesManager,
 			DataSeriesStorageManager dataSeriesStorageManager) {
 		super();

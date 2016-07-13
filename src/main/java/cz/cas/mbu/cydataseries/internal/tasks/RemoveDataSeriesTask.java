@@ -26,9 +26,8 @@ public class RemoveDataSeriesTask extends AbstractValidatedTask {
 
 	@Override
 	public ValidationState getValidationState(StringBuilder errMsg) {
-		errMsg.append("Are you sure you want to remove data series '" + dataSeries.getSelectedValue().getName() + "'");
+		errMsg.append("Are you sure you want to remove data series '" + dataSeries.getSelectedValue().getName() + "'?");
 		return ValidationState.REQUEST_CONFIRMATION;
 	}
-
 	
 }

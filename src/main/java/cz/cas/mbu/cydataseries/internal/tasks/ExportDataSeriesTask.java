@@ -16,6 +16,9 @@ import cz.cas.mbu.cydataseries.DataSeriesManager;
 import cz.cas.mbu.cydataseries.DataSeriesStorageManager;
 import cz.cas.mbu.cydataseries.DataSeriesStorageProvider;
 
+/**
+ * Exports the selected data series to an output file.
+ */
 public class ExportDataSeriesTask extends AbstractValidatedTask {
 
 	@Tunable(description = "Series to export", required = true)
@@ -26,26 +29,22 @@ public class ExportDataSeriesTask extends AbstractValidatedTask {
 	
 	private final DataSeriesStorageManager dataSeriesStorageManager;
 	
-	public ExportDataSeriesTask(DataSeriesManager dataSeriesManager, DataSeriesStorageManager dataSeriesStorageManager)
-	{		
+	public ExportDataSeriesTask(DataSeriesManager dataSeriesManager, DataSeriesStorageManager dataSeriesStorageManager) {
 		dataSeries = new ListSingleSelection<>(dataSeriesManager.getAllDataSeries());
 		this.dataSeriesStorageManager = dataSeriesStorageManager;
 	}
 	
 	@Override
 	protected ValidationState getValidationState(StringBuilder messageBuilder) {
-		if(outputFile == null || outputFile.isDirectory())
-		{
+		if (outputFile == null || outputFile.isDirectory()) {
 			messageBuilder.append("You have to select an output file.");
 			return ValidationState.INVALID;
 		}
-		if(!outputFile.getParentFile().exists())
-		{
+		if (!outputFile.getParentFile().exists()) {
 			messageBuilder.append("The parent directory of the output file has to exist.");
 			return ValidationState.INVALID;			
 		}
-		if(outputFile.exists())
-		{
+		if (outputFile.exists()) {
 			messageBuilder.append("Are you sure you want to overwrite file '" + outputFile.toString() + "'?");
 			return ValidationState.REQUEST_CONFIRMATION;
 		}
@@ -56,12 +55,9 @@ public class ExportDataSeriesTask extends AbstractValidatedTask {
 	public void run(TaskMonitor taskMonitor) throws Exception {
 		DataSeries<?, ?> selectedSeries = dataSeries.getSelectedValue();
 		DataSeriesStorageProvider storageProvider = dataSeriesStorageManager.getStorageProvider(selectedSeries.getClass());
-		if(storageProvider == null)
-		{
+		if(storageProvider == null) {
 			throw new DataSeriesException("Could not export - no storage provider found for class " + selectedSeries.getClass().getName());
-		}
-		else
-		{
+		} else {
 			storageProvider.saveDataSeries(selectedSeries, outputFile);			
 		}
 	}
