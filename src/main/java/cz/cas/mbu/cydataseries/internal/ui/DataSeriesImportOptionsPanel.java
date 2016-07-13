@@ -32,6 +32,13 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ChangeEvent;
 
+/**
+ * Data series import dialog.
+ *
+ * Data can be imported as CSV. The dialog allows for selection of separators,
+ *
+ */
+
 public class DataSeriesImportOptionsPanel extends JPanel implements TunableValidator{
 	private List<ChangeListener> parametersChangedListeners;
 	
@@ -153,8 +160,7 @@ public class DataSeriesImportOptionsPanel extends JPanel implements TunableValid
 		parametersChangedListeners.forEach(listener -> listener.stateChanged(evt));
 	}
 		
-	protected void radioButtonChanged(ItemEvent evt)
-	{
+	protected void radioButtonChanged(ItemEvent evt) {
 		if(evt.getStateChange() == ItemEvent.SELECTED)
 		{
 			fireChangeEvent();
@@ -197,8 +203,7 @@ public class DataSeriesImportOptionsPanel extends JPanel implements TunableValid
 		try {
 			return getManualIndexValuesInternal();
 		}
-		catch(NumberFormatException ex)
-		{
+		catch(NumberFormatException ex) {
 			return Collections.EMPTY_LIST;
 		}
 	}
@@ -246,4 +251,5 @@ public class DataSeriesImportOptionsPanel extends JPanel implements TunableValid
 	protected JRadioButton getRdbtnRowsAsIndex() {
 		return rdbtnRowsAsIndex;
 	}
+
 }

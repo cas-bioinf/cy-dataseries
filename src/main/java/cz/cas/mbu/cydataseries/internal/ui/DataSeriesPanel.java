@@ -37,9 +37,7 @@ public class DataSeriesPanel extends JPanel implements CytoPanelComponent2, Data
 	
 	private final CyServiceRegistrar registrar;
 	
-	/**
-	 * Create the panel.
-	 */
+	/** Create panel. */
 	public DataSeriesPanel(CyServiceRegistrar registrar) {
 		this.registrar = registrar;
 		
