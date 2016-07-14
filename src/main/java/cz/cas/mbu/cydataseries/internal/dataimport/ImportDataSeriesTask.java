@@ -10,6 +10,7 @@ import org.cytoscape.work.Tunable;
 import org.cytoscape.work.util.ListSingleSelection;
 
 import cz.cas.mbu.cydataseries.DataSeries;
+import cz.cas.mbu.cydataseries.DataSeriesException;
 import cz.cas.mbu.cydataseries.DataSeriesManager;
 import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportManager;
 import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportProvider;
@@ -51,6 +52,10 @@ public class ImportDataSeriesTask extends AbstractValidatedTask {
 	@Override
 	public void run(TaskMonitor tm) throws Exception {
 		//DS is loaded during validation to let the user modify the options immediately
+		if(importedDS == null)
+		{
+			throw new DataSeriesException("Invalid import task state: series was not imported, although validation passed.");
+		}
 		dataSeriesManager.registerDataSeries(importedDS);
 	}
 
@@ -60,15 +65,7 @@ public class ImportDataSeriesTask extends AbstractValidatedTask {
 			errMsg.append("You have to select a series type");
 			return ValidationState.INVALID;
 		}
-		if(name.isEmpty()) {
-			errMsg.append("Are you sure you do not want to provide a name?");
-			return ValidationState.REQUEST_CONFIRMATION;
-		}
-		else if(name.length() < 3) {
-			errMsg.append("Are you sure you want to use such a short name?");
-			return ValidationState.REQUEST_CONFIRMATION;
-		}
-
+		
 		try (FileReader inputReader = new FileReader(importParameters.getFile())) {
 			PreImportResults preImportResults = ImportHelper.preImport(inputReader, importParameters, true /* strict */);
 			DataSeries<?, ?> ds = provider.getSelectedValue().getProvider().importDataDataSeries(name, SUIDFactory.getNextSUID(), preImportResults);
@@ -78,6 +75,16 @@ public class ImportDataSeriesTask extends AbstractValidatedTask {
 			errMsg.append(ex.getMessage());
 			return ValidationState.INVALID;
 		}			
+		
+		if(name.isEmpty()) {
+			errMsg.append("Are you sure you do not want to provide a name?");
+			return ValidationState.REQUEST_CONFIRMATION;
+		}
+		else if(name.length() < 3) {
+			errMsg.append("Are you sure you want to use such a short name?");
+			return ValidationState.REQUEST_CONFIRMATION;
+		}
+
 		return ValidationState.OK;
 	}
 

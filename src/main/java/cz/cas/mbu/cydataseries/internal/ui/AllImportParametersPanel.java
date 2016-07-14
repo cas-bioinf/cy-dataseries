@@ -21,6 +21,7 @@ import cz.cas.mbu.cydataseries.internal.dataimport.ImportParameters;
 public class AllImportParametersPanel extends JPanel {
 
 	private String rawPreviewData;
+	private boolean rawPreviewDataTruncated;
 	private File inputFile;
 	
 	private FileImportOptionsPanel fileImportOptionsPanel;
@@ -66,9 +67,10 @@ public class AllImportParametersPanel extends JPanel {
 		dataSeriesImportOptionsPanel.addChangedListener(evt -> updatePreview());
 	}
 	
-	public void setPreviewData(String rawData)
+	public void setPreviewData(String rawData, boolean rawDataTruncated)
 	{
 		rawPreviewData = rawData;
+		this.rawPreviewDataTruncated = rawDataTruncated;
 		updatePreview();
 	}
 	
@@ -81,7 +83,7 @@ public class AllImportParametersPanel extends JPanel {
 	{
 		try {
 			PreImportResults preImportResults = ImportHelper.preImport(new StringReader(rawPreviewData), getImportParameters(), false /*strict*/);
-			importPreviewPanel.updatePreview(preImportResults);
+			importPreviewPanel.updatePreview(preImportResults, getImportParameters(), rawPreviewDataTruncated);
 		}
 		catch (Exception ex)
 		{

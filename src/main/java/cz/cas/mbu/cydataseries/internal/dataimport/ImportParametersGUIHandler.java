@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -40,14 +41,19 @@ public class ImportParametersGUIHandler extends AbstractGUITunableHandler {
 		
 		try {
 			ImportParameters params = (ImportParameters) getValue();
-			Stream<String> lines = Files.lines(params.getFile().toPath());
-			String firstLines = lines.limit(NUM_LINES_FOR_PREVIEW).collect(Collectors.joining("\r\n"));
 			
-			dataSeriesImportOptionsPanel = new AllImportParametersPanel();
-			dataSeriesImportOptionsPanel.setPreviewData(firstLines);
-			dataSeriesImportOptionsPanel.setInputfile(params.getFile());			
-			
-			panel = dataSeriesImportOptionsPanel;
+			try (Stream<String> lines = Files.lines(params.getFile().toPath())){
+				List<String> firstLinesList = lines.limit(NUM_LINES_FOR_PREVIEW).collect(Collectors.toList());
+				
+				String firstLines = String.join("\r\n", firstLinesList);
+				boolean rawDataTruncated = (firstLinesList.size() == NUM_LINES_FOR_PREVIEW); //an imperfect guess but should mostly work
+				
+				dataSeriesImportOptionsPanel = new AllImportParametersPanel();
+				dataSeriesImportOptionsPanel.setPreviewData(firstLines, rawDataTruncated);
+				dataSeriesImportOptionsPanel.setInputfile(params.getFile());			
+				
+				panel = dataSeriesImportOptionsPanel;
+			}
 		} catch (Exception ex) {
 			panel = new JPanel(new BorderLayout());
 			panel.add(new JLabel("Error processing preview: " + ex.getMessage()));
