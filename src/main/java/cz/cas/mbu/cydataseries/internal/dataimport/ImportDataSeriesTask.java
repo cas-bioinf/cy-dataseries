@@ -51,7 +51,7 @@ public class ImportDataSeriesTask extends AbstractValidatedTask {
 
 	@Override
 	public void run(TaskMonitor tm) throws Exception {
-		//DS is loaded during validation to let the user modify the options immediately
+		//DS is loaded during validation to let the user modify the options immediately after an import failure
 		if(importedDS == null)
 		{
 			throw new DataSeriesException("Invalid import task state: series was not imported, although validation passed.");
@@ -59,6 +59,15 @@ public class ImportDataSeriesTask extends AbstractValidatedTask {
 		dataSeriesManager.registerDataSeries(importedDS);
 	}
 
+	protected void tryImportSeries() throws Exception
+	{
+		try (FileReader inputReader = new FileReader(importParameters.getFile())) {
+			PreImportResults preImportResults = ImportHelper.preImport(inputReader, importParameters, true /* strict */);
+			DataSeries<?, ?> ds = provider.getSelectedValue().getProvider().importDataDataSeries(name, SUIDFactory.getNextSUID(), preImportResults);
+			importedDS = ds;
+		}
+	}
+	
 	@Override
 	public ValidationState getValidationState(StringBuilder errMsg) {
 		if (provider == null) {
@@ -66,10 +75,14 @@ public class ImportDataSeriesTask extends AbstractValidatedTask {
 			return ValidationState.INVALID;
 		}
 		
-		try (FileReader inputReader = new FileReader(importParameters.getFile())) {
-			PreImportResults preImportResults = ImportHelper.preImport(inputReader, importParameters, true /* strict */);
-			DataSeries<?, ?> ds = provider.getSelectedValue().getProvider().importDataDataSeries(name, SUIDFactory.getNextSUID(), preImportResults);
-			importedDS = ds;
+		if(importParameters.getFile() == null || !importParameters.getFile().exists())
+		{
+			errMsg.append("You have to select an existing file");
+			return ValidationState.INVALID;
+		}
+		
+		try {
+			tryImportSeries();
 		}
 		catch (Exception ex) {
 			errMsg.append(ex.getMessage());
