@@ -12,3 +12,6 @@ branches:
 after_success:
   - mvn clean
 
+notifications:
+  email:
+    - konigmatt@googlemail.com
