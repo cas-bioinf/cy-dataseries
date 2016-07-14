@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/martincerny/cy-dataseries.svg?branch=master)](https://travis-ci.org/martincerny/cy-dataseries)
 # cy-dataseries
 
 As of now (2016-06-23) a working prototype of a Cytoscape plugin for handling data series (time series, repeated measurements etc.).
