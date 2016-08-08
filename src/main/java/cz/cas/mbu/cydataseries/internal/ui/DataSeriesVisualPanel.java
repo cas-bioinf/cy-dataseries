@@ -35,7 +35,7 @@ import cz.cas.mbu.cydataseries.DataSeries;
 import cz.cas.mbu.cydataseries.DataSeriesManager;
 import cz.cas.mbu.cydataseries.DataSeriesMappingManager;
 import cz.cas.mbu.cydataseries.TimeSeries;
-import cz.cas.mbu.cydataseries.internal.TimeSeriesChartContainer;
+
 import javax.swing.JCheckBox;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.ColumnSpec;

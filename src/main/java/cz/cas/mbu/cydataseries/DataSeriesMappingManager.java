@@ -13,6 +13,8 @@ public interface DataSeriesMappingManager {
 	void unmapTableColumn(Class<? extends CyIdentifiable> targetClass, String columnName);
 	
 	DataSeries<?,?> getMappedDataSeries(Class<? extends CyIdentifiable> targetClass, String columnName);
+
+	<T extends DataSeries<?, ?>> T getMappedDataSeries(Class<? extends CyIdentifiable> targetClass, String columnName, Class<T> seriesClass);
 	
 	Map<Class<? extends CyIdentifiable>, Map<String, DataSeries<?,?>>> getAllMappings();
 	List<MappingDescriptor> getAllMappingDescriptors();

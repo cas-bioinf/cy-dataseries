@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Maps;
 
 import cz.cas.mbu.cydataseries.DataSeries;
+import cz.cas.mbu.cydataseries.DataSeriesException;
 import cz.cas.mbu.cydataseries.DataSeriesMappingManager;
 import cz.cas.mbu.cydataseries.DataSeriesMappingManager.MappingDescriptor;
 
@@ -73,8 +74,29 @@ public class DataSeriesMappingManagerImpl implements DataSeriesMappingManager{
 		}
 		return localMap.get(columnName);
 	}
-
 	
+	
+	@Override
+	public <T extends DataSeries<?, ?>> T getMappedDataSeries(Class<? extends CyIdentifiable> targetClass,
+			String columnName, Class<T> seriesClass) {
+		DataSeries<?, ?> series = getMappedDataSeries(targetClass, columnName);
+		if(series == null)
+		{
+			return null;
+		}
+		else if(seriesClass.isAssignableFrom(series.getClass()))
+		{
+			@SuppressWarnings("unchecked")
+			T castSeries = (T)series;
+			return (T)castSeries;
+		}
+		else
+		{
+			throw new DataSeriesException("Mapped data series " + series.getName() + " does not have expected class (" + seriesClass.getName() + ")");
+		}
+	}
+
+
 	@Override
 	public Map<Class<? extends CyIdentifiable>, Map<String, DataSeries<?,?>>> getAllMappings()
 	{
