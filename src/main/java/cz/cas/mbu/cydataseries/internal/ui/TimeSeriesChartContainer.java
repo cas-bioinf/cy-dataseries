@@ -1,4 +1,4 @@
-package cz.cas.mbu.cydataseries.internal;
+package cz.cas.mbu.cydataseries.internal.ui;
 
 import java.util.ArrayList;
 import java.util.Collection;
