@@ -34,6 +34,7 @@ import org.jfree.chart.ChartPanel;
 import cz.cas.mbu.cydataseries.DataSeries;
 import cz.cas.mbu.cydataseries.DataSeriesManager;
 import cz.cas.mbu.cydataseries.DataSeriesMappingManager;
+import cz.cas.mbu.cydataseries.MappingDescriptor;
 import cz.cas.mbu.cydataseries.TimeSeries;
 
 import javax.swing.JCheckBox;
@@ -58,8 +59,8 @@ public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 	private JCheckBox showAdjacentCheckbox;
 	private JPanel filteringPanel;
 	
-	private final Set<DataSeriesMappingManager.MappingDescriptor> hiddenSeries;
-	private List<DataSeriesMappingManager.MappingDescriptor> displayedDataSeries;  
+	private final Set<MappingDescriptor<?>> hiddenSeries;
+	private List<MappingDescriptor<?>> displayedDataSeries;  
 	private JLabel lblSeriesToDisplay;
 	
 	public DataSeriesVisualPanel(CyApplicationManager cyApplicationManager, DataSeriesManager dataSeriesManager, DataSeriesMappingManager dataSeriesMappingManager) {
@@ -165,7 +166,7 @@ public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 									allSeries.add(timeSeries);
 									rowIds.add(id);
 									
-									DataSeriesMappingManager.MappingDescriptor descriptor = new DataSeriesMappingManager.MappingDescriptor(source.getTargetClass(), columnName, timeSeries);
+									MappingDescriptor<TimeSeries> descriptor = new MappingDescriptor<TimeSeries>(source.getTargetClass(), columnName, timeSeries);
 									displayedDataSeries.add(descriptor);
 									
 									seriesVisible.add( !hiddenSeries.contains(descriptor) );
@@ -219,10 +220,10 @@ public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 	{
 		filteringPanel.removeAll();
 				
-		Set<DataSeriesMappingManager.MappingDescriptor> displayedDescriptors = new HashSet<>();
+		Set<MappingDescriptor<?>> displayedDescriptors = new HashSet<>();
 		for(int i = 0; i < displayedDataSeries.size(); i++)
 		{
-			final DataSeriesMappingManager.MappingDescriptor descriptor = displayedDataSeries.get(i);
+			final MappingDescriptor<?> descriptor = displayedDataSeries.get(i);
 			if(displayedDescriptors.contains(descriptor))
 			{
 				continue;
@@ -241,7 +242,7 @@ public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 		}
 	}
 	
-	private void filteringItemChanged(DataSeriesMappingManager.MappingDescriptor descriptor, boolean selected)
+	private void filteringItemChanged(MappingDescriptor<?> descriptor, boolean selected)
 	{
 		if(selected)
 		{

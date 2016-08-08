@@ -25,7 +25,7 @@ import com.jgoodies.forms.layout.RowSpec;
 
 import cz.cas.mbu.cydataseries.DataSeriesManager;
 import cz.cas.mbu.cydataseries.DataSeriesMappingManager;
-import cz.cas.mbu.cydataseries.DataSeriesMappingManager.MappingDescriptor;
+import cz.cas.mbu.cydataseries.MappingDescriptor;
 import cz.cas.mbu.cydataseries.internal.MapColumnTask;
 import cz.cas.mbu.cydataseries.internal.tasks.RemoveColumnMappingTask;
 
@@ -34,7 +34,7 @@ public class MappingManagerPanel extends JPanel {
 
 	CyServiceRegistrar registrar;
 	
-	List<MappingDescriptor> displayedDescriptors;
+	List<MappingDescriptor<?>> displayedDescriptors;
 	
 	/**
 	 * Create the panel.
@@ -81,7 +81,7 @@ public class MappingManagerPanel extends JPanel {
 		
 		for(int row = 0; row < displayedDescriptors.size(); row++)
 		{
-			MappingDescriptor desc = displayedDescriptors.get(row); 
+			MappingDescriptor<?> desc = displayedDescriptors.get(row); 
 			data[row][0] = desc.getTargetClass().getSimpleName();
 			data[row][1] = desc.getColumnName();
 			data[row][2] = desc.getDataSeries().getName();
@@ -102,7 +102,7 @@ public class MappingManagerPanel extends JPanel {
 		RemoveColumnMappingTask task = new RemoveColumnMappingTask(registrar.getService(DataSeriesMappingManager.class));
 		if(table.getSelectedRow() >= 0)
 		{
-			MappingDescriptor selectedDescriptor = displayedDescriptors.get(table.getSelectedRow());
+			MappingDescriptor<?> selectedDescriptor = displayedDescriptors.get(table.getSelectedRow());
 			task.targetMapping.setSelectedValue(selectedDescriptor);
 		}
 		startTask(task);

@@ -15,8 +15,8 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.DefaultXYDataset;
 
-import cz.cas.mbu.cydataseries.DataSeriesMappingManager;
 import cz.cas.mbu.cydataseries.DataSeriesStorageProvider;
+import cz.cas.mbu.cydataseries.MappingDescriptor;
 import cz.cas.mbu.cydataseries.TimeSeries;
 
 public class TimeSeriesChartContainer {
@@ -24,7 +24,7 @@ public class TimeSeriesChartContainer {
 	DefaultXYDataset dataset;
 	XYLineAndShapeRenderer renderer;
 	
-	Map<DataSeriesMappingManager.MappingDescriptor, List<Integer>> descriptorsToIndex;
+	Map<MappingDescriptor<?>, List<Integer>> descriptorsToIndex;
 	
 	public TimeSeriesChartContainer()
 	{
@@ -43,7 +43,7 @@ public class TimeSeriesChartContainer {
 		return chart;
 	}
 	
-	public void setSeriesData(List<TimeSeries> allSeries,List<DataSeriesMappingManager.MappingDescriptor> descriptors, List<Integer> rowIds, List<Boolean> visible)
+	public void setSeriesData(List<TimeSeries> allSeries,List<MappingDescriptor<?>> descriptors, List<Integer> rowIds, List<Boolean> visible)
 	{
 		while(dataset.getSeriesCount() > 0)
 		{
@@ -87,7 +87,7 @@ public class TimeSeriesChartContainer {
 		}
 	}
 	
-	public void setSeriesVisible(DataSeriesMappingManager.MappingDescriptor descriptor, boolean visible)
+	public void setSeriesVisible(MappingDescriptor<?> descriptor, boolean visible)
 	{
 		List<Integer> seriesIndices = descriptorsToIndex.get(descriptor);
 		if(seriesIndices != null)

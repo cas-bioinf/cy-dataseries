@@ -17,7 +17,7 @@ import com.google.common.collect.Maps;
 import cz.cas.mbu.cydataseries.DataSeries;
 import cz.cas.mbu.cydataseries.DataSeriesException;
 import cz.cas.mbu.cydataseries.DataSeriesMappingManager;
-import cz.cas.mbu.cydataseries.DataSeriesMappingManager.MappingDescriptor;
+import cz.cas.mbu.cydataseries.MappingDescriptor;
 
 public class DataSeriesMappingManagerImpl implements DataSeriesMappingManager{
 
@@ -106,16 +106,35 @@ public class DataSeriesMappingManagerImpl implements DataSeriesMappingManager{
 	
 	
 	@Override
-	public List<MappingDescriptor> getAllMappingDescriptors() {
-		List<MappingDescriptor> descriptors = new ArrayList<>();
+	public <T extends DataSeries<?, ?>> List<MappingDescriptor<T>> getAllMappingDescriptors(Class<T> dataSeriesClass) {
+		List<MappingDescriptor<T>> descriptors = new ArrayList<>();
+		mappings.entrySet().forEach(entry -> {
+			entry.getValue().entrySet().stream()
+				.filter(perClassEntry -> dataSeriesClass.isAssignableFrom(perClassEntry.getValue().getClass())) //Filter by the given class
+				.forEach(perClassEntry ->
+				{
+					@SuppressWarnings("unchecked")
+					T dataSeries = (T)perClassEntry.getValue();
+					descriptors.add(new MappingDescriptor<T>(entry.getKey(), perClassEntry.getKey(), dataSeries));
+				});
+		});
+		return descriptors;
+	}
+
+
+
+
+	@Override
+	public List<MappingDescriptor<?>> getAllMappingDescriptors() {
+		List<MappingDescriptor<?>> descriptors = new ArrayList<>();
 		mappings.entrySet().forEach(entry -> {
 			entry.getValue().entrySet().forEach(perClassEntry ->
 			{
-				descriptors.add(new MappingDescriptor(entry.getKey(), perClassEntry.getKey(), perClassEntry.getValue()));
+				descriptors.add(new MappingDescriptor<DataSeries<?,?>>(entry.getKey(), perClassEntry.getKey(), perClassEntry.getValue()));
 			});
 		});
 		return descriptors;
-	}	
+	}
 
 
 	@Override

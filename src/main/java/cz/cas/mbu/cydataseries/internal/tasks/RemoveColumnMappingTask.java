@@ -5,13 +5,13 @@ import org.cytoscape.work.Tunable;
 import org.cytoscape.work.util.ListSingleSelection;
 
 import cz.cas.mbu.cydataseries.DataSeriesMappingManager;
-import cz.cas.mbu.cydataseries.DataSeriesMappingManager.MappingDescriptor;
+import cz.cas.mbu.cydataseries.MappingDescriptor;
 
 
 public class RemoveColumnMappingTask extends AbstractValidatedTask {
 
 	@Tunable(description="Mapping to remove")
-	public ListSingleSelection<MappingDescriptor> targetMapping;
+	public ListSingleSelection<MappingDescriptor<?>> targetMapping;
 	
 	private final DataSeriesMappingManager mappingManager;
 	
@@ -24,7 +24,7 @@ public class RemoveColumnMappingTask extends AbstractValidatedTask {
 
 	@Override
 	public void run(TaskMonitor taskMonitor) throws Exception {
-		MappingDescriptor descriptor = targetMapping.getSelectedValue();		
+		MappingDescriptor<?> descriptor = targetMapping.getSelectedValue();		
 		mappingManager.unmapTableColumn(descriptor.getTargetClass(), descriptor.getColumnName());		
 	}
 
