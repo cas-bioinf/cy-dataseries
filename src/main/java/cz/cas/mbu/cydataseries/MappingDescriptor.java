@@ -1,6 +1,7 @@
 package cz.cas.mbu.cydataseries;
 
 import org.cytoscape.model.CyIdentifiable;
+import org.cytoscape.model.CyRow;
 
 public class MappingDescriptor<T extends DataSeries<?,?>> 
 {
@@ -30,10 +31,31 @@ public class MappingDescriptor<T extends DataSeries<?,?>>
 		return columnName;
 	}
 
-	public DataSeries<?, ?> getDataSeries() {
+	public T getDataSeries() {
 		return dataSeries;
 	}
 
+	/**
+	 * Gets the index of the data series row corresponding to a given CyRow under this mapping
+	 * @param row
+	 * @return -1 if there is no row for this CyRow, or the index of the associated row.
+	 * @throws DataSeriesException if the CyRow contains an invalid ID.
+	 */
+	public int getDataSeriesRow(CyRow row)
+	{
+		Integer rowID = row.get(columnName, DataSeriesMappingManager.MAPPING_COLUMN_CLASS);
+		if(rowID == null)
+		{
+			return -1;
+		}
+		int tsRow = dataSeries.idToRow(rowID);
+		if(tsRow < 0)
+		{
+			throw new DataSeriesException("Requesting non existent row id (" + tsRow + ") from Data Series " + dataSeries.getName());			
+		}
+		return tsRow;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
