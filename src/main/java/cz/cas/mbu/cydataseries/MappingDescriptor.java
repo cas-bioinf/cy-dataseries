@@ -1,5 +1,7 @@
 package cz.cas.mbu.cydataseries;
 
+import java.util.Comparator;
+
 import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.model.CyRow;
 
@@ -93,6 +95,26 @@ public class MappingDescriptor<T extends DataSeries<?,?>>
 		return true;
 	}
 	
-	
+	public static class DefaultComparator<T extends DataSeries<?, ?>> implements Comparator<MappingDescriptor<T>>
+	{
+
+		@Override
+		public int compare(MappingDescriptor<T> o1, MappingDescriptor<T> o2) {
+			int nameCompare = (o1.dataSeries.getName().compareTo(o2.getDataSeries().getName()));
+			if(nameCompare != 0)
+			{
+				return nameCompare;
+			}
+			
+			int columnNameCompare = o1.getColumnName().compareTo(o2.getColumnName());
+			if(columnNameCompare != 0)
+			{
+				return columnNameCompare;
+			}
+			
+			return o1.getTargetClass().getSimpleName().compareTo(o2.getTargetClass().getSimpleName());
+		}
+		
+	}
 	
 }
