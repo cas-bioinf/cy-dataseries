@@ -60,7 +60,7 @@ public class MapColumnTask extends AbstractTask implements TunableValidator{
 	}
 	
 	@Tunable(description = "Map by matching row names to existing column", groups={"Mapping"})
-	public boolean mapByRowNames = false;
+	public boolean mapByRowNames = true;
 
 	private ListSingleSelection<String> mapRowNamesWithColumn;
 	
