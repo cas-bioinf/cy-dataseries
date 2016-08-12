@@ -106,6 +106,7 @@ public class DataSeriesStorageManagerImpl implements DataSeriesStorageManager, S
 	@Override
 	public void handleEvent(SessionLoadedEvent e) {
 		
+		mappingManager.removeAllMappings();
 		dataSeriesManager.removeAllDataSeries();
 		
 		if (e.getLoadedSession().getAppFileListMap() == null || e.getLoadedSession().getAppFileListMap().size() ==0){
@@ -184,10 +185,7 @@ public class DataSeriesStorageManagerImpl implements DataSeriesStorageManager, S
 			userLogger.error("Error reading DS list files", ex);
 		}
 		
-		//Load mapping
-		mappingManager.removeAllMappings();
-		
-		
+		//Load mapping				
 		Optional<File> mappingFile = files.stream()
 				.filter((f) -> f.getName().equals(MAPPING_FILENAME))
 				.findAny();
