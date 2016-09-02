@@ -1,12 +1,15 @@
 package cz.cas.mbu.cydataseries.internal.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridLayout;
+import java.awt.Paint;
 import java.awt.event.ItemEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -29,7 +32,10 @@ import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTableUtil;
 import org.cytoscape.model.events.RowsSetEvent;
 import org.cytoscape.model.events.RowsSetListener;
+import org.jfree.chart.ChartColor;
 import org.jfree.chart.ChartPanel;
+import org.jfree.chart.plot.DefaultDrawingSupplier;
+import org.jfree.chart.plot.DrawingSupplier;
 
 import cz.cas.mbu.cydataseries.DataSeries;
 import cz.cas.mbu.cydataseries.DataSeriesManager;
@@ -107,8 +113,10 @@ public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 		filteringPanel.setLayout(new GridLayout(0, 1, 0, 0));
 		
 		showAdjacentCheckbox.addItemListener(e -> updateVisual());
+		
+		updateVisual();
 	}
-
+	
 	@Override
 	public Component getComponent() {
 		return this;
@@ -176,8 +184,17 @@ public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 						});
 				});
 		
+		if(allSeries.isEmpty())
+		{
+			showAdjacentCheckbox.setEnabled(false);
+		}
+		else
+		{
+			showAdjacentCheckbox.setEnabled(true);
+		}
+		
 		chartContainer.setSeriesData(allSeries, displayedDataSeries, rowIds, seriesVisible);			
-		updateFilteringPanel();		
+		updateFilteringPanel(rowSources);		
 	}
 
 	private void updateVisual()
@@ -216,30 +233,44 @@ public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 		updateVisualWithRows(sources);			
 	}
 	
-	private void updateFilteringPanel()
+	private void updateFilteringPanel(List<ChartSource> rowSources)
 	{
 		filteringPanel.removeAll();
 				
-		Set<MappingDescriptor<?>> displayedDescriptors = new HashSet<>();
-		for(int i = 0; i < displayedDataSeries.size(); i++)
+		if(rowSources.isEmpty())
 		{
-			final MappingDescriptor<?> descriptor = displayedDataSeries.get(i);
-			if(displayedDescriptors.contains(descriptor))
-			{
-				continue;
-			}
-			
-			displayedDescriptors.add(descriptor);
-			JCheckBox seriesCheckBox = new JCheckBox(descriptor.getDataSeries().getName() + " (" + descriptor.getColumnName() + ")");
-			if(!hiddenSeries.contains(descriptor))
-			{
-				seriesCheckBox.setSelected(true);				
-			}
-			seriesCheckBox.addItemListener(e -> {
-				filteringItemChanged(descriptor, e.getStateChange() == ItemEvent.SELECTED);
-			});
-			filteringPanel.add(seriesCheckBox);			
+			filteringPanel.add(new JLabel("Nothing selected"));			
 		}
+		else if(displayedDataSeries.isEmpty())
+		{
+			filteringPanel.add(new JLabel("No series available."));
+		}
+		else
+		{
+			Set<MappingDescriptor<?>> displayedDescriptors = new HashSet<>();
+			for(int i = 0; i < displayedDataSeries.size(); i++)
+			{
+				final MappingDescriptor<?> descriptor = displayedDataSeries.get(i);
+				if(displayedDescriptors.contains(descriptor))
+				{
+					continue;
+				}
+				
+				displayedDescriptors.add(descriptor);
+				JCheckBox seriesCheckBox = new JCheckBox(descriptor.getDataSeries().getName() + " (" + descriptor.getColumnName() + ")");
+				if(!hiddenSeries.contains(descriptor))
+				{
+					seriesCheckBox.setSelected(true);				
+				}
+				seriesCheckBox.addItemListener(e -> {
+					filteringItemChanged(descriptor, e.getStateChange() == ItemEvent.SELECTED);
+				});
+				filteringPanel.add(seriesCheckBox);			
+			}
+		}
+		
+		filteringPanel.revalidate();
+		filteringPanel.repaint();
 	}
 	
 	private void filteringItemChanged(MappingDescriptor<?> descriptor, boolean selected)
