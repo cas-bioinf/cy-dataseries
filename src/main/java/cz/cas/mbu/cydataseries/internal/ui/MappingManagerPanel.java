@@ -26,7 +26,7 @@ import com.jgoodies.forms.layout.RowSpec;
 import cz.cas.mbu.cydataseries.DataSeriesManager;
 import cz.cas.mbu.cydataseries.DataSeriesMappingManager;
 import cz.cas.mbu.cydataseries.MappingDescriptor;
-import cz.cas.mbu.cydataseries.internal.MapColumnTask;
+import cz.cas.mbu.cydataseries.internal.tasks.MapColumnTask;
 import cz.cas.mbu.cydataseries.internal.tasks.RemoveColumnMappingTask;
 
 public class MappingManagerPanel extends JPanel {

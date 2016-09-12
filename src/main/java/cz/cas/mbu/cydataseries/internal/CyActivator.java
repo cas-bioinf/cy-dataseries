@@ -27,6 +27,7 @@ import cz.cas.mbu.cydataseries.internal.dataimport.ImportParametersGuiHandleFact
 import cz.cas.mbu.cydataseries.internal.dataimport.TimeSeriesImportProviderImpl;
 import cz.cas.mbu.cydataseries.internal.tasks.ExportDataSeriesTaskFactory;
 import cz.cas.mbu.cydataseries.internal.tasks.ManageMappingsTask;
+import cz.cas.mbu.cydataseries.internal.tasks.MapColumnTask;
 import cz.cas.mbu.cydataseries.internal.tasks.NetworkSelectedParameterPassingTaskFactory;
 import cz.cas.mbu.cydataseries.internal.tasks.ParameterPassingTaskFactory;
 import cz.cas.mbu.cydataseries.internal.tasks.RemoveColumnMappingTask;
