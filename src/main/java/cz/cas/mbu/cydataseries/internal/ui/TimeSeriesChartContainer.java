@@ -25,9 +25,9 @@ import cz.cas.mbu.cydataseries.MappingDescriptor;
 import cz.cas.mbu.cydataseries.TimeSeries;
 
 public class TimeSeriesChartContainer {
-	private JFreeChart chart;
-	DefaultXYDataset dataset;
-	XYLineAndShapeRenderer renderer;
+	private final JFreeChart chart;
+	private final DefaultXYDataset dataset;
+	private final XYLineAndShapeRenderer renderer;
 	
 	Map<MappingDescriptor<?>, List<Integer>> descriptorsToIndex;
 	
@@ -39,7 +39,7 @@ public class TimeSeriesChartContainer {
 		renderer.setBaseLinesVisible(true);
 		XYPlot plot = new XYPlot(dataset, new NumberAxis("Time"), new NumberAxis(), renderer);
 		chart = new JFreeChart(plot);
-		plot.setDrawingSupplier(createDrawingSupplier());
+		plot.setDrawingSupplier(ChartUtils.createDrawingSupplier());
 		
 		descriptorsToIndex = new HashMap<>();
 	}
@@ -49,56 +49,7 @@ public class TimeSeriesChartContainer {
 		return chart;
 	}
 	
-	protected DrawingSupplier createDrawingSupplier()
-	{
-		//Our paint sequence (the default contains very light yellow, which is not legible
-		Paint[] paintSequence = new Paint[] {
-	            new Color(0xFF, 0x55, 0x55),
-	            new Color(0x55, 0x55, 0xFF),
-	            new Color(0x55, 0xFF, 0x55),
-	            new Color(0xFF, 0x55, 0xFF),
-	            new Color(0x55, 0xFF, 0xFF),
-	            Color.pink,
-	            Color.gray,
-	            ChartColor.DARK_RED,
-	            ChartColor.DARK_BLUE,
-	            ChartColor.DARK_GREEN,
-	            ChartColor.DARK_YELLOW,
-	            ChartColor.DARK_MAGENTA,
-	            ChartColor.DARK_CYAN,
-	            Color.darkGray,
-	            ChartColor.LIGHT_RED,
-	            ChartColor.LIGHT_BLUE,
-	            ChartColor.LIGHT_GREEN,
-	            ChartColor.LIGHT_YELLOW,
-	            ChartColor.LIGHT_MAGENTA,
-	            ChartColor.LIGHT_CYAN,
-	            Color.lightGray,
-	            ChartColor.VERY_DARK_RED,
-	            ChartColor.VERY_DARK_BLUE,
-	            ChartColor.VERY_DARK_GREEN,
-	            ChartColor.VERY_DARK_YELLOW,
-	            ChartColor.VERY_DARK_MAGENTA,
-	            ChartColor.VERY_DARK_CYAN,
-	            ChartColor.VERY_LIGHT_RED,
-	            ChartColor.VERY_LIGHT_BLUE,
-	            ChartColor.VERY_LIGHT_GREEN,
-	            ChartColor.VERY_LIGHT_YELLOW,
-	            ChartColor.VERY_LIGHT_MAGENTA,
-	            ChartColor.VERY_LIGHT_CYAN
-	        };		
-		
-		//Replace the drawing supplier with a supplier with all defaults, but a different paint sequence
-		return new DefaultDrawingSupplier(paintSequence,
-				DefaultDrawingSupplier.DEFAULT_FILL_PAINT_SEQUENCE, 
-				DefaultDrawingSupplier.DEFAULT_OUTLINE_PAINT_SEQUENCE, 
-				DefaultDrawingSupplier.DEFAULT_STROKE_SEQUENCE,
-				DefaultDrawingSupplier.DEFAULT_OUTLINE_STROKE_SEQUENCE,
-				DefaultDrawingSupplier.DEFAULT_SHAPE_SEQUENCE);
 
-		
-	}		
-	
 	public void setSeriesData(List<TimeSeries> allSeries,List<MappingDescriptor<?>> descriptors, List<Integer> rowIds, List<Boolean> visible)
 	{
 		while(dataset.getSeriesCount() > 0)

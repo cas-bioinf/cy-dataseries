@@ -163,6 +163,7 @@
             <groupId>net.sf.opencsv</groupId>
             <artifactId>opencsv</artifactId>
             <version>2.1</version>
+			<optional>true</optional>
         </dependency>
 		
 <!-- 		<dependency>
@@ -184,7 +185,6 @@
 			<artifactId>junit</artifactId>
 			<version>4.12</version>
 		</dependency>
-
 	</dependencies>
 
 	<!-- Links to the Cytoscape Maven repositories. -->

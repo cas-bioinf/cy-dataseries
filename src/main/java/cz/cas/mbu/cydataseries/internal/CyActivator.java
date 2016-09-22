@@ -3,7 +3,6 @@ package cz.cas.mbu.cydataseries.internal;
 import java.util.Properties;
 
 import org.cytoscape.application.CyApplicationManager;
-import org.cytoscape.application.swing.AbstractCyAction;
 import org.cytoscape.application.swing.CytoPanelComponent;
 import org.cytoscape.model.events.RowsSetListener;
 import org.cytoscape.service.util.AbstractCyActivator;
@@ -18,6 +17,7 @@ import cz.cas.mbu.cydataseries.DataSeriesListener;
 import cz.cas.mbu.cydataseries.DataSeriesPublicTasks;
 import cz.cas.mbu.cydataseries.DataSeriesStorageManager;
 import cz.cas.mbu.cydataseries.DataSeriesStorageProvider;
+import cz.cas.mbu.cydataseries.SmoothingService;
 import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportManager;
 import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportProvider;
 import cz.cas.mbu.cydataseries.internal.data.TimeSeriesStorageProviderImpl;
@@ -30,10 +30,10 @@ import cz.cas.mbu.cydataseries.internal.tasks.ManageMappingsTask;
 import cz.cas.mbu.cydataseries.internal.tasks.MapColumnTask;
 import cz.cas.mbu.cydataseries.internal.tasks.NetworkSelectedParameterPassingTaskFactory;
 import cz.cas.mbu.cydataseries.internal.tasks.ParameterPassingTaskFactory;
-import cz.cas.mbu.cydataseries.internal.tasks.RemoveColumnMappingTask;
 import cz.cas.mbu.cydataseries.internal.tasks.RemoveColumnMappingTaskFactory;
-import cz.cas.mbu.cydataseries.internal.tasks.RemoveDataSeriesTask;
 import cz.cas.mbu.cydataseries.internal.tasks.RemoveDataSeriesTaskFactory;
+import cz.cas.mbu.cydataseries.internal.tasks.SmoothDataSeriesTaskFactory;
+import cz.cas.mbu.cydataseries.internal.tasks.SmoothInteractiveShowUITaskFactory;
 import cz.cas.mbu.cydataseries.internal.ui.DataSeriesPanel;
 import cz.cas.mbu.cydataseries.internal.ui.DataSeriesVisualPanel;
 
@@ -60,13 +60,16 @@ public class CyActivator extends AbstractCyActivator {
 	
 		DataSeriesStorageProvider timeSeriesProvider = new TimeSeriesStorageProviderImpl(); 
 		registerService(bc, timeSeriesProvider, DataSeriesStorageProvider.class, new Properties());
-		
+
+		SmoothingService smoothingService = new SmoothingServiceImpl(); 
+		registerService(bc, smoothingService, SmoothingService.class, new Properties());
 		
 		registerService(bc, new ImportParametersGuiHandleFactory(), GUITunableHandlerFactory.class, new Properties());
 		
 		registerService(bc, new TimeSeriesImportProviderImpl(), DataSeriesImportProvider.class, new Properties());
 
 		registerService(bc, new DataSeriesFactoryImpl(), DataSeriesFactory.class, new Properties());
+
 		
 		DataSeriesImportManager importManager = new DataSeriesImportManagerImpl(bc);
 		registerService(bc, importManager, DataSeriesImportManager.class, new Properties());
@@ -111,6 +114,18 @@ public class CyActivator extends AbstractCyActivator {
 		manageMappingProperties.putAll(baseMenuProperties);
 		manageMappingProperties.setProperty(ServiceProperties.TITLE, "Manage Column Mappings");
 		registerService(bc, manageMappingTaskFactory, TaskFactory.class, manageMappingProperties);
+		
+		TaskFactory smoothTaskFactory = new SmoothDataSeriesTaskFactory(dataSeriesManager, smoothingService);
+		Properties smoothProperties = new Properties();
+		smoothProperties.putAll(baseMenuProperties);
+		smoothProperties.setProperty(ServiceProperties.TITLE, "Smooth data series");
+		registerService(bc, smoothTaskFactory, TaskFactory.class, smoothProperties);
+		
+		TaskFactory smoothInteractiveTaskFactory = new SmoothInteractiveShowUITaskFactory(serviceRegistrar);
+		Properties smoothInteractiveProperties = new Properties();
+		smoothInteractiveProperties.putAll(baseMenuProperties);
+		smoothInteractiveProperties.setProperty(ServiceProperties.TITLE, "Interactive smoothing");
+		registerService(bc, smoothInteractiveTaskFactory, TaskFactory.class, smoothInteractiveProperties);
 		
 		/*
 		Properties modifyProperties = new Properties(baseMenuProperties);
