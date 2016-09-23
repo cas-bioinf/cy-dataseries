@@ -32,14 +32,17 @@ public class SmoothInteractivePerformTask extends AbstractValidatedTask {
 	private final double[] estimateX;
 	private final double bandwidth;
 		
+	private final SmoothingPreviewPanel sourcePanel;
 	
+
 	public SmoothInteractivePerformTask(CyServiceRegistrar registrar, TimeSeries sourceTimeSeries,
-			double[] estimateX, double bandwidth) {
+			double[] estimateX, double bandwidth, SmoothingPreviewPanel sourcePanel) {
 		super();
 		this.registrar = registrar;
 		this.sourceTimeSeries = sourceTimeSeries;
 		this.estimateX = estimateX;
 		this.bandwidth = bandwidth;
+		this.sourcePanel = sourcePanel;
 	}
 
 	@Override
@@ -48,7 +51,8 @@ public class SmoothInteractivePerformTask extends AbstractValidatedTask {
 		SmoothingService smoothingService = registrar.getService(SmoothingService.class);
 		TimeSeries smoothedSeries = smoothingService.linearKernelSmoothing(sourceTimeSeries, estimateX, bandwidth, resultName, smoothingService.getDefaultRowGrouping(sourceTimeSeries));
 		
-		registrar.getService(DataSeriesManager.class).registerDataSeries(smoothedSeries);		
+		registrar.getService(DataSeriesManager.class).registerDataSeries(smoothedSeries);
+		registrar.unregisterAllServices(sourcePanel);
 	}
 
 	@Override

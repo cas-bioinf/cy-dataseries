@@ -74,7 +74,7 @@ public class SmoothingServiceImpl implements SmoothingService{
 	@Override
 	public Map<String, List<Integer>> getDefaultRowGrouping(TimeSeries series) {
 		return IntStream.range(0, series.getRowCount())
-				.mapToObj(x -> (Integer)x)  //I need to map to Integers to be able to use Collectors.groupingBy
+				.boxed() //I need to map to Integers to be able to use Collectors.groupingBy
 				.collect(Collectors.groupingBy(rowIndex -> series.getRowName(rowIndex)));		
 	}
 

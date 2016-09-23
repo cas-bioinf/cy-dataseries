@@ -5,29 +5,30 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.event.ItemEvent;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
+import javax.swing.JTextField;
 
-import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.CytoPanelComponent;
 import org.cytoscape.application.swing.CytoPanelName;
-import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyRow;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskManager;
-import org.cytoscape.work.Tunable;
 import org.jfree.chart.ChartPanel;
 
 import com.google.common.primitives.Doubles;
@@ -37,18 +38,13 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.FormSpecs;
 import com.jgoodies.forms.layout.RowSpec;
 
-import cern.colt.Arrays;
 import cz.cas.mbu.cydataseries.SmoothingService;
 import cz.cas.mbu.cydataseries.TimeSeries;
 import cz.cas.mbu.cydataseries.internal.KernelSmoothing;
 import cz.cas.mbu.cydataseries.internal.dataimport.MatlabSyntaxNumberList;
 import cz.cas.mbu.cydataseries.internal.tasks.SmoothInteractivePerformTask;
-
-import javax.swing.JTextPane;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.JTextField;
-import javax.swing.JCheckBox;
+import javax.swing.JRadioButton;
+import javax.swing.ButtonGroup;
 
 public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent {
 
@@ -62,17 +58,23 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 	
 	private double[] estimateX = null;
 	
-	private Map<String,List<Integer>> currentlyShownRows;
+	private Map<String,List<Integer>> currentlyShownGroupings;
 	private double currentBandwidth;
 		
 	
 	private final Color errorTextFieldBackground = new Color(255, 125, 128);
 	private final Color defaultTextFieldBackground;
 	
+	private final Random random;
+	
 	private String caption;
 	private JTextField bandwidthTextField;
 	private JTextField timePointsTextField;
-	private JCheckBox keepSourceTimePointsCheckBox;
+	private final ButtonGroup timePointsButtonGroup = new ButtonGroup();
+	private JTextField numEquidistantTextField;
+	private JRadioButton rdbtnKeepSourceTimePoints;
+	private JRadioButton rdbtnEquidistantTimePoints;
+	private JRadioButton rdbtnGivenTimePoints;
 	
 	/**
 	 * Create the panel.
@@ -104,6 +106,8 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 				FormSpecs.RELATED_GAP_ROWSPEC,
 				FormSpecs.DEFAULT_ROWSPEC,
 				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
 				FormSpecs.DEFAULT_ROWSPEC,}));
 		
 		JLabel lblDisplay = new JLabel("Display:");
@@ -128,6 +132,12 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 		JSeparator separator = new JSeparator();
 		controlPanel.add(separator, "1, 1, 12, 1");
 		
+		rdbtnKeepSourceTimePoints = new JRadioButton("Estimate in the same time points as the original series");
+		rdbtnKeepSourceTimePoints.setSelected(true);
+		timePointsButtonGroup.add(rdbtnKeepSourceTimePoints);
+		controlPanel.add(rdbtnKeepSourceTimePoints, "6, 2, 5, 1");
+		rdbtnKeepSourceTimePoints.addItemListener(evt -> timePointsInputChanged());
+		
 		JButton btnResampleRows = new JButton("See different examples");
 		controlPanel.add(btnResampleRows, "12, 2");
 		btnResampleRows.addActionListener(evt -> showDifferentExamples());
@@ -136,51 +146,63 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 		btnPerformSmoothing.setFont(new Font("Tahoma", Font.BOLD, 13));
 		btnPerformSmoothing.addActionListener(evt -> performSmoothing());
 		
-		keepSourceTimePointsCheckBox = new JCheckBox("Estimate in the same time points as the original series");
-		keepSourceTimePointsCheckBox.setSelected(true);
-		controlPanel.add(keepSourceTimePointsCheckBox, "2, 4, 3, 1");
-		keepSourceTimePointsCheckBox.addItemListener(evt -> estimateInputChanged());
-		
-		JLabel lblNewLabel = new JLabel("Time points to estimate the data:");
-		controlPanel.add(lblNewLabel, "6, 4, right, default");
-		
-		timePointsTextField = new JTextField();
-		controlPanel.add(timePointsTextField, "8, 4, 3, 1, fill, default");
-		timePointsTextField.setColumns(10);
-		controlPanel.add(btnPerformSmoothing, "12, 4");
-		timePointsTextField.getDocument().addDocumentListener(UIUtils.listenForAllDocumentChanges(this::estimateInputChanged));
-		
 		JLabel lblSmoothingBandwidth = new JLabel("Smoothing bandwidth:");
-		controlPanel.add(lblSmoothingBandwidth, "2, 6, right, default");
+		controlPanel.add(lblSmoothingBandwidth, "2, 4, right, default");
 		
 		bandwidthTextField = new JTextField();
-		controlPanel.add(bandwidthTextField, "4, 6, fill, default");
+		controlPanel.add(bandwidthTextField, "4, 4, fill, default");
 		bandwidthTextField.setColumns(10);
-				
-		JLabel lblCommaSeparatedSupports = new JLabel("Comma separated, supports Matlab notation (e.g. 1,2,3:5,10:2:20)");
-		lblCommaSeparatedSupports.setFont(new Font("Tahoma", Font.ITALIC, 11));
-		controlPanel.add(lblCommaSeparatedSupports, "6, 6, 5, 1");
+								
+		rdbtnEquidistantTimePoints = new JRadioButton("Estimate at N equidistant points:");
+		timePointsButtonGroup.add(rdbtnEquidistantTimePoints);
+		controlPanel.add(rdbtnEquidistantTimePoints, "6, 4");		
+		rdbtnEquidistantTimePoints.addItemListener(evt -> timePointsInputChanged());
+		
+		numEquidistantTextField = new JTextField();
+		numEquidistantTextField.setText("100");
+		numEquidistantTextField.setEnabled(false);
+		controlPanel.add(numEquidistantTextField, "8, 4, 3, 1, fill, default");
+		numEquidistantTextField.setColumns(10);
+		controlPanel.add(btnPerformSmoothing, "12, 4");
+		numEquidistantTextField.getDocument().addDocumentListener(UIUtils.listenForAllDocumentChanges(this::timePointsInputChanged));
+		
+		rdbtnGivenTimePoints = new JRadioButton("Estimate at specific time points:");
+		timePointsButtonGroup.add(rdbtnGivenTimePoints);
+		controlPanel.add(rdbtnGivenTimePoints, "6, 6");
+		rdbtnGivenTimePoints.addItemListener(evt -> timePointsInputChanged());
+		
+		timePointsTextField = new JTextField();
+		timePointsTextField.setText("1:100");
+		timePointsTextField.setEnabled(false);
+		controlPanel.add(timePointsTextField, "8, 6, 3, 1, fill, default");
+		timePointsTextField.setColumns(10);
+		timePointsTextField.getDocument().addDocumentListener(UIUtils.listenForAllDocumentChanges(this::timePointsInputChanged));
 		
 		JButton btnClose = new JButton("Close");
 		controlPanel.add(btnClose, "12, 6");
+		
+		JLabel lblCommaSeparatedSupports = new JLabel("Comma separated, supports Matlab notation (e.g. 1,2,3:5,10:2:20)");
+		lblCommaSeparatedSupports.setFont(new Font("Tahoma", Font.ITALIC, 11));
+		controlPanel.add(lblCommaSeparatedSupports, "6, 8, 5, 1");
 		btnClose.addActionListener(evt -> closePanel());
-
-		
-		//Add listener only after initial assignment to the bandwidth text field
-		bandwidthTextField.getDocument().addDocumentListener(UIUtils.listenForAllDocumentChanges(this::bandwidthTextChanged));
-		
-		this.defaultTextFieldBackground = bandwidthTextField.getBackground();
 		
 		this.registrar = registrar;
 		this.sourceTimeSeries = timeSeries;
 		this.estimateX = timeSeries.getIndexArray();	
 		
-		currentlyShownRows = new HashMap<>();
+		currentlyShownGroupings = new HashMap<>();
+		random = new Random();
+		
+		this.defaultTextFieldBackground = bandwidthTextField.getBackground();
 		
 		if(!java.beans.Beans.isDesignTime())
 		{
 			currentBandwidth = guessBandwidth(sourceTimeSeries);
 			bandwidthTextField.setText(Double.toString(currentBandwidth));
+			
+			//Add listener only after initial assignment to the bandwidth text field
+			bandwidthTextField.getDocument().addDocumentListener(UIUtils.listenForAllDocumentChanges(this::bandwidthTextChanged));
+			
 			
 			sampleShownRows();
 			updateDisplayGrid();
@@ -192,23 +214,59 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 
 	private double guessBandwidth(TimeSeries ts)
 	{
-		return 10;
+		if(ts.getIndexCount() < 2)
+		{
+			return 1;
+		}
+		double maxDiff = 0;
+		List<Double> sortedList = new ArrayList<>(ts.getIndex());
+		sortedList.sort(null);
+		for(int i = 1; i < sortedList.size(); i++)
+		{
+			maxDiff = Math.max(maxDiff, sortedList.get(i) - sortedList.get(i - 1));
+		}
+		return Math.max(0.0001, maxDiff);
 	}
 	
 	private void sampleShownRows()
 	{
 		//sample row names
-		currentlyShownRows.clear();
-		for(int i = 0; i < Math.min(getMaxDisplayed(), sourceTimeSeries.getRowCount()); i++)
+		currentlyShownGroupings.clear();
+		
+		SmoothingService smoothingService = registrar.getService(SmoothingService.class);
+		
+		Map<String, List<Integer>> rowGroupings = smoothingService.getDefaultRowGrouping(sourceTimeSeries);
+
+		int numGroupingsToSelect = getMaxDisplayed();
+		if(rowGroupings.size() <= numGroupingsToSelect)
 		{
-			currentlyShownRows.put(sourceTimeSeries.getRowName(i), Collections.singletonList(i));
+			currentlyShownGroupings.putAll(rowGroupings);
 		}
+		else
+		{
+			//randomly select maxDisplayed groupings
+			List<String> groupingNames = new ArrayList<>(rowGroupings.keySet());
+			
+			for(int i = 0; i < numGroupingsToSelect;i++)
+			{
+				int selectedIndex = random.nextInt(groupingNames.size() - i);
+				String selectedName = groupingNames.get(selectedIndex);
+				currentlyShownGroupings.put(selectedName, rowGroupings.get(selectedName));
+
+				//Shrink the set of values available for choosing
+				int lastUsedIndex = groupingNames.size() - i - 1;
+				groupingNames.set(selectedIndex, groupingNames.get(lastUsedIndex));
+			}
+			
+		}		 
+		
 	}
 	
 	private void updateEstimateX()
 	{
-		boolean showTextError = false;
-		if(!keepSourceTimePointsCheckBox.isSelected())
+		boolean showGivenTimePointsError = false;
+		boolean showEquidistantError = false;
+		if(rdbtnGivenTimePoints.isSelected())
 		{
 			try {
 				List<Double> timePointsList = MatlabSyntaxNumberList.listFromString(timePointsTextField.getText());
@@ -218,12 +276,39 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 				}
 				else
 				{
-					showTextError = true;
+					showGivenTimePointsError = true;
 				}
 			}
 			catch (NumberFormatException ex)
 			{
-				showTextError = true;
+				showGivenTimePointsError = true;
+			}
+		}
+		else if (rdbtnEquidistantTimePoints.isSelected())
+		{
+			try 
+			{
+				int numEquidistant = Integer.parseInt(numEquidistantTextField.getText());
+				if(numEquidistant < 2)
+				{
+					showEquidistantError = true;					
+				}
+				else
+				{
+					double min = DoubleStream.of(sourceTimeSeries.getIndexArray()).min().orElse(0);
+					double max = DoubleStream.of(sourceTimeSeries.getIndexArray()).max().orElse(1);
+					
+					estimateX = new double[numEquidistant];
+					double step = (max - min) / (numEquidistant - 1);
+					for(int i = 0; i < numEquidistant; i++)
+					{
+						estimateX[i] = min + (step * i);
+					}
+				}
+			}
+			catch (NumberFormatException ex)
+			{
+				showEquidistantError = true;
 			}
 		}
 		else 
@@ -231,7 +316,7 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 			estimateX = sourceTimeSeries.getIndexArray();
 		}
 		
-		if(showTextError)
+		if(showGivenTimePointsError)
 		{
 			timePointsTextField.setBackground(errorTextFieldBackground);			
 		}
@@ -239,13 +324,23 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 		{
 			timePointsTextField.setBackground(defaultTextFieldBackground);
 		}
+		
+		if(showEquidistantError)
+		{
+			numEquidistantTextField.setBackground(errorTextFieldBackground);			
+		}
+		else
+		{
+			numEquidistantTextField.setBackground(defaultTextFieldBackground);						
+		}
 	}
 	
-	private void estimateInputChanged()
+	private void timePointsInputChanged()
 	{
 		double[] oldEstimateX = estimateX;
 		updateEstimateX();
-		timePointsTextField.setEnabled(!keepSourceTimePointsCheckBox.isSelected());
+		timePointsTextField.setEnabled(rdbtnGivenTimePoints.isSelected());
+		numEquidistantTextField.setEnabled(rdbtnEquidistantTimePoints.isSelected());
 		if(oldEstimateX != estimateX) //intentional reference equality - just to bypass the most obvious unnecessary redrawings
 		{
 			updateDisplayGrid();
@@ -292,7 +387,8 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 
 		int maxDisplayed = getMaxDisplayed();		
 
-		if(maxDisplayed != currentlyShownRows.size())
+		//Resample if maxDisplayed increased, unless we are already showing the whole series
+		if(maxDisplayed > currentlyShownGroupings.size() && currentlyShownGroupings.size() == sourceTimeSeries.getRowCount())
 		{
 			sampleShownRows();
 		}
@@ -321,7 +417,7 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 		
 		mainDisplayPanel.setLayout(new FormLayout(layoutColumns, layoutRows));
 		
-		List<JPanel> panelsToShow = currentlyShownRows.entrySet().stream()
+		List<JPanel> panelsToShow = currentlyShownGroupings.entrySet().stream()
 				.map(entry -> {
 					List<Integer> rows = entry.getValue();
 					double[] allRowsConcat = new double[rows.size() * sourceTimeSeries.getIndexCount()];
@@ -411,7 +507,7 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 	
 	private void performSmoothing()
 	{
-		registrar.getService(TaskManager.class).execute(new TaskIterator(new SmoothInteractivePerformTask(registrar, sourceTimeSeries, estimateX, currentBandwidth)));
+		registrar.getService(TaskManager.class).execute(new TaskIterator(new SmoothInteractivePerformTask(registrar, sourceTimeSeries, estimateX, currentBandwidth, this)));
 	}
 	
 	public void closePanel()

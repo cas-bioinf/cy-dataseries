@@ -93,7 +93,7 @@ public class CyActivator extends AbstractCyActivator {
 		Properties removeDataSeriesProperties = new Properties();
 		removeDataSeriesProperties.putAll(baseMenuProperties);
 		removeDataSeriesProperties.setProperty(ServiceProperties.TITLE, "Remove Data Series");
-		removeDataSeriesProperties.setProperty("insertSeparatorAfter", Boolean.toString(true));
+		//removeDataSeriesProperties.setProperty("insertSeparatorAfter", Boolean.toString(true));
 		TaskFactory removeDataSeriesTaskFactory = new RemoveDataSeriesTaskFactory(dataSeriesManager);
 		registerService(bc, removeDataSeriesTaskFactory, TaskFactory.class, removeDataSeriesProperties);
 
