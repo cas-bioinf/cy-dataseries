@@ -20,11 +20,14 @@ import cz.cas.mbu.cydataseries.DataSeriesStorageProvider;
 import cz.cas.mbu.cydataseries.SmoothingService;
 import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportManager;
 import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportProvider;
+import cz.cas.mbu.cydataseries.internal.data.NamedDoubleDataSeriesStorageProviderImpl;
 import cz.cas.mbu.cydataseries.internal.data.TimeSeriesStorageProviderImpl;
 import cz.cas.mbu.cydataseries.internal.dataimport.DataSeriesImportManagerImpl;
 import cz.cas.mbu.cydataseries.internal.dataimport.ImportDataSeriesTaskFactory;
 import cz.cas.mbu.cydataseries.internal.dataimport.ImportParametersGuiHandleFactory;
+import cz.cas.mbu.cydataseries.internal.dataimport.NamedDoubleDataSeriesImportProviderImpl;
 import cz.cas.mbu.cydataseries.internal.dataimport.TimeSeriesImportProviderImpl;
+import cz.cas.mbu.cydataseries.internal.smoothing.SmoothingServiceImpl;
 import cz.cas.mbu.cydataseries.internal.tasks.ExportDataSeriesTaskFactory;
 import cz.cas.mbu.cydataseries.internal.tasks.ManageMappingsTask;
 import cz.cas.mbu.cydataseries.internal.tasks.MapColumnTask;
@@ -58,8 +61,8 @@ public class CyActivator extends AbstractCyActivator {
 		DataSeriesStorageManager storageManager = new DataSeriesStorageManagerImpl(bc, dataSeriesManager, mappingManager);
 		registerAllServices(bc, storageManager, new Properties());
 	
-		DataSeriesStorageProvider timeSeriesProvider = new TimeSeriesStorageProviderImpl(); 
-		registerService(bc, timeSeriesProvider, DataSeriesStorageProvider.class, new Properties());
+		registerService(bc, new TimeSeriesStorageProviderImpl(), DataSeriesStorageProvider.class, new Properties());
+		registerService(bc, new NamedDoubleDataSeriesStorageProviderImpl(), DataSeriesStorageProvider.class, new Properties());
 
 		SmoothingService smoothingService = new SmoothingServiceImpl(); 
 		registerService(bc, smoothingService, SmoothingService.class, new Properties());
@@ -67,6 +70,7 @@ public class CyActivator extends AbstractCyActivator {
 		registerService(bc, new ImportParametersGuiHandleFactory(), GUITunableHandlerFactory.class, new Properties());
 		
 		registerService(bc, new TimeSeriesImportProviderImpl(), DataSeriesImportProvider.class, new Properties());
+		registerService(bc, new NamedDoubleDataSeriesImportProviderImpl(), DataSeriesImportProvider.class, new Properties());
 
 		registerService(bc, new DataSeriesFactoryImpl(), DataSeriesFactory.class, new Properties());
 

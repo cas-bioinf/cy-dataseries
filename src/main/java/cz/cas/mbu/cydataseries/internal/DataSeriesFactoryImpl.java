@@ -5,19 +5,33 @@ import java.util.List;
 import org.cytoscape.model.SUIDFactory;
 
 import cz.cas.mbu.cydataseries.DataSeriesFactory;
+import cz.cas.mbu.cydataseries.NamedDoubleDataSeries;
 import cz.cas.mbu.cydataseries.TimeSeries;
+import cz.cas.mbu.cydataseries.internal.data.NamedDoubleDataSeriesImpl;
 import cz.cas.mbu.cydataseries.internal.data.TimeSeriesImpl;
 
 public class DataSeriesFactoryImpl implements DataSeriesFactory {
 
-	@Override
-	public TimeSeries createTimeSeries(String name, List<String> rowNames, double[] timePoints, double[][] data) {
-		int[] rowIDs = new int[data.length];
-		for(int row = 0; row < rowIDs.length; row++)
+	private int[] createRowIDs(int count)
+	{
+		int[] rowIDs = new int[count];
+		for(int row = 0; row < count; row++)
 		{
 			rowIDs[row] = row;
-		}
-		return new TimeSeriesImpl(SUIDFactory.getNextSUID(), name, rowIDs, rowNames, timePoints, data);
+		}		
+		return rowIDs;
 	}
+	
+	@Override
+	public TimeSeries createTimeSeries(String name, List<String> rowNames, double[] timePoints, double[][] data) {
+		return new TimeSeriesImpl(SUIDFactory.getNextSUID(), name, createRowIDs(rowNames.size()), rowNames, timePoints, data);
+	}
+
+	@Override
+	public NamedDoubleDataSeries createNamedDoubleDataSeries(String name, List<String> rowNames,
+			List<String> columnNames, double[][] data) {
+		return new NamedDoubleDataSeriesImpl(SUIDFactory.getNextSUID(), name, createRowIDs(rowNames.size()), rowNames, columnNames, data);
+	}
+
 	
 }

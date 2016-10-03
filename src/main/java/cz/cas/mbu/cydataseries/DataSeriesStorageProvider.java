@@ -2,14 +2,6 @@ package cz.cas.mbu.cydataseries;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-
-import org.cytoscape.model.CyIdentifiable;
-import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyRow;
-import org.cytoscape.model.CyTable;
-
-import cz.cas.mbu.cydataseries.internal.TimeSeriesSourceType;
 
 /**
  * @author MBU
@@ -18,6 +10,7 @@ import cz.cas.mbu.cydataseries.internal.TimeSeriesSourceType;
  */
 public interface DataSeriesStorageProvider {
 	Class<? extends DataSeries<?,?>> getProvidedClass();
+	String getSeriesTypeCaption();
 
 	/**
 	 * 

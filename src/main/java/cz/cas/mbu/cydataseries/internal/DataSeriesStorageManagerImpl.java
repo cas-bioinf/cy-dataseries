@@ -81,7 +81,15 @@ public class DataSeriesStorageManagerImpl implements DataSeriesStorageManager, S
 			try
 			{
 				DataSeriesStorageProvider p = (DataSeriesStorageProvider)obj;
-				providers.put(p.getProvidedClass().getName(), p);				
+				String providerKey = p.getProvidedClass().getName();
+				if(providers.containsKey(providerKey))
+				{
+					logger.error("Multiple providers for DS class " + providerKey + ". First registered: " + providers.get(providerKey).getClass().getName() + ", ignored: " + p.getClass().getName());									
+				}
+				else
+				{
+					providers.put(providerKey, p);
+				}
 			}
 			catch(ClassCastException ex)
 			{
@@ -165,6 +173,10 @@ public class DataSeriesStorageManagerImpl implements DataSeriesStorageManager, S
 						if(seriesFile.isPresent())
 						{
 							DataSeries<?, ?> ds = provider.loadDataSeries(seriesFile.get(), name, oldsuid);
+							if(! ds.getClass().getName().equals(provider.getProvidedClass().getName()))
+							{
+								userLogger.error("The provider " + provider.getClass().getName() + " should load series of type " + provider.getProvidedClass().getName() + " but loaded a series of type " + ds.getClass().getName());													
+							}
 							oldSuidMapping.put(oldsuid, ds);
 							dataSeriesManager.registerDataSeries(ds);
 						}

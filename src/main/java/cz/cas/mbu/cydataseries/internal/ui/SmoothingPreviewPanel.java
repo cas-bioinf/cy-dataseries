@@ -40,8 +40,8 @@ import com.jgoodies.forms.layout.RowSpec;
 
 import cz.cas.mbu.cydataseries.SmoothingService;
 import cz.cas.mbu.cydataseries.TimeSeries;
-import cz.cas.mbu.cydataseries.internal.KernelSmoothing;
 import cz.cas.mbu.cydataseries.internal.dataimport.MatlabSyntaxNumberList;
+import cz.cas.mbu.cydataseries.internal.smoothing.KernelSmoothing;
 import cz.cas.mbu.cydataseries.internal.tasks.SmoothInteractivePerformTask;
 import javax.swing.JRadioButton;
 import javax.swing.ButtonGroup;

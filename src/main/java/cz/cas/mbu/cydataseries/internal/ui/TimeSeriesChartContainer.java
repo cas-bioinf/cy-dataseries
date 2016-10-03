@@ -20,16 +20,16 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.DefaultXYDataset;
 
+import cz.cas.mbu.cydataseries.DataSeries;
 import cz.cas.mbu.cydataseries.DataSeriesStorageProvider;
 import cz.cas.mbu.cydataseries.MappingDescriptor;
 import cz.cas.mbu.cydataseries.TimeSeries;
 
-public class TimeSeriesChartContainer {
+public class TimeSeriesChartContainer extends AbstractDataSeriesChartContainer {
 	private final JFreeChart chart;
 	private final DefaultXYDataset dataset;
 	private final XYLineAndShapeRenderer renderer;
 	
-	Map<MappingDescriptor<?>, List<Integer>> descriptorsToIndex;
 	
 	public TimeSeriesChartContainer()
 	{
@@ -41,7 +41,6 @@ public class TimeSeriesChartContainer {
 		chart = new JFreeChart(plot);
 		plot.setDrawingSupplier(ChartUtils.createDrawingSupplier());
 		
-		descriptorsToIndex = new HashMap<>();
 	}
 	
 	public JFreeChart getChart()
@@ -50,40 +49,30 @@ public class TimeSeriesChartContainer {
 	}
 	
 
-	public void setSeriesData(List<TimeSeries> allSeries,List<MappingDescriptor<?>> descriptors, List<Integer> rowIds, List<Boolean> visible)
-	{
+	
+	
+	@Override
+	protected void clearDataset() {
 		while(dataset.getSeriesCount() > 0)
 		{
 			dataset.removeSeries(dataset.getSeriesKey(0));
 		}
-		
-		descriptorsToIndex.clear();
-		
-		for(int i = 0; i < allSeries.size(); i++)
+	}
+
+	@Override
+	protected int processSeriesRow(DataSeries<?, ?> seriesRaw, String label, int row) {
+		if(seriesRaw instanceof TimeSeries)
 		{
-			TimeSeries series = allSeries.get(i);
-			int row = series.idToRow(rowIds.get(i));
-			if(row >= 0)
-			{
-				double [][] data = new double[][] { series.getIndexArray(), series.getRowDataArray(row) };
-				dataset.addSeries(series.getRowName(row) + " (ID " + rowIds.get(i) + " in " + series.getName() + ")", data);
-				
-				if(!visible.get(i))
-				{
-					//The current series is the last series
-					setSeriesVisible(dataset.getSeriesCount() - 1, false);
-				}
-				
-				List<Integer> indexList = descriptorsToIndex.get(descriptors.get(i)); 
-				if(indexList == null)
-				{
-					indexList = new ArrayList<>();					
-					descriptorsToIndex.put(descriptors.get(i), indexList);					
-				}
-				indexList.add(dataset.getSeriesCount() - 1);
-			}			
-		}		
-		
+			TimeSeries series = (TimeSeries)seriesRaw;
+			double [][] data = new double[][] { series.getIndexArray(), series.getRowDataArray(row) };
+			dataset.addSeries(label, data);
+			int index = dataset.getSeriesCount() - 1;
+			return index;
+		}
+		else
+		{
+			return -1;			
+		}
 	}
 	
 	public void resetSeriesVisible()
@@ -94,17 +83,8 @@ public class TimeSeriesChartContainer {
 		}
 	}
 	
-	public void setSeriesVisible(MappingDescriptor<?> descriptor, boolean visible)
-	{
-		List<Integer> seriesIndices = descriptorsToIndex.get(descriptor);
-		if(seriesIndices != null)
-		{
-			seriesIndices.forEach(
-					index -> setSeriesVisible(index.intValue(), visible)
-					);
-		}		
-	}
 	
+	@Override
 	protected void setSeriesVisible(int seriesIndex, boolean visible)
 	{
 		Boolean visibleValue;

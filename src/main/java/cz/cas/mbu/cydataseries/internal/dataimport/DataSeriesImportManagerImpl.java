@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
+import cz.cas.mbu.cydataseries.DataSeries;
 import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportManager;
 import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportProvider;
 
@@ -40,5 +41,5 @@ public class DataSeriesImportManagerImpl implements DataSeriesImportManager {
 		}
 		return providers;
 	}
-
+	
 }

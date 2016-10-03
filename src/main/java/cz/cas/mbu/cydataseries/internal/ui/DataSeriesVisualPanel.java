@@ -3,6 +3,7 @@ package cz.cas.mbu.cydataseries.internal.ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Paint;
 import java.awt.event.ItemEvent;
@@ -36,6 +37,7 @@ import org.jfree.chart.ChartColor;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.plot.DefaultDrawingSupplier;
 import org.jfree.chart.plot.DrawingSupplier;
+import org.omg.CORBA.NamedValue;
 
 import cz.cas.mbu.cydataseries.DataSeries;
 import cz.cas.mbu.cydataseries.DataSeriesManager;
@@ -59,11 +61,12 @@ public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 	private final CyApplicationManager cyApplicationManager;
 	private final DataSeriesManager dataSeriesManager;
 	private final DataSeriesMappingManager dataSeriesMappingManager;
-	
-	private final TimeSeriesChartContainer chartContainer;
-	private final ChartPanel chartPanel;
+
+	List<AbstractDataSeriesChartContainer> chartContainers;
+	List<ChartPanel> chartPanels;
 	private JCheckBox showAdjacentCheckbox;
 	private JPanel filteringPanel;
+	private final JPanel chartContainerPanel;
 	
 	private final Set<MappingDescriptor<?>> hiddenSeries;
 	private List<MappingDescriptor<?>> displayedDataSeries;  
@@ -78,11 +81,21 @@ public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 		hiddenSeries = new HashSet<>();
 		displayedDataSeries = new ArrayList<>();
 		
-		chartContainer = new TimeSeriesChartContainer();
-		chartPanel = new ChartPanel(chartContainer.getChart(), getWidth(), getHeight(), ChartPanel.DEFAULT_MINIMUM_DRAW_WIDTH, ChartPanel.DEFAULT_MINIMUM_DRAW_HEIGHT, Integer.MAX_VALUE, Integer.MAX_VALUE, ChartPanel.DEFAULT_BUFFER_USED, true /*properties*/, true /* save */, true /* print */, true /* zoom */, true /* tooltips */);
-
+		chartContainers = new ArrayList<>();
+		chartContainers.add(new TimeSeriesChartContainer());
+		chartContainers.add(new NamedDoubleSeriesChartContainer());
 		
-		this.add(chartPanel, BorderLayout.CENTER);
+		chartPanels = new ArrayList<>();
+		for(AbstractDataSeriesChartContainer chartContainer: chartContainers)
+		{
+			ChartPanel newPanel = new ChartPanel(chartContainer.getChart());
+			chartPanels.add(newPanel);
+		}
+		
+		
+		chartContainerPanel = new JPanel(new GridLayout(1, chartContainers.size()));
+				
+		this.add(chartContainerPanel, BorderLayout.CENTER);
 		
 		JPanel panel = new JPanel();
 		add(panel, BorderLayout.EAST);
@@ -144,17 +157,17 @@ public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 	
 	private void updateVisualWithRows(List<ChartSource> rowSources)
 	{
-		List<TimeSeries> allSeries = new ArrayList<>();
+		List<DataSeries<?, ?>> allSeries = new ArrayList<>();		
 		List<Integer> rowIds = new ArrayList<>();
 		List<Boolean> seriesVisible = new ArrayList<>();
 		displayedDataSeries.clear();
 		
 		rowSources.forEach(
 				source -> {
-					dataSeriesMappingManager.getAllMappings(source.getTargetClass(), TimeSeries.class).entrySet()
+					dataSeriesMappingManager.getAllMappings(source.getTargetClass()).entrySet()
 						.forEach((entry) -> {
 							String columnName = entry.getKey();
-							TimeSeries timeSeries = entry.getValue();
+							DataSeries<?,?> ds = entry.getValue();
 							
 							Integer id = source.getRow().get(columnName, DataSeriesMappingManager.MAPPING_COLUMN_CLASS);
 							if(id != null)
@@ -171,10 +184,10 @@ public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 								}
 								if(!alreadyPresent)
 								{
-									allSeries.add(timeSeries);
+									allSeries.add(ds);
 									rowIds.add(id);
 									
-									MappingDescriptor<TimeSeries> descriptor = new MappingDescriptor<TimeSeries>(source.getTargetClass(), columnName, timeSeries);
+									MappingDescriptor<DataSeries<?,?>> descriptor = new MappingDescriptor<DataSeries<?,?>>(source.getTargetClass(), columnName, ds);
 									displayedDataSeries.add(descriptor);
 									
 									seriesVisible.add( !hiddenSeries.contains(descriptor) );
@@ -193,44 +206,77 @@ public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 			showAdjacentCheckbox.setEnabled(true);
 		}
 		
-		chartContainer.setSeriesData(allSeries, displayedDataSeries, rowIds, seriesVisible);			
+		for(AbstractDataSeriesChartContainer chartContainer: chartContainers)
+		{
+			chartContainer.setSeriesData(allSeries, displayedDataSeries, rowIds, seriesVisible);						
+		}
+		updateChartVisibility();
 		updateFilteringPanel(rowSources);		
 	}
 
+	private void updateChartVisibility()
+	{
+		chartContainerPanel.removeAll();
+		boolean showedAnyCharts = false;
+		for(int chartIndex = 0; chartIndex < chartPanels.size(); chartIndex++)
+		{
+			if(chartContainers.get(chartIndex).hasSeriesToShow())
+			{
+				chartContainerPanel.add(chartPanels.get(chartIndex));
+				showedAnyCharts = true;
+			}
+		}
+		
+		if(!showedAnyCharts)
+		{
+			chartContainerPanel.add(new JLabel("No data series to display."));
+		}
+		
+		chartContainerPanel.revalidate();
+		chartContainerPanel.repaint();
+		
+	}
+	
 	private void updateVisual()
 	{
 		CyNetwork network = cyApplicationManager.getCurrentNetwork();
-		List<CyNode> nodes = CyTableUtil.getNodesInState(network,"selected",true);
-		List<ChartSource> sources = new ArrayList<>();
-		
-		
-		
-		nodes.forEach(node -> {
-			CyRow row = network.getRow(node);
-			sources.add(new ChartSource(CyNode.class, row));
+		if(network == null)
+		{
+			updateVisualWithRows(Collections.EMPTY_LIST);
+		}
+		else
+		{
+			List<CyNode> nodes = CyTableUtil.getNodesInState(network,"selected",true);
+			List<ChartSource> sources = new ArrayList<>();
+						
 			
-			if(getShowAdjacentCheckbox().isSelected())
-			{
-				network.getAdjacentEdgeList(node, CyEdge.Type.ANY).forEach( edge ->
+			nodes.forEach(node -> {
+				CyRow row = network.getRow(node);
+				sources.add(new ChartSource(CyNode.class, row));
+				
+				if(getShowAdjacentCheckbox().isSelected())
 				{
-					sources.add(new ChartSource(CyEdge.class, network.getRow(edge)));
-				});
-			}			
-		});
-		
-		List<CyEdge> edges = CyTableUtil.getEdgesInState(network, "selected", true);
-		edges.forEach(edge -> {
-			CyRow row = network.getRow(edge);
-			sources.add(new ChartSource(CyEdge.class, row));
+					network.getAdjacentEdgeList(node, CyEdge.Type.ANY).forEach( edge ->
+					{
+						sources.add(new ChartSource(CyEdge.class, network.getRow(edge)));
+					});
+				}			
+			});
 			
-			if(getShowAdjacentCheckbox().isSelected())
-			{
-				sources.add(new ChartSource(CyNode.class, network.getRow(edge.getSource())));
-				sources.add(new ChartSource(CyNode.class, network.getRow(edge.getTarget())));
-			}			
-		});
-
-		updateVisualWithRows(sources);			
+			List<CyEdge> edges = CyTableUtil.getEdgesInState(network, "selected", true);
+			edges.forEach(edge -> {
+				CyRow row = network.getRow(edge);
+				sources.add(new ChartSource(CyEdge.class, row));
+				
+				if(getShowAdjacentCheckbox().isSelected())
+				{
+					sources.add(new ChartSource(CyNode.class, network.getRow(edge.getSource())));
+					sources.add(new ChartSource(CyNode.class, network.getRow(edge.getTarget())));
+				}			
+			});
+	
+			updateVisualWithRows(sources);
+		}
 	}
 	
 	private void updateFilteringPanel(List<ChartSource> rowSources)
@@ -284,7 +330,13 @@ public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 			hiddenSeries.add(descriptor);
 		}
 		
-		chartContainer.setSeriesVisible(descriptor, selected);
+		for(AbstractDataSeriesChartContainer chartContainer: chartContainers)
+		{
+			chartContainer.setSeriesVisible(descriptor, selected);			
+		}
+		
+		updateChartVisibility();
+			
 	}
 
 	@Override

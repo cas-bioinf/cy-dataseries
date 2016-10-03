@@ -28,6 +28,8 @@ import cz.cas.mbu.cydataseries.DataSeries;
 import cz.cas.mbu.cydataseries.DataSeriesEvent;
 import cz.cas.mbu.cydataseries.DataSeriesListener;
 import cz.cas.mbu.cydataseries.DataSeriesManager;
+import cz.cas.mbu.cydataseries.DataSeriesStorageManager;
+import cz.cas.mbu.cydataseries.DataSeriesStorageProvider;
 
 public class DataSeriesPanel extends JPanel implements CytoPanelComponent2, DataSeriesListener {
 	private JTable table;
@@ -36,6 +38,8 @@ public class DataSeriesPanel extends JPanel implements CytoPanelComponent2, Data
 	private DataSeries<?, ?> selectedDataSeries;
 	
 	private final CyServiceRegistrar registrar;
+	private JLabel lblTypeCaption;
+	private JLabel lblDSType;
 	
 	/** Create panel. */
 	public DataSeriesPanel(CyServiceRegistrar registrar) {
@@ -46,6 +50,9 @@ public class DataSeriesPanel extends JPanel implements CytoPanelComponent2, Data
 				FormSpecs.DEFAULT_COLSPEC,
 				FormSpecs.RELATED_GAP_COLSPEC,
 				FormSpecs.DEFAULT_COLSPEC,
+				FormSpecs.UNRELATED_GAP_COLSPEC,
+				FormSpecs.DEFAULT_COLSPEC,
+				FormSpecs.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),},
 			new RowSpec[] {
 				FormSpecs.RELATED_GAP_ROWSPEC,
@@ -65,8 +72,14 @@ public class DataSeriesPanel extends JPanel implements CytoPanelComponent2, Data
 		});
 		add(dataSeriesComboBox, "4, 2, fill, default");
 		
+		lblTypeCaption = new JLabel("Type:");
+		add(lblTypeCaption, "6, 2");
+		
+		lblDSType = new JLabel("New label");
+		add(lblDSType, "8, 2");
+		
 		JScrollPane scrollPane = new JScrollPane();
-		add(scrollPane, "2, 4, 4, 1, fill, fill");
+		add(scrollPane, "2, 4, 7, 1, fill, fill");
 		
 		table = new JTable();
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
@@ -107,10 +120,22 @@ public class DataSeriesPanel extends JPanel implements CytoPanelComponent2, Data
 		{
 			selectedDataSeries = null;
 			table.setModel(new DefaultTableModel(new Object[][] { { "No data series selected"}}, new Object[] {""}));
+			lblDSType.setText("N/A");			
 		}
 		else
 		{
 			selectedDataSeries = (DataSeries<?,?>)dataSeriesComboBox.getSelectedItem();
+			
+			DataSeriesStorageProvider storageProvider = registrar.getService(DataSeriesStorageManager.class).getStorageProvider(selectedDataSeries.getClass());
+			if(storageProvider == null)
+			{
+				lblDSType.setText("N/A");
+			}
+			else
+			{
+				lblDSType.setText(storageProvider.getSeriesTypeCaption());				
+			}
+			
 			Object[] columnNames = new Object[selectedDataSeries.getIndexCount() + 2]; //+2 for index and row names
 			columnNames[0] = "Id";
 			columnNames[1] = "Row name";

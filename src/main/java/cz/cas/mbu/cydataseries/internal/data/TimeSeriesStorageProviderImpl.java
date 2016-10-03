@@ -18,6 +18,13 @@ public class TimeSeriesStorageProviderImpl extends AbstractDataSeriesStorageProv
 	    return TimeSeriesImpl.class;
 	}
 
+	
+	@Override
+	public String getSeriesTypeCaption() {
+		return "Time series";
+	}
+
+
 	@Override
 	protected String transformIndexForWrite(Object index){
 	    return INDEX_PREFIX + Double.toString((Double)index);

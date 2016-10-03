@@ -12,4 +12,7 @@ public interface DataSeriesFactory {
 	 * @return
 	 */
 	TimeSeries createTimeSeries(String name, List<String> rowNames, double[] timePoints, double[][]data);
+	
+	NamedDoubleDataSeries createNamedDoubleDataSeries(String name, List<String> rowNames, List<String> columnNames, double[][]data);
+
 }
