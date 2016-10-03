@@ -1,4 +1,4 @@
-package cz.cas.mbu.cydataseries.internal;
+package cz.cas.mbu.cydataseries.internal.smoothing;
 
 import java.util.ArrayList;
 import java.util.Arrays;
