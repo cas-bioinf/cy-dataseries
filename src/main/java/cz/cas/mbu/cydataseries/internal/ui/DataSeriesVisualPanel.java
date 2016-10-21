@@ -341,10 +341,16 @@ public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 
 	@Override
 	public void handleEvent(RowsSetEvent e) {
-		if (!e.containsColumn(CyNetwork.SELECTED) || ignoreSelection)
+		if (!e.containsColumn(CyNetwork.SELECTED) || ignoreSelection) 
+		{
 			return;
-		if(e.getSource().equals(cyApplicationManager.getCurrentNetwork().getTable(CyNode.class, CyNetwork.LOCAL_ATTRS)) 
-				|| e.getSource().equals(cyApplicationManager.getCurrentNetwork().getTable(CyEdge.class, CyNetwork.LOCAL_ATTRS)))
+		}
+		
+		CyNetwork currentNetwork = cyApplicationManager.getCurrentNetwork();
+		
+		if(currentNetwork == null 
+				|| e.getSource().equals(currentNetwork.getTable(CyNode.class, CyNetwork.LOCAL_ATTRS)) 
+				|| e.getSource().equals(currentNetwork.getTable(CyEdge.class, CyNetwork.LOCAL_ATTRS)))
 		{
 			updateVisual();
 	
