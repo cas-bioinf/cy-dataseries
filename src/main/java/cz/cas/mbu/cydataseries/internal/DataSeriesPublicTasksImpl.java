@@ -9,12 +9,15 @@ public class DataSeriesPublicTasksImpl implements DataSeriesPublicTasks {
 
 	private final TaskFactory importTaskFactory;
 	private final TaskFactory mapTaskFactory;
+	private final TaskFactory interactiveSmoothingTaskFactory;
 	
 	
-	public DataSeriesPublicTasksImpl(TaskFactory importTaskFactory, TaskFactory mapTaskFactory) {
+	public DataSeriesPublicTasksImpl(TaskFactory importTaskFactory, TaskFactory mapTaskFactory,
+			TaskFactory interactiveSmoothingTaskFactory) {
 		super();
 		this.importTaskFactory = importTaskFactory;
 		this.mapTaskFactory = mapTaskFactory;
+		this.interactiveSmoothingTaskFactory = interactiveSmoothingTaskFactory;
 	}
 
 	@Override
@@ -27,4 +30,10 @@ public class DataSeriesPublicTasksImpl implements DataSeriesPublicTasks {
 		return mapTaskFactory.createTaskIterator();
 	}
 
+	@Override
+	public TaskIterator getInteractiveSmoothingTask() {
+		return interactiveSmoothingTaskFactory.createTaskIterator();
+	}
+
+	
 }

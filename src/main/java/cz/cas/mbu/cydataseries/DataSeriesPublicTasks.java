@@ -6,4 +6,5 @@ import org.cytoscape.work.TaskIterator;
 public interface DataSeriesPublicTasks {
 	TaskIterator getImportDataSeriesTask();
 	TaskIterator getMapDataSeriesTask();
+	TaskIterator getInteractiveSmoothingTask();
 }

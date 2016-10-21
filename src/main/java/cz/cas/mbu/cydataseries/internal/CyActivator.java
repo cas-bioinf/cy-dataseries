@@ -144,7 +144,7 @@ public class CyActivator extends AbstractCyActivator {
 		registerService(bc, visualPanel, CytoPanelComponent.class, new Properties());
 		registerService(bc, visualPanel, RowsSetListener.class, new Properties());
 		
-		registerService(bc, new DataSeriesPublicTasksImpl(importTaskFactory, mapColumnTaskFactory), DataSeriesPublicTasks.class, new Properties());
+		registerService(bc, new DataSeriesPublicTasksImpl(importTaskFactory, mapColumnTaskFactory, smoothInteractiveTaskFactory), DataSeriesPublicTasks.class, new Properties());
 	}
 
 }
