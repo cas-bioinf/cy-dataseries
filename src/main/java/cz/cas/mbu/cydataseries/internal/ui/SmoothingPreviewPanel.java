@@ -45,6 +45,7 @@ import cz.cas.mbu.cydataseries.internal.smoothing.KernelSmoothing;
 import cz.cas.mbu.cydataseries.internal.tasks.SmoothInteractivePerformTask;
 import javax.swing.JRadioButton;
 import javax.swing.ButtonGroup;
+import javax.swing.JSlider;
 
 public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent {
 
@@ -60,7 +61,10 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 	
 	private Map<String,List<Integer>> currentlyShownGroupings;
 	private double currentBandwidth;
+	private double minExpectedBandwidth;
+	private double maxExpectedBandwidth;
 		
+	private boolean updatingBandwidth = false;
 	
 	private final Color errorTextFieldBackground = new Color(255, 125, 128);
 	private final Color defaultTextFieldBackground;
@@ -69,6 +73,7 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 	
 	private String caption;
 	private JTextField bandwidthTextField;
+	private JSlider bandwidthSlider; 
 	private JTextField timePointsTextField;
 	private final ButtonGroup timePointsButtonGroup = new ButtonGroup();
 	private JTextField numEquidistantTextField;
@@ -133,7 +138,6 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 		controlPanel.add(separator, "1, 1, 12, 1");
 		
 		rdbtnKeepSourceTimePoints = new JRadioButton("Estimate in the same time points as the original series");
-		rdbtnKeepSourceTimePoints.setSelected(true);
 		timePointsButtonGroup.add(rdbtnKeepSourceTimePoints);
 		controlPanel.add(rdbtnKeepSourceTimePoints, "6, 2, 5, 1");
 		rdbtnKeepSourceTimePoints.addItemListener(evt -> timePointsInputChanged());
@@ -149,22 +153,28 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 		JLabel lblSmoothingBandwidth = new JLabel("Smoothing bandwidth:");
 		controlPanel.add(lblSmoothingBandwidth, "2, 4, right, default");
 		
-		bandwidthTextField = new JTextField();
-		controlPanel.add(bandwidthTextField, "4, 4, fill, default");
-		bandwidthTextField.setColumns(10);
+		bandwidthSlider = new JSlider();
+		controlPanel.add(bandwidthSlider, "4, 4");
+		bandwidthSlider.addChangeListener(evt -> bandwidthSliderChanged());
 								
 		rdbtnEquidistantTimePoints = new JRadioButton("Estimate at N equidistant points:");
+		rdbtnEquidistantTimePoints.setSelected(true);
 		timePointsButtonGroup.add(rdbtnEquidistantTimePoints);
 		controlPanel.add(rdbtnEquidistantTimePoints, "6, 4");		
 		rdbtnEquidistantTimePoints.addItemListener(evt -> timePointsInputChanged());
 		
 		numEquidistantTextField = new JTextField();
 		numEquidistantTextField.setText("100");
-		numEquidistantTextField.setEnabled(false);
 		controlPanel.add(numEquidistantTextField, "8, 4, 3, 1, fill, default");
 		numEquidistantTextField.setColumns(10);
 		controlPanel.add(btnPerformSmoothing, "12, 4");
 		numEquidistantTextField.getDocument().addDocumentListener(UIUtils.listenForAllDocumentChanges(this::timePointsInputChanged));
+		
+		bandwidthTextField = new JTextField();
+		controlPanel.add(bandwidthTextField, "4, 6, fill, default");
+		bandwidthTextField.setColumns(10);
+		
+		this.defaultTextFieldBackground = bandwidthTextField.getBackground();
 		
 		rdbtnGivenTimePoints = new JRadioButton("Estimate at specific time points:");
 		timePointsButtonGroup.add(rdbtnGivenTimePoints);
@@ -188,17 +198,16 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 		
 		this.registrar = registrar;
 		this.sourceTimeSeries = timeSeries;
-		this.estimateX = timeSeries.getIndexArray();	
 		
 		currentlyShownGroupings = new HashMap<>();
 		random = new Random();
 		
-		this.defaultTextFieldBackground = bandwidthTextField.getBackground();
-		
 		if(!java.beans.Beans.isDesignTime())
 		{
-			currentBandwidth = guessBandwidth(sourceTimeSeries);
-			bandwidthTextField.setText(Double.toString(currentBandwidth));
+			updateEstimateX();
+			
+			guessBandwidth(sourceTimeSeries);
+			updateDisplayedBandwidth();
 			
 			//Add listener only after initial assignment to the bandwidth text field
 			bandwidthTextField.getDocument().addDocumentListener(UIUtils.listenForAllDocumentChanges(this::bandwidthTextChanged));
@@ -212,20 +221,42 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 		
 	}
 
-	private double guessBandwidth(TimeSeries ts)
+	private void updateDisplayedBandwidth() {
+		updateDisplayedBandwidthText();
+		updateDisplayedBandwidthSlider();
+	}
+
+	private void updateDisplayedBandwidthText()
+	{
+		bandwidthTextField.setText(Double.toString(currentBandwidth));		
+	}
+	
+	private void updateDisplayedBandwidthSlider()
+	{
+		bandwidthSlider.setValue((int)(((currentBandwidth - minExpectedBandwidth) / maxExpectedBandwidth) * bandwidthSlider.getMaximum()));
+	}
+	
+	private void guessBandwidth(TimeSeries ts)
 	{
 		if(ts.getIndexCount() < 2)
 		{
-			return 1;
+			minExpectedBandwidth = 0.01;
+			currentBandwidth = 1;
+			maxExpectedBandwidth = 100;
 		}
 		double maxDiff = 0;
+		double minDiff = Double.POSITIVE_INFINITY;
 		List<Double> sortedList = new ArrayList<>(ts.getIndex());
 		sortedList.sort(null);
 		for(int i = 1; i < sortedList.size(); i++)
 		{
-			maxDiff = Math.max(maxDiff, sortedList.get(i) - sortedList.get(i - 1));
+			double diff = sortedList.get(i) - sortedList.get(i - 1);
+			maxDiff = Math.max(maxDiff, diff);
+			minDiff = Math.min(minDiff, diff);
 		}
-		return Math.max(0.0001, maxDiff);
+		currentBandwidth = Math.max(0.0001, maxDiff);
+		minExpectedBandwidth = minDiff / 5;
+		maxExpectedBandwidth = (sortedList.get(sortedList.size() - 1) - sortedList.get(0));
 	}
 	
 	private void sampleShownRows()
@@ -475,34 +506,68 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 		return displayGridComboBox.getItemAt(displayGridComboBox.getSelectedIndex());
 	}
 	
-	private void bandwidthTextChanged()
+	private void bandwidthSliderChanged()
 	{
-		boolean showError = false;
+		if(updatingBandwidth)
+		{
+			return;
+		}
 		try 
 		{
-			double bandwidth = Double.parseDouble(bandwidthTextField.getText());
-			if (bandwidth > 0 && Double.isFinite(bandwidth))
+			updatingBandwidth = true;
+			currentBandwidth = ((double)bandwidthSlider.getValue()) / ((double)bandwidthSlider.getMaximum()) * (maxExpectedBandwidth - minExpectedBandwidth) + minExpectedBandwidth;
+			updateDisplayedBandwidthText();
+			updateDisplayGrid();
+		}
+		finally
+		{
+			updatingBandwidth = false;
+		}
+	}
+	
+	private void bandwidthTextChanged()
+	{
+		if(updatingBandwidth)
+		{
+			return;
+		}
+		try 
+		{
+			updatingBandwidth = true;
+			
+			boolean showError = false;
+			try 
 			{
-				currentBandwidth = bandwidth;
-				updateDisplayGrid();
-			}
-			else
+				double bandwidth = Double.parseDouble(bandwidthTextField.getText());
+				if (bandwidth > 0 && Double.isFinite(bandwidth))
+				{
+					currentBandwidth = bandwidth;
+					updateDisplayedBandwidthSlider();
+					updateDisplayGrid();
+				}
+				else
+				{
+					showError = true;
+				}
+			} catch (NumberFormatException ex)
 			{
 				showError = true;
 			}
-		} catch (NumberFormatException ex)
+			
+			if(showError)
+			{
+				bandwidthTextField.setBackground(errorTextFieldBackground);
+			}
+			else
+			{
+				bandwidthTextField.setBackground(defaultTextFieldBackground);
+			}			
+		}
+		finally
 		{
-			showError = true;
+			updatingBandwidth = false;
 		}
 		
-		if(showError)
-		{
-			bandwidthTextField.setBackground(errorTextFieldBackground);
-		}
-		else
-		{
-			bandwidthTextField.setBackground(defaultTextFieldBackground);
-		}
 	}
 	
 	private void performSmoothing()
