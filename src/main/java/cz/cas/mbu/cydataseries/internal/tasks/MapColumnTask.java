@@ -21,16 +21,13 @@ import org.cytoscape.work.Tunable;
 import org.cytoscape.work.TunableValidator;
 import org.cytoscape.work.util.ListSingleSelection;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Iterables;
-
 import cz.cas.mbu.cydataseries.DataSeries;
 import cz.cas.mbu.cydataseries.DataSeriesException;
 import cz.cas.mbu.cydataseries.DataSeriesManager;
 import cz.cas.mbu.cydataseries.DataSeriesMappingManager;
 import cz.cas.mbu.cydataseries.internal.AlphanumComparator;
 
-public class MapColumnTask extends AbstractTask implements TunableValidator{
+public class MapColumnTask extends AbstractValidatedTask {
 	
 	private final Logger userLogger = Logger.getLogger(CyUserLog.NAME); 
 
@@ -48,10 +45,20 @@ public class MapColumnTask extends AbstractTask implements TunableValidator{
 
 	private ListSingleSelection<String> existingColumnForMapping;
 	
+	private boolean updatingExistingColumnForMapping = false;
+	
 	@Tunable(description="Existing column", groups={"Column"}, dependsOn="createNewColumn=false", listenForChange ="targetClass")
 	public ListSingleSelection<String> getExistingColumnForMapping()
 	{
-		updateExistingColumnForMapping(targetClass.getSelectedValue().getTargetClass());
+		if(!updatingExistingColumnForMapping)
+		{
+			updatingExistingColumnForMapping = true;
+			try {
+				updateExistingColumnForMapping(targetClass.getSelectedValue().getTargetClass());
+			} finally {
+				updatingExistingColumnForMapping = false;
+			}
+		}
 		return existingColumnForMapping;
 	}
 	
@@ -65,10 +72,21 @@ public class MapColumnTask extends AbstractTask implements TunableValidator{
 
 	private ListSingleSelection<String> mapRowNamesWithColumn;
 	
+	private boolean updatingMapRowNamesWithColumn = false;
+	
 	@Tunable(description="Column to match row names", groups={"Mapping"}, dependsOn="mapByRowNames=true", listenForChange ="targetClass")
 	public ListSingleSelection<String> getMapRowNamesWithColumn()
 	{
-		updateMapRowNamesWithColumn(targetClass.getSelectedValue().getTargetClass());
+		if(!updatingMapRowNamesWithColumn)
+		{
+			updatingMapRowNamesWithColumn = true;
+			try 
+			{
+				updateMapRowNamesWithColumn(targetClass.getSelectedValue().getTargetClass());
+			} finally {
+				updatingMapRowNamesWithColumn = false;
+			}
+		}
 		return mapRowNamesWithColumn;
 	}
 	
@@ -191,52 +209,53 @@ public class MapColumnTask extends AbstractTask implements TunableValidator{
 	
 	
 	@Override
-	public ValidationState getValidationState(Appendable errMsg) {
+	public ValidationState getValidationState(StringBuilder errMsg) {
 		ValidationState result = ValidationState.OK;
-		try {
-			CyNetwork network = applicationManager.getCurrentNetwork();
-			CyTable targetTable = network.getTable(targetClass.getSelectedValue().getTargetClass(), CyNetwork.DEFAULT_ATTRS);
-			
-			if(createNewColumn && targetTable.getColumn(newColumnName) != null)
-			{
-				errMsg.append("Column with name '" + newColumnName + "' already exists.");
-				return ValidationState.INVALID;
-			}
-			
-			if(createNewColumn && (newColumnName == null || newColumnName.isEmpty()))
-			{
-				errMsg.append("You have to specify a new column name.");
-				return ValidationState.INVALID;
-			}
-			
-			String targetColumnName;
-			if(createNewColumn)
-			{
-				targetColumnName = newColumnName;
-			}
-			else
-			{
-				targetColumnName = existingColumnForMapping.getSelectedValue();
-			}
-			
-			DataSeries<?, ?> currentMappingTarget = mappingManager.getMappedDataSeries(targetClass.getSelectedValue().getTargetClass(), targetColumnName); 
-			if(currentMappingTarget != null)
-			{
-				errMsg.append("The column '" + targetColumnName + "' is already mapped to data series '" + currentMappingTarget.getName() + "' do you want to overwrite the mapping?\n");
-				result = ValidationState.REQUEST_CONFIRMATION;
-			}
-			
-			if(!createNewColumn && mapByRowNames)
-			{
-				errMsg.append("This will overwrite the contents of column '" + existingColumnForMapping.getSelectedValue() + "', are you sure?\n");
-				result = ValidationState.REQUEST_CONFIRMATION;
-			}
-			
-		}
-		catch (IOException ex)
+		CyNetwork network = applicationManager.getCurrentNetwork();
+		CyTable targetTable = network.getTable(targetClass.getSelectedValue().getTargetClass(), CyNetwork.DEFAULT_ATTRS);
+		
+		if(createNewColumn && targetTable.getColumn(newColumnName) != null)
 		{
+			errMsg.append("Column with name '" + newColumnName + "' already exists.");
 			return ValidationState.INVALID;
 		}
+		
+		if(createNewColumn && (newColumnName == null || newColumnName.isEmpty()))
+		{
+			errMsg.append("You have to specify a new column name.");
+			return ValidationState.INVALID;
+		}
+		
+		if(mapByRowNames && mapRowNamesWithColumn.getSelectedValue() == null)
+		{
+			errMsg.append("You have to select a column to match row names");
+			return ValidationState.INVALID;
+		}
+		
+		
+		String targetColumnName;
+		if(createNewColumn)
+		{
+			targetColumnName = newColumnName;
+		}
+		else
+		{
+			targetColumnName = existingColumnForMapping.getSelectedValue();
+		}
+			
+		DataSeries<?, ?> currentMappingTarget = mappingManager.getMappedDataSeries(targetClass.getSelectedValue().getTargetClass(), targetColumnName); 
+		if(currentMappingTarget != null)
+		{
+			errMsg.append("The column '" + targetColumnName + "' is already mapped to data series '" + currentMappingTarget.getName() + "' do you want to overwrite the mapping?\n");
+			result = ValidationState.REQUEST_CONFIRMATION;
+		}
+		
+		if(!createNewColumn && mapByRowNames)
+		{
+			errMsg.append("This will overwrite the contents of column '" + existingColumnForMapping.getSelectedValue() + "', are you sure?\n");
+			result = ValidationState.REQUEST_CONFIRMATION;
+		}
+			
 		return result;
 	}
 
