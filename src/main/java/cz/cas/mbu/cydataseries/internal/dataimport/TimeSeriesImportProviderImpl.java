@@ -3,6 +3,7 @@ package cz.cas.mbu.cydataseries.internal.dataimport;
 import java.util.List;
 
 import cz.cas.mbu.cydataseries.DataSeries;
+import cz.cas.mbu.cydataseries.TimeSeries;
 import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportException;
 import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportProvider;
 import cz.cas.mbu.cydataseries.dataimport.PreImportResults;
@@ -62,5 +63,12 @@ public class TimeSeriesImportProviderImpl implements DataSeriesImportProvider{
 	public String getDescription() {
 		return "Time Series";
 	}
+
+	@Override
+	public Class<? extends DataSeries<?, ?>> getImportedClass() {
+		return TimeSeries.class;
+	}
+	
+	
 
 }

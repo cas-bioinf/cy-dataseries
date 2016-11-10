@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cz.cas.mbu.cydataseries.DataSeries;
+import cz.cas.mbu.cydataseries.NamedDoubleDataSeries;
 import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportException;
 import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportProvider;
 import cz.cas.mbu.cydataseries.dataimport.PreImportResults;
@@ -53,5 +54,12 @@ public class NamedDoubleDataSeriesImportProviderImpl implements DataSeriesImport
 	public String getDescription() {
 		return "Named numeric series";
 	}
+
+	@Override
+	public Class<? extends DataSeries<?, ?>> getImportedClass() {
+		return NamedDoubleDataSeries.class;
+	}
+	
+	
 
 }

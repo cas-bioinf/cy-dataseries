@@ -3,6 +3,7 @@ package cz.cas.mbu.cydataseries.internal.dataimport;
 import org.cytoscape.work.AbstractTaskFactory;
 import org.cytoscape.work.TaskIterator;
 
+import cz.cas.mbu.cydataseries.DataSeries;
 import cz.cas.mbu.cydataseries.DataSeriesManager;
 import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportManager;
 
@@ -18,13 +19,22 @@ public class ImportDataSeriesTaskFactory extends AbstractTaskFactory {
 		this.importManager = importManager;
 	}
 
-	@Override
-	public TaskIterator createTaskIterator() {
+	public TaskIterator createTaskIterator(Class<? extends DataSeries<?, ?>> preferredClass) {
 		ImportDataSeriesTask importTask = new ImportDataSeriesTask(dataSeriesManager, importManager);
+		if(preferredClass != null)
+		{
+			importTask.setPreferredProvider(preferredClass);			
+		}
 		AskForInputFileTask inputFileTask = new AskForInputFileTask("Choose input file", 
 				file -> importTask.importParameters.setFile(file)
 				);
-		return new TaskIterator(inputFileTask, importTask);
+		return new TaskIterator(inputFileTask, importTask);		
+	}
+	
+	
+	@Override
+	public TaskIterator createTaskIterator() {
+		return createTaskIterator(null);
 	}
 
 }

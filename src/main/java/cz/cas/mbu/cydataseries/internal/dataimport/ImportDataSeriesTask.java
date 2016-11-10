@@ -43,6 +43,33 @@ public class ImportDataSeriesTask extends AbstractValidatedTask {
 				.collect(Collectors.toList()));
 	}
 
+	public void setPreferredProvider(Class<? extends DataSeries<?, ?>> preferredClass)
+	{
+		if (preferredClass != null)
+		{
+			ProviderDisplay bestMatch = null;
+			for(int index = 0; index < provider.getPossibleValues().size(); index++)
+			{
+				ProviderDisplay display = provider.getPossibleValues().get(index);
+				Class<? extends DataSeries<?, ?>> importedClass = display.getProvider().getImportedClass();
+				if (preferredClass.equals(importedClass)){
+					//exact match, do not search any longer
+					bestMatch = display;
+					break;
+				}
+				else if (preferredClass.isAssignableFrom(importedClass) && bestMatch == null) {
+					//inexact match, set only if not better match found yet and continue searching
+					bestMatch = display;
+				}
+			}
+			
+			if(bestMatch != null)
+			{
+				provider.setSelectedValue(bestMatch);
+			}
+		}
+	}
+	
 	@ProvidesTitle
 	public String getTitle()
 	{
