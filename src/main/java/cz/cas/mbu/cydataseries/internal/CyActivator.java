@@ -30,7 +30,9 @@ import cz.cas.mbu.cydataseries.internal.dataimport.TimeSeriesImportProviderImpl;
 import cz.cas.mbu.cydataseries.internal.smoothing.SmoothingServiceImpl;
 import cz.cas.mbu.cydataseries.internal.tasks.ExportDataSeriesTaskFactory;
 import cz.cas.mbu.cydataseries.internal.tasks.ManageMappingsTask;
+import cz.cas.mbu.cydataseries.internal.tasks.ManageMappingsTaskFactory;
 import cz.cas.mbu.cydataseries.internal.tasks.MapColumnTask;
+import cz.cas.mbu.cydataseries.internal.tasks.MapColumnTaskFactory;
 import cz.cas.mbu.cydataseries.internal.tasks.NetworkSelectedParameterPassingTaskFactory;
 import cz.cas.mbu.cydataseries.internal.tasks.ParameterPassingTaskFactory;
 import cz.cas.mbu.cydataseries.internal.tasks.RemoveColumnMappingTaskFactory;
@@ -101,7 +103,7 @@ public class CyActivator extends AbstractCyActivator {
 		TaskFactory removeDataSeriesTaskFactory = new RemoveDataSeriesTaskFactory(dataSeriesManager);
 		registerService(bc, removeDataSeriesTaskFactory, TaskFactory.class, removeDataSeriesProperties);
 
-		NetworkSelectedParameterPassingTaskFactory<MapColumnTask> mapColumnTaskFactory = new NetworkSelectedParameterPassingTaskFactory<>(MapColumnTask.class, cyApplicationManager, dataSeriesManager, mappingManager, cyApplicationManager);
+		TaskFactory mapColumnTaskFactory = new MapColumnTaskFactory(serviceRegistrar);
 		Properties mapProperties = new Properties();
 		mapProperties.putAll(baseMenuProperties);
 		mapProperties.setProperty(ServiceProperties.TITLE, "Map Column to Series");
@@ -113,7 +115,7 @@ public class CyActivator extends AbstractCyActivator {
 		removeMappingProperties.setProperty(ServiceProperties.TITLE, "Remove Column Mapping");
 		registerService(bc, removeMappingTaskFactory, TaskFactory.class, removeMappingProperties);
 
-		ParameterPassingTaskFactory<ManageMappingsTask> manageMappingTaskFactory = new ParameterPassingTaskFactory<>(ManageMappingsTask.class, serviceRegistrar);
+		ManageMappingsTaskFactory manageMappingTaskFactory = new ManageMappingsTaskFactory(serviceRegistrar);
 		Properties manageMappingProperties = new Properties();
 		manageMappingProperties.putAll(baseMenuProperties);
 		manageMappingProperties.setProperty(ServiceProperties.TITLE, "Manage Column Mappings");
