@@ -1,6 +1,7 @@
 package cz.cas.mbu.cydataseries.internal.dataimport;
 
 import java.io.FileReader;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.cytoscape.model.SUIDFactory;
@@ -12,6 +13,7 @@ import org.cytoscape.work.util.ListSingleSelection;
 import cz.cas.mbu.cydataseries.DataSeries;
 import cz.cas.mbu.cydataseries.DataSeriesException;
 import cz.cas.mbu.cydataseries.DataSeriesManager;
+import cz.cas.mbu.cydataseries.TimeSeries;
 import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportManager;
 import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportProvider;
 import cz.cas.mbu.cydataseries.dataimport.PreImportResults;
@@ -41,6 +43,16 @@ public class ImportDataSeriesTask extends AbstractValidatedTask {
 		this.provider = new ListSingleSelection<>(importManager.getAllImportProviders().stream()
 				.map(x -> new ProviderDisplay(x))
 				.collect(Collectors.toList()));
+		
+		Optional<ProviderDisplay> timeSeriesDisplay = provider.getPossibleValues().stream()
+				.filter(x -> 
+					x.getProvider().getImportedClass() != null && TimeSeries.class.isAssignableFrom(x.getProvider().getImportedClass()))
+				.findAny();
+		
+		if(timeSeriesDisplay.isPresent())
+		{
+			provider.setSelectedValue(timeSeriesDisplay.get());
+		}
 	}
 
 	public void setPreferredProvider(Class<? extends DataSeries<?, ?>> preferredClass)
@@ -73,7 +85,7 @@ public class ImportDataSeriesTask extends AbstractValidatedTask {
 	@ProvidesTitle
 	public String getTitle()
 	{
-		return "Adding time series."; 
+		return "Adding data series."; 
 	}
 
 	@Override
