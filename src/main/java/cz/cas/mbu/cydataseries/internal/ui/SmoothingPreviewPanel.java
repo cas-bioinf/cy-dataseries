@@ -233,7 +233,7 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 	
 	private void updateDisplayedBandwidthSlider()
 	{
-		bandwidthSlider.setValue((int)(((currentBandwidth - minExpectedBandwidth) / maxExpectedBandwidth) * bandwidthSlider.getMaximum()));
+		bandwidthSlider.setValue((int)(Math.sqrt((currentBandwidth - minExpectedBandwidth) / maxExpectedBandwidth) * bandwidthSlider.getMaximum()));
 	}
 	
 	private void guessBandwidth(TimeSeries ts)
@@ -515,7 +515,8 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 		try 
 		{
 			updatingBandwidth = true;
-			currentBandwidth = ((double)bandwidthSlider.getValue()) / ((double)bandwidthSlider.getMaximum()) * (maxExpectedBandwidth - minExpectedBandwidth) + minExpectedBandwidth;
+			double rootNormalizedBandwidth = ((double)bandwidthSlider.getValue()) / ((double)bandwidthSlider.getMaximum()) ;
+			currentBandwidth = rootNormalizedBandwidth * rootNormalizedBandwidth * (maxExpectedBandwidth - minExpectedBandwidth) + minExpectedBandwidth; 
 			updateDisplayedBandwidthText();
 			updateDisplayGrid();
 		}
