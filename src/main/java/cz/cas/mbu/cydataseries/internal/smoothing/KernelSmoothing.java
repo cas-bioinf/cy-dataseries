@@ -53,7 +53,7 @@ public class KernelSmoothing {
 				
 				double weighedDistance = distance * kernelValue;
 				s1 += weighedDistance;
-				s2 += distance * s1;
+				s2 += distance * weighedDistance;
 			}
 			
 			double numeratorSum = 0;
