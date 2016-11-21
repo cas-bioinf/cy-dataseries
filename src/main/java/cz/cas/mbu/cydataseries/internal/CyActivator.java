@@ -17,6 +17,7 @@ import cz.cas.mbu.cydataseries.DataSeriesListener;
 import cz.cas.mbu.cydataseries.DataSeriesPublicTasks;
 import cz.cas.mbu.cydataseries.DataSeriesStorageManager;
 import cz.cas.mbu.cydataseries.DataSeriesStorageProvider;
+import cz.cas.mbu.cydataseries.MappingManipulationService;
 import cz.cas.mbu.cydataseries.SmoothingService;
 import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportManager;
 import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportProvider;
@@ -76,6 +77,7 @@ public class CyActivator extends AbstractCyActivator {
 
 		registerService(bc, new DataSeriesFactoryImpl(), DataSeriesFactory.class, new Properties());
 
+		registerService(bc, new MappingManipulationServiceImpl(serviceRegistrar), MappingManipulationService.class, new Properties());
 		
 		DataSeriesImportManager importManager = new DataSeriesImportManagerImpl(bc);
 		registerService(bc, importManager, DataSeriesImportManager.class, new Properties());
@@ -121,7 +123,7 @@ public class CyActivator extends AbstractCyActivator {
 		manageMappingProperties.setProperty(ServiceProperties.TITLE, "Manage Column Mappings");
 		registerService(bc, manageMappingTaskFactory, TaskFactory.class, manageMappingProperties);
 		
-		TaskFactory smoothTaskFactory = new SmoothDataSeriesTaskFactory(dataSeriesManager, smoothingService);
+		TaskFactory smoothTaskFactory = new SmoothDataSeriesTaskFactory(serviceRegistrar);
 		Properties smoothProperties = new Properties();
 		smoothProperties.putAll(baseMenuProperties);
 		smoothProperties.setProperty(ServiceProperties.TITLE, "Smooth data series");

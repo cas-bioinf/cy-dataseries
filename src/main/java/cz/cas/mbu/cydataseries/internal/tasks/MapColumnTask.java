@@ -187,7 +187,8 @@ public class MapColumnTask extends AbstractValidatedTask {
 				}
 				else
 				{
-					int rowIndex = dataSeries.getSelectedValue().getRowNames().indexOf(rowNameInData);
+					List<String> rowNames = dataSeries.getSelectedValue().getRowNames();
+					int rowIndex = rowNames.indexOf(rowNameInData);
 					if(rowIndex < 0)
 					{
 						row.set(mappingColumn.getName(), null);					
@@ -196,6 +197,10 @@ public class MapColumnTask extends AbstractValidatedTask {
 					else
 					{
 						int rowID = dataSeries.getSelectedValue().getRowID(rowIndex);
+						if (rowNames.lastIndexOf(rowNameInData) != rowIndex)
+						{
+							userLogger.warn("The data series '" + dataSeries.getSelectedValue().getName() + "' contains multiple rows with name '" +  rowNameInData + "'. Mapping the node '" + rowNameInData + "' to row ID " + rowID); 
+						}
 						row.set(mappingColumn.getName(), rowID);						
 						mapped++;
 					}

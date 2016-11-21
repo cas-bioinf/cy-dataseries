@@ -2,7 +2,10 @@ package cz.cas.mbu.cydataseries.internal.tasks;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
+import org.cytoscape.service.util.CyServiceRegistrar;
+import org.cytoscape.work.ContainsTunables;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
 import org.cytoscape.work.util.ListMultipleSelection;
@@ -12,15 +15,13 @@ import com.google.common.primitives.Doubles;
 
 import cz.cas.mbu.cydataseries.DataSeries;
 import cz.cas.mbu.cydataseries.DataSeriesManager;
+import cz.cas.mbu.cydataseries.MappingManipulationService;
 import cz.cas.mbu.cydataseries.SmoothingService;
 import cz.cas.mbu.cydataseries.TimeSeries;
 import cz.cas.mbu.cydataseries.internal.dataimport.MatlabSyntaxNumberList;
 
 public class SmoothDataSeriesTask extends AbstractValidatedTask {
-	
-	@Tunable(description="Name of the resulting series")
-	public String resultName;
-	
+		
 	@Tunable(description="Series to smooth")
 	public ListSingleSelection<TimeSeries> timeSeries;
 	
@@ -31,23 +32,33 @@ public class SmoothDataSeriesTask extends AbstractValidatedTask {
 			dependsOn="keepSourcePoints=false")
 	public String estimationTimePoints;
 
+	@Tunable(description="Combine rows with the same name together")
+	public boolean combineRows;
+	
+	
 	@Tunable(description="Kernel bandwidth")
 	public double bandwidth = 1;
 	
+	@ContainsTunables
+	public SmoothingOutputParameters outputParameters;
+	
 	private final DataSeriesManager dataSeriesManager;
 	private final SmoothingService smoothingService;
+	private final CyServiceRegistrar registrar;
 	
-	public SmoothDataSeriesTask(DataSeriesManager dataSeriesManager, SmoothingService smoothingService) {
-		this.dataSeriesManager = dataSeriesManager;
-		this.smoothingService = smoothingService;
+	public SmoothDataSeriesTask(CyServiceRegistrar registrar) {
+		this.dataSeriesManager = registrar.getService(DataSeriesManager.class);
+		this.smoothingService = registrar.getService(SmoothingService.class);
+		this.registrar = registrar;
 		timeSeries = new ListSingleSelection<>(dataSeriesManager.getDataSeriesByType(TimeSeries.class));
+		outputParameters = new SmoothingOutputParameters();
 	}
 	
 	@Override
 	public void run(TaskMonitor taskMonitor) throws Exception {
-		TimeSeries result;
+		TimeSeries smoothedSeries;
 		double[] resultTimePoints;
-		TimeSeries selectedSeries = timeSeries.getSelectedValue();
+		TimeSeries sourceTimeSeries = timeSeries.getSelectedValue();
 		if(!keepSourcePoints)
 		{
 			List<Double> timePointsList = MatlabSyntaxNumberList.listFromString(estimationTimePoints);			
@@ -55,21 +66,41 @@ public class SmoothDataSeriesTask extends AbstractValidatedTask {
 		}
 		else 
 		{
-			resultTimePoints = Arrays.copyOf(selectedSeries.getIndexArray(), selectedSeries.getIndexCount());
+			resultTimePoints = Arrays.copyOf(sourceTimeSeries.getIndexArray(), sourceTimeSeries.getIndexCount());
 		}
 		
-		result = smoothingService.linearKernelSmoothing(selectedSeries, resultTimePoints, bandwidth, resultName);		
-		dataSeriesManager.registerDataSeries(result);
-	
+		smoothedSeries = smoothingService.linearKernelSmoothing(sourceTimeSeries, resultTimePoints, bandwidth, outputParameters.resultName);		
+		dataSeriesManager.registerDataSeries(smoothedSeries);
+		
+		Map<String, List<Integer>> rowGrouping;
+		if(combineRows)
+		{
+			rowGrouping = smoothingService.getDefaultRowGrouping(sourceTimeSeries);
+		}
+		else
+		{
+			rowGrouping = null;
+		}
+		
+		if(outputParameters.mapResult)
+		{
+			MappingManipulationService manipulationService = registrar.getService(MappingManipulationService.class);					
+			
+			if(outputParameters.replaceMapping)
+			{
+				manipulationService.replaceMapping(sourceTimeSeries, smoothedSeries, rowGrouping); 
+			}
+			else
+			{
+				manipulationService.copyMapping(sourceTimeSeries, smoothedSeries, rowGrouping, outputParameters.mappingSuffix);
+			}
+		}
+			
 	}
 
 	@Override
 	public ValidationState getValidationState(StringBuilder errMsg) {
-		if(resultName.isEmpty())
-		{
-			errMsg.append("You have to specify a name for the new time series.");
-			return ValidationState.INVALID;
-		}
+	
 		if(timeSeries.getSelectedValue() == null)
 		{
 			errMsg.append("You have to select an input time series");
@@ -98,6 +129,9 @@ public class SmoothDataSeriesTask extends AbstractValidatedTask {
 			}
 			
 		}
+		
+		ValidationState outputValidation = outputParameters.getValidationState(timeSeries.getSelectedValue(), registrar, errMsg); 
+		
 		return ValidationState.OK;
 	}
 		

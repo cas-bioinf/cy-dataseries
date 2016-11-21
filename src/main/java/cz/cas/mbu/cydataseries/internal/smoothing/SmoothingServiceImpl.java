@@ -47,7 +47,7 @@ public class SmoothingServiceImpl implements SmoothingService{
 			rowNames.add(rowGroup.getKey());
 			row++;
 		}
-		return new TimeSeriesImpl(SUIDFactory.getNextSUID(), resultName, rowIds, new ArrayList<>(noisyData.getRowNames()), Arrays.copyOf(estimateX,  estimateX.length), resultData);
+		return new TimeSeriesImpl(SUIDFactory.getNextSUID(), resultName, rowIds, new ArrayList<>(rowNames), Arrays.copyOf(estimateX,  estimateX.length), resultData);
 	}
 
 	@Override

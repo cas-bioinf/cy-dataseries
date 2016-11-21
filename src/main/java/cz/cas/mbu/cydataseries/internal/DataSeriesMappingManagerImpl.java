@@ -43,7 +43,7 @@ public class DataSeriesMappingManagerImpl implements DataSeriesMappingManager{
 		
 		if(localMap.containsKey(columnName))
 		{
-			logger.warn("Remapping column '" + columnName +" for class " + targetClass.getSimpleName());			
+			logger.warn("Remapping column '" + columnName +"' for class " + targetClass.getSimpleName());			
 		}
 		localMap.put(columnName, ds);
 	}
@@ -131,6 +131,23 @@ public class DataSeriesMappingManagerImpl implements DataSeriesMappingManager{
 			entry.getValue().entrySet().forEach(perClassEntry ->
 			{
 				descriptors.add(new MappingDescriptor<DataSeries<?,?>>(entry.getKey(), perClassEntry.getKey(), perClassEntry.getValue()));
+			});
+		});
+		return descriptors;
+	}
+		
+
+
+	@Override
+	public <T extends DataSeries<?, ?>> List<MappingDescriptor<T>> getMappingDescriptorsForSeries(T dataSeries) {
+		List<MappingDescriptor<T>> descriptors = new ArrayList<>();
+		mappings.entrySet().forEach(entry -> {
+			entry.getValue().entrySet().forEach(perClassEntry ->
+			{
+				if (perClassEntry.getValue() == dataSeries) 
+				{
+					descriptors.add(new MappingDescriptor<T>(entry.getKey(), perClassEntry.getKey(), dataSeries));
+				}
 			});
 		});
 		return descriptors;

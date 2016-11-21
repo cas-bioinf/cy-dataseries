@@ -1,5 +1,6 @@
 package cz.cas.mbu.cydataseries.internal.tasks;
 
+import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.AbstractTaskFactory;
 import org.cytoscape.work.TaskIterator;
 
@@ -8,13 +9,14 @@ import cz.cas.mbu.cydataseries.SmoothingService;
 
 public class SmoothDataSeriesTaskFactory extends AbstractTaskFactory {
 
+	private final CyServiceRegistrar registrar;
 	private final DataSeriesManager dataSeriesManager;
-	private final SmoothingService smoothingService;
 
-	public SmoothDataSeriesTaskFactory(DataSeriesManager dataSeriesManager, SmoothingService smoothingService) {
+
+	public SmoothDataSeriesTaskFactory(CyServiceRegistrar registrar) {
 		super();
-		this.dataSeriesManager = dataSeriesManager;
-		this.smoothingService = smoothingService;
+		this.registrar = registrar;
+		dataSeriesManager = registrar.getService(DataSeriesManager.class);
 	}
 
 	@Override
@@ -24,7 +26,7 @@ public class SmoothDataSeriesTaskFactory extends AbstractTaskFactory {
 
 	@Override
 	public TaskIterator createTaskIterator() {
-		return new TaskIterator(new SmoothDataSeriesTask(dataSeriesManager, smoothingService));
+		return new TaskIterator(new SmoothDataSeriesTask(registrar));
 	}
 	
 }

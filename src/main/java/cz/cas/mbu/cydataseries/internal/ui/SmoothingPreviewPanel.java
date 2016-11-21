@@ -125,7 +125,7 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 				new DisplayFormat(3, 2),				
 				new DisplayFormat(5, 1),				
 				}));
-		displayGridComboBox.setSelectedIndex(3);//TODO - use RememberValueService
+		displayGridComboBox.setSelectedIndex(3);//TODO - use RememberValueService and set default to 0
 		displayGridComboBox.addItemListener(evt -> {
 			if(evt.getStateChange() == ItemEvent.SELECTED)
 			{
@@ -573,7 +573,7 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 	
 	private void performSmoothing()
 	{
-		registrar.getService(TaskManager.class).execute(new TaskIterator(new SmoothInteractivePerformTask(registrar, sourceTimeSeries, estimateX, currentBandwidth, this)));
+		registrar.getService(TaskManager.class).execute(new TaskIterator(new SmoothInteractivePerformTask(registrar, sourceTimeSeries, estimateX, currentBandwidth, currentlyShownGroupings, this)));
 	}
 	
 	public void closePanel()
