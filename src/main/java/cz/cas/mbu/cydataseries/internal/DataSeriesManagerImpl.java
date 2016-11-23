@@ -138,7 +138,7 @@ public class DataSeriesManagerImpl implements DataSeriesManager {
 		mappingManager.getAllMappingDescriptors().stream()
 			.filter( descriptor -> (descriptor.getDataSeries() == ds)) //get all descriptors that match the removed DS
 			.forEach( descriptor -> { 
-				mappingManager.unmapTableColumn(descriptor.getTargetClass(), descriptor.getColumnName()); //and unmap them
+				mappingManager.unmap(descriptor); //and unmap them
 			});
 		fireEvent(new DataSeriesEvent(this, DataSeriesEvent.EventType.DS_REMOVED, Collections.singletonList(ds)));
 	}

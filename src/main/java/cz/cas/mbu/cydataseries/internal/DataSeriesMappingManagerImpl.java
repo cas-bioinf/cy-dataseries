@@ -9,6 +9,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.cytoscape.model.CyIdentifiable;
+import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyTable;
+import org.cytoscape.model.subnetwork.CyRootNetwork;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +26,7 @@ public class DataSeriesMappingManagerImpl implements DataSeriesMappingManager{
 
 	private final Logger logger = LoggerFactory.getLogger(DataSeriesMappingManagerImpl.class); 
 	
-	Map<Class<? extends CyIdentifiable>, Map<String, DataSeries<?,?>>> mappings;
+	Map<CyNetwork, Map<Class<? extends CyIdentifiable>, Map<String, DataSeries<?,?>>>> mappings;
 	
 	public  DataSeriesMappingManagerImpl()
 	{
@@ -32,25 +35,40 @@ public class DataSeriesMappingManagerImpl implements DataSeriesMappingManager{
 	
 	
 	@Override
-	public void mapDataSeriesRowsToTableColumn(Class<? extends CyIdentifiable> targetClass, String columnName,
+	public void mapDataSeriesRowsToTableColumn(CyNetwork network, Class<? extends CyIdentifiable> targetClass, String columnName,
 			DataSeries<?, ?> ds) {
-		Map<String, DataSeries<?, ?>> localMap = mappings.get(targetClass);
+		
+		Map<Class<? extends CyIdentifiable>, Map<String, DataSeries<?, ?>>> networkMappings = mappings.get(network);
+		if (networkMappings == null)
+		{
+			networkMappings = new HashMap<>();
+			mappings.put(network, networkMappings);
+		}
+		
+		Map<String, DataSeries<?, ?>> localMap = networkMappings.get(targetClass);
 		if(localMap == null)
 		{
 			localMap = new HashMap<>();
-			mappings.put(targetClass, localMap);
+			networkMappings.put(targetClass, localMap);
 		}
 		
 		if(localMap.containsKey(columnName))
 		{
-			logger.warn("Remapping column '" + columnName +"' for class " + targetClass.getSimpleName());			
+			logger.warn("Remapping column '" + columnName +"' for network " + Utils.getNetworkName(network) + " class " + targetClass.getSimpleName());			
 		}
 		localMap.put(columnName, ds);
 	}
 
 	@Override
-	public void unmapTableColumn(Class<? extends CyIdentifiable> targetClass, String columnName) {
-		Map<String, DataSeries<?, ?>> localMap = mappings.get(targetClass);
+	public void unmapTableColumn(CyNetwork network, Class<? extends CyIdentifiable> targetClass, String columnName) {
+		Map<Class<? extends CyIdentifiable>, Map<String, DataSeries<?, ?>>> networkMappings = mappings.get(network);
+		if (networkMappings == null)
+		{
+			logger.warn("No mappings for network " + Utils.getNetworkName(network)  + " exists. Cannot remove mapping for '" + columnName + "'");
+			return;			
+		}
+		
+		Map<String, DataSeries<?, ?>> localMap = networkMappings.get(targetClass);
 		if(localMap == null)
 		{
 			logger.warn("No mappings for " + targetClass.getSimpleName() + " exists. Cannot remove mapping for '" + columnName + "'");
@@ -58,7 +76,7 @@ public class DataSeriesMappingManagerImpl implements DataSeriesMappingManager{
 		}
 		if(!localMap.containsKey(columnName))
 		{
-			logger.warn("Mappings for column '" + columnName + "' for closs" + targetClass.getSimpleName() + " does not exist, cannot remove.");
+			logger.warn("Mappings for column '" + columnName + "' for network " + Utils.getNetworkName(network)  + " and class " + targetClass.getSimpleName() + " does not exist, cannot remove.");
 			return;			
 		}
 		localMap.remove(columnName);
@@ -66,8 +84,13 @@ public class DataSeriesMappingManagerImpl implements DataSeriesMappingManager{
 	}
 
 	@Override
-	public DataSeries<?, ?> getMappedDataSeries(Class<? extends CyIdentifiable> targetClass, String columnName) {
-		Map<String, DataSeries<?, ?>> localMap = mappings.get(targetClass);
+	public DataSeries<?, ?> getMappedDataSeries(CyNetwork network, Class<? extends CyIdentifiable> targetClass, String columnName) {
+		Map<Class<? extends CyIdentifiable>, Map<String, DataSeries<?, ?>>> networkMappings = mappings.get(network);
+		if (networkMappings == null)
+		{
+			return null;
+		}
+		Map<String, DataSeries<?, ?>> localMap = networkMappings.get(targetClass);
 		if(localMap == null)
 		{
 			return null;
@@ -77,9 +100,9 @@ public class DataSeriesMappingManagerImpl implements DataSeriesMappingManager{
 	
 	
 	@Override
-	public <T extends DataSeries<?, ?>> T getMappedDataSeries(Class<? extends CyIdentifiable> targetClass,
+	public <T extends DataSeries<?, ?>> T getMappedDataSeries(CyNetwork network, Class<? extends CyIdentifiable> targetClass,
 			String columnName, Class<T> seriesClass) {
-		DataSeries<?, ?> series = getMappedDataSeries(targetClass, columnName);
+		DataSeries<?, ?> series = getMappedDataSeries(network, targetClass, columnName);
 		if(series == null)
 		{
 			return null;
@@ -98,7 +121,7 @@ public class DataSeriesMappingManagerImpl implements DataSeriesMappingManager{
 
 
 	@Override
-	public Map<Class<? extends CyIdentifiable>, Map<String, DataSeries<?,?>>> getAllMappings()
+	public Map<CyNetwork, Map<Class<? extends CyIdentifiable>, Map<String, DataSeries<?,?>>>> getAllMappings()
 	{
 		return mappings;
 	}
@@ -109,14 +132,16 @@ public class DataSeriesMappingManagerImpl implements DataSeriesMappingManager{
 	public <T extends DataSeries<?, ?>> List<MappingDescriptor<T>> getAllMappingDescriptors(Class<T> dataSeriesClass) {
 		List<MappingDescriptor<T>> descriptors = new ArrayList<>();
 		mappings.entrySet().forEach(entry -> {
-			entry.getValue().entrySet().stream()
-				.filter(perClassEntry -> dataSeriesClass.isAssignableFrom(perClassEntry.getValue().getClass())) //Filter by the given class
-				.forEach(perClassEntry ->
-				{
-					@SuppressWarnings("unchecked")
-					T dataSeries = (T)perClassEntry.getValue();
-					descriptors.add(new MappingDescriptor<T>(entry.getKey(), perClassEntry.getKey(), dataSeries));
-				});
+			entry.getValue().entrySet().forEach(perNetworkEntry -> {			
+				perNetworkEntry.getValue().entrySet().stream()
+					.filter(perClassEntry -> dataSeriesClass.isAssignableFrom(perClassEntry.getValue().getClass())) //Filter by the given class
+					.forEach(perClassEntry ->
+					{
+						@SuppressWarnings("unchecked")
+						T dataSeries = (T)perClassEntry.getValue();
+						descriptors.add(new MappingDescriptor<T>(entry.getKey(), perNetworkEntry.getKey(), perClassEntry.getKey(), dataSeries));
+					});
+			});
 		});
 		return descriptors;
 	}
@@ -128,9 +153,11 @@ public class DataSeriesMappingManagerImpl implements DataSeriesMappingManager{
 	public List<MappingDescriptor<?>> getAllMappingDescriptors() {
 		List<MappingDescriptor<?>> descriptors = new ArrayList<>();
 		mappings.entrySet().forEach(entry -> {
-			entry.getValue().entrySet().forEach(perClassEntry ->
-			{
-				descriptors.add(new MappingDescriptor<DataSeries<?,?>>(entry.getKey(), perClassEntry.getKey(), perClassEntry.getValue()));
+			entry.getValue().entrySet().forEach(perNetworkEntry -> {			
+				perNetworkEntry.getValue().entrySet().forEach(perClassEntry ->
+				{
+					descriptors.add(new MappingDescriptor<DataSeries<?,?>>(entry.getKey(), perNetworkEntry.getKey(), perClassEntry.getKey(), perClassEntry.getValue()));
+				});
 			});
 		});
 		return descriptors;
@@ -142,22 +169,51 @@ public class DataSeriesMappingManagerImpl implements DataSeriesMappingManager{
 	public <T extends DataSeries<?, ?>> List<MappingDescriptor<T>> getMappingDescriptorsForSeries(T dataSeries) {
 		List<MappingDescriptor<T>> descriptors = new ArrayList<>();
 		mappings.entrySet().forEach(entry -> {
-			entry.getValue().entrySet().forEach(perClassEntry ->
-			{
-				if (perClassEntry.getValue() == dataSeries) 
+			entry.getValue().entrySet().forEach(perNetworkEntry -> {			
+				perNetworkEntry.getValue().entrySet().forEach(perClassEntry ->
 				{
-					descriptors.add(new MappingDescriptor<T>(entry.getKey(), perClassEntry.getKey(), dataSeries));
-				}
+					if (perClassEntry.getValue() == dataSeries) 
+					{
+						descriptors.add(new MappingDescriptor<T>(entry.getKey(), perNetworkEntry.getKey(), perClassEntry.getKey(), dataSeries));
+					}
+				});
 			});
 		});
 		return descriptors;
 	}
 
+	
+
+	@Override
+	public void unmap(MappingDescriptor<? extends DataSeries<?, ?>> descriptor) {
+		unmapTableColumn(descriptor.getNetwork(), descriptor.getTargetClass(), descriptor.getColumnName());
+		
+	}
+
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Map<String, DataSeries<?, ?>> getAllMappings(Class<? extends CyIdentifiable> targetClass) {
-		Map<String, DataSeries<?, ?>> localMap = mappings.get(targetClass);
+	public Map<Class<? extends CyIdentifiable>, Map<String, DataSeries<?, ?>>> getAllMappings(CyNetwork network) {
+		Map<Class<? extends CyIdentifiable>, Map<String, DataSeries<?, ?>>> networkMap = mappings.get(network);
+		if(networkMap == null)
+		{
+			return Collections.EMPTY_MAP;
+		}
+		return networkMap;
+	}
+
+
+	@Override
+	public CyTable getMappingTable(CyNetwork network, Class<? extends CyIdentifiable> targetClass) {
+		return network.getTable(targetClass, CyNetwork.LOCAL_ATTRS);
+	}
+
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public Map<String, DataSeries<?, ?>> getAllMappings(CyNetwork network, Class<? extends CyIdentifiable> targetClass) {
+		Map<Class<? extends CyIdentifiable>, Map<String, DataSeries<?, ?>>> networkMap = getAllMappings(network);
+		Map<String, DataSeries<?, ?>> localMap = networkMap.get(targetClass);
 		if(localMap == null)
 		{
 			return Collections.EMPTY_MAP;
@@ -167,9 +223,14 @@ public class DataSeriesMappingManagerImpl implements DataSeriesMappingManager{
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T extends DataSeries<?, ?>> Map<String, T> getAllMappings(Class<? extends CyIdentifiable> targetClass,
+	public <T extends DataSeries<?, ?>> Map<String, T> getAllMappings(CyNetwork network, Class<? extends CyIdentifiable> targetClass,
 			Class<T> dataSeriesClass) {
-		Map<String, DataSeries<?, ?>> localMap = mappings.get(targetClass);
+		Map<Class<? extends CyIdentifiable>, Map<String, DataSeries<?, ?>>> networkMap = mappings.get(network);
+		if(networkMap == null)
+		{
+			return Collections.EMPTY_MAP;
+		}
+		Map<String, DataSeries<?, ?>> localMap = networkMap.get(targetClass);
 		if(localMap == null)
 		{
 			return Collections.EMPTY_MAP;
@@ -181,11 +242,14 @@ public class DataSeriesMappingManagerImpl implements DataSeriesMappingManager{
 
 	@Override
 	public boolean isMappingsEmpty() {
-		for(Map<String, DataSeries<?,?>> classMapping: mappings.values())
+		for(Map<Class<? extends CyIdentifiable>, Map<String, DataSeries<?, ?>>> networkMapping : mappings.values())
 		{
-			if(!classMapping.isEmpty())
+			for(Map<String, DataSeries<?,?>> classMapping: networkMapping.values())
 			{
-				return false;
+				if(!classMapping.isEmpty())
+				{
+					return false;
+				}
 			}
 		}
 		return true;
@@ -193,8 +257,13 @@ public class DataSeriesMappingManagerImpl implements DataSeriesMappingManager{
 
 
 	@Override
-	public Collection<Class<? extends CyIdentifiable>> getTargetsWithMappedDataSeries() {
-		return mappings.keySet();
+	public Collection<Class<? extends CyIdentifiable>> getTargetsWithMappedDataSeries(CyNetwork network) {
+		Map<Class<? extends CyIdentifiable>, Map<String, DataSeries<?, ?>>> networkMapping = mappings.get(network);
+		if(networkMapping == null)
+		{
+			return Collections.EMPTY_LIST;
+		}
+		return networkMapping.keySet();
 	}
 	
 	

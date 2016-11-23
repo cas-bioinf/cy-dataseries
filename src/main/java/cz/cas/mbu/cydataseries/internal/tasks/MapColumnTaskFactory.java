@@ -1,12 +1,11 @@
 package cz.cas.mbu.cydataseries.internal.tasks;
 
-import org.cytoscape.application.CyApplicationManager;
+import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.AbstractTaskFactory;
 import org.cytoscape.work.TaskIterator;
 
 import cz.cas.mbu.cydataseries.DataSeriesManager;
-import cz.cas.mbu.cydataseries.DataSeriesMappingManager;
 
 
 public class MapColumnTaskFactory extends AbstractTaskFactory {
@@ -20,12 +19,16 @@ public class MapColumnTaskFactory extends AbstractTaskFactory {
 
 	@Override
 	public TaskIterator createTaskIterator() {
-		return new TaskIterator(new MapColumnTask(registrar.getService(DataSeriesManager.class), registrar.getService(DataSeriesMappingManager.class), registrar.getService(CyApplicationManager.class)));
+		return new TaskIterator(new MapColumnTask(registrar));
 	}
 
 	@Override
 	public boolean isReady() {
-		return !registrar.getService(DataSeriesManager.class).getAllDataSeries().isEmpty();
+		if (registrar.getService(CyNetworkManager.class).getNetworkSet().isEmpty())
+		{
+			return false;
+		}
+		return  !registrar.getService(DataSeriesManager.class).getAllDataSeries().isEmpty();
 	}
 
 }

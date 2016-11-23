@@ -4,6 +4,7 @@ import java.util.Properties;
 
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.CytoPanelComponent;
+import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.events.RowsSetListener;
 import org.cytoscape.service.util.AbstractCyActivator;
 import org.cytoscape.service.util.CyServiceRegistrar;
@@ -61,7 +62,7 @@ public class CyActivator extends AbstractCyActivator {
 		DataSeriesManagerImpl dataSeriesManager = new DataSeriesManagerImpl(bc, mappingManager);
 		registerAllServices(bc, dataSeriesManager, new Properties());
 
-		DataSeriesStorageManager storageManager = new DataSeriesStorageManagerImpl(bc, dataSeriesManager, mappingManager);
+		DataSeriesStorageManager storageManager = new DataSeriesStorageManagerImpl(bc, serviceRegistrar.getService(CyNetworkManager.class), dataSeriesManager, mappingManager);
 		registerAllServices(bc, storageManager, new Properties());
 	
 		registerService(bc, new TimeSeriesStorageProviderImpl(), DataSeriesStorageProvider.class, new Properties());

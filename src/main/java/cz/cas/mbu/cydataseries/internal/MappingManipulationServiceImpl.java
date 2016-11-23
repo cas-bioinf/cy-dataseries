@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.cytoscape.model.CyIdentifiable;
+import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.service.util.CyServiceRegistrar;
 
@@ -21,19 +22,18 @@ public class MappingManipulationServiceImpl implements MappingManipulationServic
 		this.registrar = registrar;
 	}
 
-	private void setColumnIndicesForNewSeriesMapping(Class<? extends CyIdentifiable> targetClass, DataSeries<?,?> sourceSeries, String sourceColumn, DataSeries<?,?> smoothedSeries, String targetColumn, Map<Integer, Integer> rowMapping)
+	private void setColumnIndicesForNewSeriesMapping(CyTable table, DataSeries<?,?> sourceSeries, String sourceColumn, DataSeries<?,?> smoothedSeries, String targetColumn, Map<Integer, Integer> rowMapping)
 	{
-		CyTable defaultTable = Utils.getDefaultTable(registrar, targetClass);
 		if(rowMapping != null)
 		{
-			defaultTable.getAllRows().forEach(
+			table.getAllRows().forEach(
 					row -> 
 						row.set(targetColumn, rowMapping.get(row.get(sourceColumn, DataSeriesMappingManager.MAPPING_COLUMN_CLASS)))
 				);
 		}
 		else
 		{
-			defaultTable.getAllRows().forEach(
+			table.getAllRows().forEach(
 					row -> 
 						row.set(targetColumn, row.get(sourceColumn, DataSeriesMappingManager.MAPPING_COLUMN_CLASS))
 				);			
@@ -64,15 +64,16 @@ public class MappingManipulationServiceImpl implements MappingManipulationServic
 		Map<Integer, Integer> rowMapping = rowMappingFromRowGrouping(rowGrouping, targetTimeSeries);
 		
 		allDescriptors.forEach(descriptor -> {
-			mappingManager.unmapTableColumn(descriptor.getTargetClass(), descriptor.getColumnName());
+			mappingManager.unmap(descriptor);
 
 			//No need to write anything if rows were not grouped
 			if(rowGrouping != null)
 			{
-				setColumnIndicesForNewSeriesMapping(descriptor.getTargetClass(), sourceTimeSeries, descriptor.getColumnName(), targetTimeSeries, descriptor.getColumnName(), rowMapping);
+				CyTable table = mappingManager.getMappingTable(descriptor.getNetwork(), descriptor.getTargetClass());
+				setColumnIndicesForNewSeriesMapping(table, sourceTimeSeries, descriptor.getColumnName(), targetTimeSeries, descriptor.getColumnName(), rowMapping);
 			}
 			
-			mappingManager.mapDataSeriesRowsToTableColumn(descriptor.getTargetClass(), descriptor.getColumnName(), targetTimeSeries);
+			mappingManager.mapDataSeriesRowsToTableColumn(descriptor.getNetwork(), descriptor.getTargetClass(), descriptor.getColumnName(), targetTimeSeries);
 		});
 	}
 
@@ -85,13 +86,13 @@ public class MappingManipulationServiceImpl implements MappingManipulationServic
 		Map<Integer, Integer> rowMapping = rowMappingFromRowGrouping(rowGrouping, targetTimeSeries);
 				allDescriptors.forEach(descriptor -> {
 					String newColumnName = descriptor.getColumnName() + mappingSuffix;
-					CyTable defaultTable = Utils.getDefaultTable(registrar, descriptor.getTargetClass());
-					if (defaultTable.getColumn(newColumnName) == null)
+					CyTable table = mappingManager.getMappingTable(descriptor.getNetwork(), descriptor.getTargetClass());
+					if (table.getColumn(newColumnName) == null)
 					{
-						defaultTable.createColumn(newColumnName, DataSeriesMappingManager.MAPPING_COLUMN_CLASS, false);
+						table.createColumn(newColumnName, DataSeriesMappingManager.MAPPING_COLUMN_CLASS, false);
 					}
-					setColumnIndicesForNewSeriesMapping(descriptor.getTargetClass(), sourceTimeSeries, descriptor.getColumnName(), targetTimeSeries, newColumnName, rowMapping);
-					mappingManager.mapDataSeriesRowsToTableColumn(descriptor.getTargetClass(), newColumnName, targetTimeSeries);
+					setColumnIndicesForNewSeriesMapping(table, sourceTimeSeries, descriptor.getColumnName(), targetTimeSeries, newColumnName, rowMapping);
+					mappingManager.mapDataSeriesRowsToTableColumn(descriptor.getNetwork(), descriptor.getTargetClass(), newColumnName, targetTimeSeries);
 				});				
 	}
 

@@ -12,9 +12,11 @@ import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
+import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
@@ -33,6 +35,10 @@ public class MapColumnTask extends AbstractValidatedTask {
 
 	@Tunable(description = "Data series:")
 	public ListSingleSelection<DataSeries<?,?>> dataSeries;
+
+	@Tunable(description = "Network to attach:")
+	public ListSingleSelection<CyNetwork> targetNetwork;
+	
 	
 	@Tunable(description = "Attach the series to:")
 	public ListSingleSelection<TargetClassInfo> targetClass;
@@ -47,7 +53,7 @@ public class MapColumnTask extends AbstractValidatedTask {
 	
 	private boolean updatingExistingColumnForMapping = false;
 	
-	@Tunable(description="Existing column", groups={"Column"}, dependsOn="createNewColumn=false", listenForChange ="targetClass")
+	@Tunable(description="Existing column", groups={"Column"}, dependsOn="createNewColumn=false", listenForChange ={"targetClass","targetNetwork"})
 	public ListSingleSelection<String> getExistingColumnForMapping()
 	{
 		if(!updatingExistingColumnForMapping)
@@ -99,15 +105,27 @@ public class MapColumnTask extends AbstractValidatedTask {
 
 	private final CyApplicationManager applicationManager;
 	
-	public MapColumnTask(DataSeriesManager dataSeriesManager, DataSeriesMappingManager mappingManager, CyApplicationManager applicationManager) {
-		this.applicationManager = applicationManager;
-		this.mappingManager = mappingManager;
+	public MapColumnTask(CyServiceRegistrar registrar) {
+		this.applicationManager = registrar.getService(CyApplicationManager.class);
+		this.mappingManager = registrar.getService(DataSeriesMappingManager.class);
+		
+		DataSeriesManager dataSeriesManager = registrar.getService(DataSeriesManager.class);
+		CyNetworkManager networkManager = registrar.getService(CyNetworkManager.class);
+		
 		targetClass = new ListSingleSelection<>(new TargetClassInfo("Nodes", CyNode.class), new TargetClassInfo("Edges", CyEdge.class));
 		dataSeries = new ListSingleSelection<>(dataSeriesManager.getAllDataSeries());
 		existingColumnForMapping = new ListSingleSelection<>();
-		updateExistingColumnForMapping(CyNode.class);
 		mapRowNamesWithColumn = new ListSingleSelection<>();
+		
+		targetNetwork = new ListSingleSelection<>(networkManager.getNetworkSet().stream().toArray(CyNetwork[]::new));
+		if(applicationManager.getCurrentNetwork() != null)
+		{
+			targetNetwork.setSelectedValue(applicationManager.getCurrentNetwork());
+		}
+		
+		updateExistingColumnForMapping(CyNode.class);
 		updateMapRowNamesWithColumn(CyNode.class);
+		
 	}
 	
 	
@@ -123,8 +141,8 @@ public class MapColumnTask extends AbstractValidatedTask {
 	
 	private void showColumnsForClass(Class<?> columnType, ListSingleSelection<String> selection, Class<? extends CyIdentifiable> targetClass)
 	{
-		CyNetwork network = applicationManager.getCurrentNetwork();
-		List<CyColumn> candidateColumns = new ArrayList<>(network.getTable(targetClass, CyNetwork.DEFAULT_ATTRS).getColumns());
+		CyNetwork network = targetNetwork.getSelectedValue();
+		List<CyColumn> candidateColumns = new ArrayList<>(mappingManager.getMappingTable(network, targetClass).getColumns());
 		List<String> filteredCandidateColumnsNames = candidateColumns.stream()
 				.filter(col -> col.getType() == columnType && !col.isPrimaryKey())
 				.map(col -> col.getName())
@@ -139,7 +157,7 @@ public class MapColumnTask extends AbstractValidatedTask {
 	@Override
 	public void run(TaskMonitor tm) throws Exception {
 		CyNetwork network = applicationManager.getCurrentNetwork();
-		CyTable targetTable = network.getTable(targetClass.getSelectedValue().getTargetClass(), CyNetwork.DEFAULT_ATTRS);
+		CyTable targetTable = mappingManager.getMappingTable(network, targetClass.getSelectedValue().getTargetClass());
 		
 		//Create the actual mapping
 		CyColumn mappingColumn = null;
@@ -163,7 +181,7 @@ public class MapColumnTask extends AbstractValidatedTask {
 			throw new DataSeriesException("The mapping column is of wrong type (should be " + DataSeriesMappingManager.MAPPING_COLUMN_CLASS.getSimpleName() + ", is" + mappingColumn.getType().getSimpleName() + ")");
 		}
 		
-		mappingManager.mapDataSeriesRowsToTableColumn(targetClass.getSelectedValue().targetClass, mappingColumn.getName(), dataSeries.getSelectedValue());
+		mappingManager.mapDataSeriesRowsToTableColumn(targetNetwork.getSelectedValue(), targetClass.getSelectedValue().targetClass, mappingColumn.getName(), dataSeries.getSelectedValue());
 		
 		//Fill the mapping column 
 		if(mapByRowNames)
@@ -217,7 +235,7 @@ public class MapColumnTask extends AbstractValidatedTask {
 	public ValidationState getValidationState(StringBuilder errMsg) {
 		ValidationState result = ValidationState.OK;
 		CyNetwork network = applicationManager.getCurrentNetwork();
-		CyTable targetTable = network.getTable(targetClass.getSelectedValue().getTargetClass(), CyNetwork.DEFAULT_ATTRS);
+		CyTable targetTable = mappingManager.getMappingTable(network, targetClass.getSelectedValue().getTargetClass());
 		
 		if(createNewColumn && targetTable.getColumn(newColumnName) != null)
 		{
@@ -248,7 +266,7 @@ public class MapColumnTask extends AbstractValidatedTask {
 			targetColumnName = existingColumnForMapping.getSelectedValue();
 		}
 			
-		DataSeries<?, ?> currentMappingTarget = mappingManager.getMappedDataSeries(targetClass.getSelectedValue().getTargetClass(), targetColumnName); 
+		DataSeries<?, ?> currentMappingTarget = mappingManager.getMappedDataSeries(targetNetwork.getSelectedValue(), targetClass.getSelectedValue().getTargetClass(), targetColumnName); 
 		if(currentMappingTarget != null)
 		{
 			errMsg.append("The column '" + targetColumnName + "' is already mapped to data series '" + currentMappingTarget.getName() + "' do you want to overwrite the mapping?\n");

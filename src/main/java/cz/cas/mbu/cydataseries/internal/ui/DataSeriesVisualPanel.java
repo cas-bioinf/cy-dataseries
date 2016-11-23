@@ -164,7 +164,7 @@ public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 		
 		rowSources.forEach(
 				source -> {
-					dataSeriesMappingManager.getAllMappings(source.getTargetClass()).entrySet()
+					dataSeriesMappingManager.getAllMappings(source.getNetwork(), source.getTargetClass()).entrySet()
 						.forEach((entry) -> {
 							String columnName = entry.getKey();
 							DataSeries<?,?> ds = entry.getValue();
@@ -187,7 +187,7 @@ public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 									allSeries.add(ds);
 									rowIds.add(id);
 									
-									MappingDescriptor<DataSeries<?,?>> descriptor = new MappingDescriptor<DataSeries<?,?>>(source.getTargetClass(), columnName, ds);
+									MappingDescriptor<DataSeries<?,?>> descriptor = new MappingDescriptor<DataSeries<?,?>>(source.getNetwork(), source.getTargetClass(), columnName, ds);
 									displayedDataSeries.add(descriptor);
 									
 									seriesVisible.add( !hiddenSeries.contains(descriptor) );
@@ -239,7 +239,7 @@ public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 	
 	private void updateVisual()
 	{
-		CyNetwork network = cyApplicationManager.getCurrentNetwork();
+		final CyNetwork network = cyApplicationManager.getCurrentNetwork();
 		if(network == null)
 		{
 			updateVisualWithRows(Collections.EMPTY_LIST);
@@ -252,13 +252,13 @@ public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 			
 			nodes.forEach(node -> {
 				CyRow row = network.getRow(node);
-				sources.add(new ChartSource(CyNode.class, row));
+				sources.add(new ChartSource(network, CyNode.class, row));
 				
 				if(getShowAdjacentCheckbox().isSelected())
 				{
 					network.getAdjacentEdgeList(node, CyEdge.Type.ANY).forEach( edge ->
 					{
-						sources.add(new ChartSource(CyEdge.class, network.getRow(edge)));
+						sources.add(new ChartSource(network, CyEdge.class, network.getRow(edge)));
 					});
 				}			
 			});
@@ -266,12 +266,12 @@ public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 			List<CyEdge> edges = CyTableUtil.getEdgesInState(network, "selected", true);
 			edges.forEach(edge -> {
 				CyRow row = network.getRow(edge);
-				sources.add(new ChartSource(CyEdge.class, row));
+				sources.add(new ChartSource(network, CyEdge.class, row));
 				
 				if(getShowAdjacentCheckbox().isSelected())
 				{
-					sources.add(new ChartSource(CyNode.class, network.getRow(edge.getSource())));
-					sources.add(new ChartSource(CyNode.class, network.getRow(edge.getTarget())));
+					sources.add(new ChartSource(network, CyNode.class, network.getRow(edge.getSource())));
+					sources.add(new ChartSource(network, CyNode.class, network.getRow(edge.getTarget())));
 				}			
 			});
 	
@@ -368,13 +368,19 @@ public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 	
 	private static class ChartSource
 	{
+		private final CyNetwork network;
 		private final Class<? extends CyIdentifiable> targetClass;
 		private final CyRow row;
 		
-		public ChartSource(Class<? extends CyIdentifiable> targetClass, CyRow row) {
+		public ChartSource(CyNetwork network, Class<? extends CyIdentifiable> targetClass, CyRow row) {
 			super();
+			this.network = network;
 			this.targetClass = targetClass;
 			this.row = row;
+		}
+
+		public CyNetwork getNetwork(){
+			return network;
 		}
 		
 		public Class<? extends CyIdentifiable> getTargetClass() {
@@ -384,6 +390,7 @@ public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 		public CyRow getRow() {
 			return row;
 		}
+		
 		
 		
 	}

@@ -18,6 +18,8 @@ import org.apache.commons.csv.CSVRecord;
 import org.cytoscape.application.CyUserLog;
 import org.cytoscape.io.util.StreamUtil;
 import org.cytoscape.model.CyIdentifiable;
+import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.session.events.SessionAboutToBeSavedEvent;
 import org.cytoscape.session.events.SessionAboutToBeSavedListener;
@@ -41,6 +43,7 @@ public class DataSeriesStorageManagerImpl implements DataSeriesStorageManager, S
 	private static final String SERIES_CLASS_COLUMN = "class";
 
 	private static final String MAPPING_FILENAME = "_dataSeriesMappings.tsv";
+	private static final String MAPPING_TARGET_NETWORK_SUID_COLUMN = "targetNetworkSUID";
 	private static final String MAPPING_TARGET_CLASS_COLUMN = "targetClass";
 	private static final String MAPPING_COLUMN_NAME_COLUMN = "columnName";
 	private static final String MAPPING_SERIES_SUID_COLUMN = "seriesSUID";
@@ -52,12 +55,14 @@ public class DataSeriesStorageManagerImpl implements DataSeriesStorageManager, S
 	
 	private final DataSeriesManagerImpl dataSeriesManager;
 	private final DataSeriesMappingManagerImpl mappingManager;
+	private final CyNetworkManager networkManager;
 	
 	private final ServiceTracker providerTracker;
 	
-	public DataSeriesStorageManagerImpl(BundleContext bc, DataSeriesManagerImpl dataSeriesManager, DataSeriesMappingManagerImpl mappingManager) {
+	public DataSeriesStorageManagerImpl(BundleContext bc, CyNetworkManager networkManager, DataSeriesManagerImpl dataSeriesManager, DataSeriesMappingManagerImpl mappingManager) {
 		this.dataSeriesManager = dataSeriesManager;
 		this.mappingManager = mappingManager;
+		this.networkManager = networkManager;
 		providerTracker = new ServiceTracker(bc, DataSeriesStorageProvider.class.getName(), null);
 		providerTracker.open();
 	}
@@ -211,31 +216,60 @@ public class DataSeriesStorageManagerImpl implements DataSeriesStorageManager, S
 			CSVFormat mappingFormat = CSV_FORMAT.withHeader();
 			try (CSVParser parser = new CSVParser(new FileReader(mappingFile.get()), mappingFormat))
 			{
+				//Warning this loop uses continue statements to handle errors in reading the CSV file
 				for(CSVRecord record: parser)
 				{
 					try {
+				
 						String columnName = record.get(MAPPING_COLUMN_NAME_COLUMN);
-						long seriesSuid = Long.parseLong(record.get(MAPPING_SERIES_SUID_COLUMN));
+						long seriesSuid;
+						long networkSuid;
+						
+						seriesSuid = Long.parseLong(record.get(MAPPING_SERIES_SUID_COLUMN));
+						networkSuid = Long.parseLong(record.get(MAPPING_TARGET_NETWORK_SUID_COLUMN));
+						
 						if (!oldSuidMapping.containsKey(seriesSuid))
 						{
 							userLogger.error("Could not find DS with old SUID " + seriesSuid + " mentioned in mapping.");
 							continue;
 						}
 						
+						CyNetwork network = null;
+						try {
+							network = e.getLoadedSession().getObject(networkSuid, CyNetwork.class);
+						} catch (ClassCastException ex)
+						{
+							userLogger.error("Could not find network with old SUID " + networkSuid + " mentioned in mapping. The SUID is assigned to a different object.", ex);
+							continue;
+						}
+						
+						if (network == null)
+						{
+							userLogger.error("Could not find network with old SUID " + networkSuid + " mentioned in mapping.");
+							continue;
+						}
 						
 						String targetClassName = record.get(MAPPING_TARGET_CLASS_COLUMN);
-						Class<?> targetClassRaw = Class.forName(targetClassName);
-
+						Class<?> targetClassRaw;
+						try {
+							targetClassRaw = Class.forName(targetClassName);
+						}
+						catch(ClassNotFoundException ex)
+						{
+							userLogger.error("Could not find target class for mapping.", ex);
+							continue;
+						}
+	
 						if(CyIdentifiable.class.isAssignableFrom(targetClassRaw))
 						{
 							Class<? extends CyIdentifiable> classCast = (Class<? extends CyIdentifiable>)targetClassRaw; 
-							mappingManager.mapDataSeriesRowsToTableColumn(classCast, columnName, oldSuidMapping.get(seriesSuid));
+							mappingManager.mapDataSeriesRowsToTableColumn(network, classCast, columnName, oldSuidMapping.get(seriesSuid));
 						}
-					}
-					catch(ClassNotFoundException ex)
+					} catch (Exception ex)
 					{
-						userLogger.error("Could not find target class for mapping.", ex);						
-					}
+						userLogger.error("Could not parse DS mapping.", ex);
+						continue;
+					}						
 				}
 			}
 			catch (IOException ex)
@@ -301,16 +335,21 @@ public class DataSeriesStorageManagerImpl implements DataSeriesStorageManager, S
 			}
 		};
 		
+		
 		//Save mapping
 		File mappingFile = new File(tmpDir, MAPPING_FILENAME);
 		try (CSVPrinter mappingPrinter = new CSVPrinter(new FileWriter(mappingFile), CSV_FORMAT))
 		{
-			mappingPrinter.printRecord(MAPPING_TARGET_CLASS_COLUMN, MAPPING_COLUMN_NAME_COLUMN, MAPPING_SERIES_SUID_COLUMN);
-			for(Class<? extends CyIdentifiable> targetClass : mappingManager.getTargetsWithMappedDataSeries())
+			mappingPrinter.printRecord(MAPPING_TARGET_NETWORK_SUID_COLUMN, MAPPING_TARGET_CLASS_COLUMN, MAPPING_COLUMN_NAME_COLUMN, MAPPING_SERIES_SUID_COLUMN);
+
+			for (CyNetwork network : networkManager.getNetworkSet())
 			{
-				for(Map.Entry<String, DataSeries<?, ?>> entry : mappingManager.getAllMappings(targetClass).entrySet())
+				for(Class<? extends CyIdentifiable> targetClass : mappingManager.getTargetsWithMappedDataSeries(network))
 				{
-					mappingPrinter.printRecord(targetClass.getName(), entry.getKey(), entry.getValue().getSUID());
+					for(Map.Entry<String, DataSeries<?, ?>> entry : mappingManager.getAllMappings(network, targetClass).entrySet())
+					{
+						mappingPrinter.printRecord(network.getSUID(), targetClass.getName(), entry.getKey(), entry.getValue().getSUID());
+					}
 				}
 			}
 			dsFiles.add(mappingFile);

@@ -50,7 +50,7 @@ public class SmoothingOutputParameters {
 			
 			allDescriptors.forEach(descriptor -> {
 				String newColumnName = descriptor.getColumnName() + mappingSuffix;			
-				CyTable defaultTable = Utils.getDefaultTable(registrar, descriptor.getTargetClass());
+				CyTable defaultTable = mappingManager.getMappingTable(descriptor.getNetwork(), descriptor.getTargetClass());
 				CyColumn newColumn = defaultTable.getColumn(newColumnName);
 				if (newColumn != null)
 				{

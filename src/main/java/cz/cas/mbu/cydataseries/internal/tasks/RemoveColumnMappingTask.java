@@ -25,7 +25,7 @@ public class RemoveColumnMappingTask extends AbstractValidatedTask {
 	@Override
 	public void run(TaskMonitor taskMonitor) throws Exception {
 		MappingDescriptor<?> descriptor = targetMapping.getSelectedValue();		
-		mappingManager.unmapTableColumn(descriptor.getTargetClass(), descriptor.getColumnName());		
+		mappingManager.unmap(descriptor);		
 	}
 
 	@Override

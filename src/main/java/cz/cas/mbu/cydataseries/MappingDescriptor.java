@@ -3,26 +3,37 @@ package cz.cas.mbu.cydataseries;
 import java.util.Comparator;
 
 import org.cytoscape.model.CyIdentifiable;
+import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyRow;
+import org.cytoscape.model.subnetwork.CySubNetwork;
+
+import cz.cas.mbu.cydataseries.internal.Utils;
 
 public class MappingDescriptor<T extends DataSeries<?,?>> 
 {
-	private Class<? extends CyIdentifiable> targetClass;
-	private String columnName;
-	private T dataSeries;
+	private final CyNetwork network;
+	private final Class<? extends CyIdentifiable> targetClass;
+	private final String columnName;
+	private final T dataSeries;
 	
-	public MappingDescriptor(Class<? extends CyIdentifiable> targetClass, String columnName,
+	
+	public MappingDescriptor(CyNetwork network, Class<? extends CyIdentifiable> targetClass, String columnName,
 			T dataSeries) {
 		super();
+		this.network = network;
 		this.targetClass = targetClass;
 		this.columnName = columnName;
 		this.dataSeries = dataSeries;
 	}
-	
+
 	@Override
 	public String toString()
 	{
-		return targetClass.getSimpleName() + ": " + columnName + " -> " + dataSeries.getName();
+		return Utils.getNetworkName(network) + ", " + targetClass.getSimpleName() + ": " + columnName + " -> " + dataSeries.getName();
+	}
+	
+	public CyNetwork getNetwork() {
+		return network;
 	}
 
 	public Class<? extends CyIdentifiable> getTargetClass() {
@@ -58,12 +69,15 @@ public class MappingDescriptor<T extends DataSeries<?,?>>
 		return tsRow;
 	}
 	
+
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((columnName == null) ? 0 : columnName.hashCode());
 		result = prime * result + ((dataSeries == null) ? 0 : dataSeries.hashCode());
+		result = prime * result + ((network == null) ? 0 : network.hashCode());
 		result = prime * result + ((targetClass == null) ? 0 : targetClass.hashCode());
 		return result;
 	}
@@ -76,7 +90,7 @@ public class MappingDescriptor<T extends DataSeries<?,?>>
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		MappingDescriptor<?> other = (MappingDescriptor<?>) obj;
+		MappingDescriptor other = (MappingDescriptor) obj;
 		if (columnName == null) {
 			if (other.columnName != null)
 				return false;
@@ -87,6 +101,11 @@ public class MappingDescriptor<T extends DataSeries<?,?>>
 				return false;
 		} else if (!dataSeries.equals(other.dataSeries))
 			return false;
+		if (network == null) {
+			if (other.network != null)
+				return false;
+		} else if (!network.equals(other.network))
+			return false;
 		if (targetClass == null) {
 			if (other.targetClass != null)
 				return false;
@@ -94,12 +113,20 @@ public class MappingDescriptor<T extends DataSeries<?,?>>
 			return false;
 		return true;
 	}
-	
+
+
+
 	public static class DefaultComparator<T extends DataSeries<?, ?>> implements Comparator<MappingDescriptor<T>>
 	{
 
 		@Override
 		public int compare(MappingDescriptor<T> o1, MappingDescriptor<T> o2) {
+			int networkNameCompare = Utils.getNetworkName(o1.getNetwork()).compareTo(Utils.getNetworkName(o2.getNetwork()));
+			if (networkNameCompare != 0)
+			{
+				return networkNameCompare;
+			}
+			
 			int nameCompare = (o1.dataSeries.getName().compareTo(o2.getDataSeries().getName()));
 			if(nameCompare != 0)
 			{

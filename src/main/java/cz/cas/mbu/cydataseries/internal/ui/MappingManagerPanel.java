@@ -93,7 +93,7 @@ public class MappingManagerPanel extends JPanel {
 
 	private void addClicked()
 	{
-		MapColumnTask task = new MapColumnTask(registrar.getService(DataSeriesManager.class), registrar.getService(DataSeriesMappingManager.class), registrar.getService(CyApplicationManager.class));
+		MapColumnTask task = new MapColumnTask(registrar);
 		startTask(task);
 	}
 	
