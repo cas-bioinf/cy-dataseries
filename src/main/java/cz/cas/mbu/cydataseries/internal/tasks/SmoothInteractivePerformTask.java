@@ -38,6 +38,7 @@ public class SmoothInteractivePerformTask extends AbstractValidatedTask {
 		this.sourcePanel = sourcePanel;
 		this.rowGrouping = rowGrouping;
 		outputParameters = new SmoothingOutputParameters();
+		outputParameters.resultName = sourceTimeSeries + "_Smooth";
 	}
 	
 

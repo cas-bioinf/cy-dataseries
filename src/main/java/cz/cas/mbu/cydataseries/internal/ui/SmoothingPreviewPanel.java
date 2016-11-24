@@ -120,12 +120,13 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 		
 		displayGridComboBox = new JComboBox<>(new DefaultComboBoxModel<DisplayFormat>(new DisplayFormat[] {
 				new DisplayFormat(1, 1),
-				new DisplayFormat(1, 5),
+				new DisplayFormat(1, 2),
+				new DisplayFormat(1, 3),
 				new DisplayFormat(2, 2),				
 				new DisplayFormat(3, 2),				
 				new DisplayFormat(5, 1),				
 				}));
-		displayGridComboBox.setSelectedIndex(3);//TODO - use RememberValueService and set default to 0
+		displayGridComboBox.setSelectedIndex(1);//TODO - use RememberValueService
 		displayGridComboBox.addItemListener(evt -> {
 			if(evt.getStateChange() == ItemEvent.SELECTED)
 			{
@@ -191,7 +192,7 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 		JButton btnClose = new JButton("Close");
 		controlPanel.add(btnClose, "12, 6");
 		
-		JLabel lblCommaSeparatedSupports = new JLabel("Comma separated, supports Matlab notation (e.g. 1,2,3:5,10:2:20)");
+		JLabel lblCommaSeparatedSupports = new JLabel("<html>Comma separated, supports Matlab notation (e.g. 1,2,3:5,10:2:20). Points outside the original interval are ignored.</html>");
 		lblCommaSeparatedSupports.setFont(new Font("Tahoma", Font.ITALIC, 11));
 		controlPanel.add(lblCommaSeparatedSupports, "6, 8, 5, 1");
 		btnClose.addActionListener(evt -> closePanel());
@@ -301,9 +302,18 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 		{
 			try {
 				List<Double> timePointsList = MatlabSyntaxNumberList.listFromString(timePointsTextField.getText());
-				if(!timePointsList.isEmpty())
+								
+				//filter points outside the original data interval
+				double minTime = sourceTimeSeries.getIndex().stream().reduce(Double.POSITIVE_INFINITY, Math::min);
+				double maxTime = sourceTimeSeries.getIndex().stream().reduce(Double.NEGATIVE_INFINITY, Math::max);
+				
+				List<Double> timePointsListFiltered = timePointsList.stream()
+						.filter(x -> x >= minTime - 0.0001 && x <= maxTime + 0.0001 )
+						.collect(Collectors.toList());
+				
+				if(!timePointsListFiltered.isEmpty())
 				{
-					estimateX = Doubles.toArray(timePointsList);
+					estimateX = Doubles.toArray(timePointsListFiltered);
 				}
 				else
 				{
@@ -573,7 +583,8 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 	
 	private void performSmoothing()
 	{
-		registrar.getService(TaskManager.class).execute(new TaskIterator(new SmoothInteractivePerformTask(registrar, sourceTimeSeries, estimateX, currentBandwidth, currentlyShownGroupings, this)));
+		Map<String, List<Integer>> rowGrouping = registrar.getService(SmoothingService.class).getDefaultRowGrouping(sourceTimeSeries);
+		registrar.getService(TaskManager.class).execute(new TaskIterator(new SmoothInteractivePerformTask(registrar, sourceTimeSeries, estimateX, currentBandwidth, rowGrouping, this)));
 	}
 	
 	public void closePanel()
