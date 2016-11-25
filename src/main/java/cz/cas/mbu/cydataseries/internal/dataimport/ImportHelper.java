@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
 
 import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportException;
 import cz.cas.mbu.cydataseries.dataimport.PreImportResults;
@@ -20,75 +19,141 @@ public class ImportHelper {
 	
 	private static PreImportResults preImportFromArray(List<List<String>> records, ImportParameters params, boolean strict) {
 		if(records.isEmpty()) {
-			return new PreImportResults(Collections.EMPTY_LIST, Collections.EMPTY_LIST, new String[][]{});
+			return new PreImportResults(Collections.EMPTY_LIST, Collections.EMPTY_LIST, new String[][]{}, Collections.EMPTY_LIST);
 		}
-		
+				
 		List<String> index;
 		List<String> rowNames;
 		String[][] cellData;
 		int dataStartIndex;
-		if(params.isManualIndexData()) {
-			index = params.getManualIndexValues();
-			dataStartIndex = 0;
-		} else {
-			
-			if(params.isImportRowNames()) {
-				//skip the first column dedicated to row names
-				index = new ArrayList<String>(records.get(0).size() - 1); 
-				for(int column = 1; column < records.get(0).size(); column++)
-				{
-					index.add(records.get(0).get(column));
-				}
-			}
-			else
-			{
-				index = new ArrayList<String>(records.get(0).size() - 1);
-				records.get(0).forEach(x -> index.add(x));					
-			}
-			dataStartIndex = 1;				
+		List<String> firstRow = records.get(0);
+		
+		List<String> rawIndex = new ArrayList<>(firstRow.size());
+				
+		for(int column = 0; column < firstRow.size(); column++)
+		{
+			rawIndex.add(firstRow.get(column));
 		}
 		
+		switch(params.getIndexSource())
+		{
+			case ManualAdd :
+				index = params.getManualIndexValues();
+				dataStartIndex = 0;
+				break;
+			case ManualOverride :
+				index = params.getManualIndexValues();
+				dataStartIndex = 1;
+				break;
+			case Data :
+				dataStartIndex = 1;
+				
+				int indexStart;		
+				if(params.isImportRowNames()) {
+					//skip the first column dedicated to row names
+					indexStart = 1;
+				}
+				else
+				{
+					indexStart = 0;
+				}
+				
+				if(params.isImportAllColumns()) {				
+					index = rawIndex.subList(indexStart, rawIndex.size());
+				}
+				else{
+					index = new ArrayList<>();
+					for(int column = indexStart; column < params.getImportedColumnIndices().size(); column++)
+					{
+						int columnIndex = params.getImportedColumnIndices().get(column);
+						if(columnIndex < firstRow.size())
+						{
+							index.add(firstRow.get(columnIndex));													
+						}
+					}					
+				}		
+				break;
+			default:
+				throw new IllegalStateException("Unrecognized index source: " + params.getIndexSource());
+		}
+					
 		rowNames = new ArrayList<>(records.size() - dataStartIndex);
 		
 		int maxColumns = 0;
-		for(int row = dataStartIndex; row < records.size(); row++) {
-			int numColumns = records.get(row).size();
+		if(params.isImportAllColumns()) {
+			for(int row = dataStartIndex; row < records.size(); row++) {
+				int numColumns = records.get(row).size();
+				if(params.isImportRowNames()) {
+					numColumns -= 1; //skip the column for row names
+				}
+				if(strict && numColumns > index.size())
+				{
+					throw new DataSeriesImportException("Row " + row + " has more columns (" + numColumns + ") than there are index values (" + index.size() + ")"); 
+				}
+				maxColumns = Math.max(maxColumns, numColumns);
+			}
+			maxColumns = Math.max(maxColumns, index.size());
+		}
+		else
+		{
 			if(params.isImportRowNames()) {
-				numColumns -= 1; //skip the column for row names
+				maxColumns = params.getImportedColumnIndices().size() - 1;
 			}
-			if(strict && numColumns > index.size())
+			else
 			{
-				throw new DataSeriesImportException("Row " + row + " has more columns (" + numColumns + ") than there are index values (" + index.size() + ")"); 
+				maxColumns = params.getImportedColumnIndices().size();				
 			}
-			maxColumns = Math.max(maxColumns, numColumns);
 		}
 		
 		
-		maxColumns = Math.max(maxColumns, index.size());
 		
 		cellData = new String[records.size() - dataStartIndex][maxColumns];
 
 		for(int row = dataStartIndex; row < records.size(); row++)
 		{
 			List<String> currentRecord = records.get(row);
+			boolean rowNameImported = false;
 			int firstColumn = 0;
 			if(params.isImportRowNames() && currentRecord.size() > 0)
 			{
-				rowNames.add(currentRecord.get(0));
+				if(params.isImportAllColumns())
+				{
+					rowNames.add(currentRecord.get(0));
+					rowNameImported = true;
+				}
+				else if (params.getImportedColumnIndices().get(0) < currentRecord.size())
+				{
+					rowNames.add(currentRecord.get(params.getImportedColumnIndices().get(0)));
+					rowNameImported = true;
+				}
 				firstColumn = 1;
 			}
-			else
+			
+			if(!rowNameImported)
 			{
 				rowNames.add("Row" + Integer.toString(row - dataStartIndex + 1));
 			}
 					
-			for(int column = firstColumn; column < currentRecord.size(); column ++)
+			if(params.isImportAllColumns())
 			{
-				cellData[row - dataStartIndex][column - firstColumn] = currentRecord.get(column);
+				for(int column = firstColumn; column < currentRecord.size(); column ++)
+				{
+					cellData[row - dataStartIndex][column - firstColumn] = currentRecord.get(column);
+				}
+			}
+			else
+			{
+				for(int column = firstColumn; column < params.getImportedColumnIndices().size(); column++)
+				{
+					int columnIndex = params.getImportedColumnIndices().get(column);
+					if(columnIndex < currentRecord.size())
+					cellData[row - dataStartIndex][column - firstColumn] = currentRecord.get(columnIndex);
+				}
+				
 			}
 		}		
 		
-		return new PreImportResults(rowNames, index, cellData);		
+		return new PreImportResults(rowNames, index, cellData, rawIndex);		
 	}
 	
 		

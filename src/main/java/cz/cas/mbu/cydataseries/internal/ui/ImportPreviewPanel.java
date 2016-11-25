@@ -88,7 +88,7 @@ public class ImportPreviewPanel extends JPanel {
 		
 		StringBuilder dimensionsText = new StringBuilder();
 	    dimensionsText.append(preImportResults.getIndexValues().size());
-	    if(rawDataTruncated && params.isTransposeBeforeImport() && !params.isManualIndexData())
+	    if(rawDataTruncated && params.isTransposeBeforeImport() && params.getIndexSource() == ImportParameters.IndexSource.Data)
 	    {
 	    	dimensionsText.append("+");
 	    }

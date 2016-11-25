@@ -6,33 +6,44 @@ public class PreImportResults {
 	private List<String> rowNames;
 	private List<String> indexValues;
 	private String[][] cellData;
-	
-	
-	public PreImportResults(List<String> rowNames, List<String> indexValues, String[][] cellData) {
+
+	private List<String> originalIndexValues;
+
+	public PreImportResults(List<String> rowNames, List<String> indexValues, String[][] cellData,
+			List<String> originalIndexValues) {
 		super();
 		this.rowNames = rowNames;
 		this.indexValues = indexValues;
 		this.cellData = cellData;
+		this.originalIndexValues = originalIndexValues;
 	}
-	
+
 	public List<String> getRowNames() {
 		return rowNames;
 	}
+
 	public List<String> getIndexValues() {
 		return indexValues;
 	}
+
 	public String[][] getCellData() {
 		return cellData;
 	}
-	
+
+	public List<String> getOriginalIndexValues() {
+		return originalIndexValues;
+	}
+
 	public void checkConsistentcy() {
-		if(rowNames.size() != cellData.length) {
-			throw new DataSeriesImportException("The size of row names (" + rowNames.size() + ") is different from the size of the data (" + cellData.length + ").");
+		if (rowNames.size() != cellData.length) {
+			throw new DataSeriesImportException("The size of row names (" + rowNames.size()
+					+ ") is different from the size of the data (" + cellData.length + ").");
 		}
-		
-		for(int row = 0; row < cellData.length; row++) {
-			if(indexValues.size() != cellData[row].length) {
-				throw new DataSeriesImportException("The size of the index (" + indexValues.size() + ") is different from the size of row " + row + " (" + cellData[row].length + ")");
+
+		for (int row = 0; row < cellData.length; row++) {
+			if (indexValues.size() != cellData[row].length) {
+				throw new DataSeriesImportException("The size of the index (" + indexValues.size()
+						+ ") is different from the size of row " + row + " (" + cellData[row].length + ")");
 			}
 		}
 	}
