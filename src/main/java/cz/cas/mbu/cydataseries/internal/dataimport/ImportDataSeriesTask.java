@@ -29,7 +29,7 @@ public class ImportDataSeriesTask extends AbstractValidatedTask {
 	public ListSingleSelection<ProviderDisplay> provider;
 	
 	@Tunable
-	public ImportParameters importParameters;
+	public TabularFileImportParameters importParameters;
 	
 	private final DataSeriesManager dataSeriesManager;
 		
@@ -37,7 +37,7 @@ public class ImportDataSeriesTask extends AbstractValidatedTask {
 	
 	public ImportDataSeriesTask(DataSeriesManager dataSeriesManager, DataSeriesImportManager importManager) {
 		super();
-		this.importParameters = new ImportParameters();
+		this.importParameters = new TabularFileImportParameters();
 		this.dataSeriesManager = dataSeriesManager;
 		
 		this.provider = new ListSingleSelection<>(importManager.getAllImportProviders().stream()
@@ -101,7 +101,7 @@ public class ImportDataSeriesTask extends AbstractValidatedTask {
 	protected void tryImportSeries() throws Exception
 	{
 		try (FileReader inputReader = new FileReader(importParameters.getFile())) {
-			PreImportResults preImportResults = ImportHelper.preImport(inputReader, importParameters, true /* strict */);
+			PreImportResults preImportResults = ImportHelper.preImport(inputReader, importParameters.getFileFormatParameters(), importParameters.getDataSeriesParameters(), true /* strict */);
 			DataSeries<?, ?> ds = provider.getSelectedValue().getProvider().importDataDataSeries(name, SUIDFactory.getNextSUID(), preImportResults);
 			importedDS = ds;
 		}

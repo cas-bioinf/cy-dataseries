@@ -5,7 +5,7 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
 import cz.cas.mbu.cydataseries.dataimport.PreImportResults;
-import cz.cas.mbu.cydataseries.internal.dataimport.ImportParameters;
+import cz.cas.mbu.cydataseries.internal.dataimport.DataSeriesImportParameters;
 
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
@@ -55,7 +55,7 @@ public class ImportPreviewPanel extends JPanel {
 
 	}
 
-	public void updatePreview(PreImportResults preImportResults, ImportParameters params, boolean rawDataTruncated) {
+	public void updatePreview(PreImportResults preImportResults, DataSeriesImportParameters params, boolean wasTransposed, boolean rawDataTruncated) {
 		int numRows = Math.max(preImportResults.getRowNames().size(), preImportResults.getCellData().length);
 		numRows = Math.min(numRows, MAX_ROWS_TO_DISPLAY);
 		
@@ -88,14 +88,14 @@ public class ImportPreviewPanel extends JPanel {
 		
 		StringBuilder dimensionsText = new StringBuilder();
 	    dimensionsText.append(preImportResults.getIndexValues().size());
-	    if(rawDataTruncated && params.isTransposeBeforeImport() && params.getIndexSource() == ImportParameters.IndexSource.Data)
+	    if(rawDataTruncated && wasTransposed && params.getIndexSource() == DataSeriesImportParameters.IndexSource.Data)
 	    {
 	    	dimensionsText.append("+");
 	    }
 	    dimensionsText.append(" data points for " );
 	    
 	    dimensionsText.append(preImportResults.getRowNames().size());
-	    if(rawDataTruncated && !params.isTransposeBeforeImport())
+	    if(rawDataTruncated && !wasTransposed)
 	    {
 	    	dimensionsText.append("+");
 	    }

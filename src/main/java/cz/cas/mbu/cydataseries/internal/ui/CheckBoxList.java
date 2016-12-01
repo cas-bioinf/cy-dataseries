@@ -4,9 +4,14 @@ import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
-public class CheckBoxList extends JList<CheckBoxList.Item> {
+public class CheckBoxList extends JList<CheckBoxList.Item> implements ItemSelectable {
+	
+	private final List<ItemListener> itemListeners = new ArrayList<>();
+	
 	public static class Item {
 		private final String label;
 		private boolean selected;
@@ -48,6 +53,7 @@ public class CheckBoxList extends JList<CheckBoxList.Item> {
 				if (index != -1) {
 					Item item = getModel().getElementAt(index);
 					item.setSelected(!item.isSelected());
+					fireItemEvent(new ItemEvent(CheckBoxList.this, index, item, item.isSelected() ? ItemEvent.SELECTED : ItemEvent.DESELECTED));
 					repaint();
 				}
 			}
@@ -75,6 +81,37 @@ public class CheckBoxList extends JList<CheckBoxList.Item> {
 		init();
 	}
 
+	@Override
+	public void addItemListener(ItemListener listener)
+	{
+		itemListeners.add(listener);
+	}	
+
+	@Override
+	public void removeItemListener(ItemListener l) {
+		itemListeners.remove(l);
+	}
+	
+	@Override
+	public Object[] getSelectedObjects() {
+		List<Item> selectedItems = new ArrayList<>();
+		for(int i = 0; i < getModel().getSize(); i++)
+		{
+			Item item = getModel().getElementAt(i);
+			if(item.isSelected()) {
+				selectedItems.add(item);
+			}
+		}
+		
+		return selectedItems.toArray();
+	}
+	
+
+	protected void fireItemEvent(ItemEvent evt)
+	{
+		itemListeners.forEach(x -> x.itemStateChanged(evt));
+	}
+	
 	protected class CellRenderer implements ListCellRenderer<Item> {
 		private JCheckBox checkbox;
 

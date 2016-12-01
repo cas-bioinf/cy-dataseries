@@ -17,7 +17,7 @@ import cz.cas.mbu.cydataseries.dataimport.PreImportResults;
  */
 public class ImportHelper {
 	
-	private static PreImportResults preImportFromArray(List<List<String>> records, ImportParameters params, boolean strict) {
+	public static PreImportResults preImportFromArray(List<List<String>> records, DataSeriesImportParameters params, boolean strict) {
 		if(records.isEmpty()) {
 			return new PreImportResults(Collections.EMPTY_LIST, Collections.EMPTY_LIST, new String[][]{}, Collections.EMPTY_LIST);
 		}
@@ -157,7 +157,7 @@ public class ImportHelper {
 	}
 	
 		
-	public static PreImportResults preImport(Reader reader, ImportParameters params, boolean strict) throws IOException {
+	public static PreImportResults preImport(Reader reader, FileFormatImportParameters params, DataSeriesImportParameters dataSeriesParams, boolean strict) throws IOException {
 		CSVFormat format = CSVFormat.DEFAULT
 								.withDelimiter(params.getSeparator())
 								.withCommentMarker(params.getCommentCharacter());
@@ -199,7 +199,7 @@ public class ImportHelper {
 				}
 			});
 			
-			return preImportFromArray(recordsList, params, strict);
+			return preImportFromArray(recordsList, dataSeriesParams, strict);
 		}
 	}
 }

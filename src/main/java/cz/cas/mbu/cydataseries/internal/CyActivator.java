@@ -26,7 +26,7 @@ import cz.cas.mbu.cydataseries.internal.data.NamedDoubleDataSeriesStorageProvide
 import cz.cas.mbu.cydataseries.internal.data.TimeSeriesStorageProviderImpl;
 import cz.cas.mbu.cydataseries.internal.dataimport.DataSeriesImportManagerImpl;
 import cz.cas.mbu.cydataseries.internal.dataimport.ImportDataSeriesTaskFactory;
-import cz.cas.mbu.cydataseries.internal.dataimport.ImportParametersGuiHandleFactory;
+import cz.cas.mbu.cydataseries.internal.dataimport.TabularFilesImportParametersGuiHandlerFactory;
 import cz.cas.mbu.cydataseries.internal.dataimport.NamedDoubleDataSeriesImportProviderImpl;
 import cz.cas.mbu.cydataseries.internal.dataimport.TimeSeriesImportProviderImpl;
 import cz.cas.mbu.cydataseries.internal.smoothing.SmoothingServiceImpl;
@@ -71,7 +71,7 @@ public class CyActivator extends AbstractCyActivator {
 		SmoothingService smoothingService = new SmoothingServiceImpl(); 
 		registerService(bc, smoothingService, SmoothingService.class, new Properties());
 		
-		registerService(bc, new ImportParametersGuiHandleFactory(), GUITunableHandlerFactory.class, new Properties());
+		registerService(bc, new TabularFilesImportParametersGuiHandlerFactory(), GUITunableHandlerFactory.class, new Properties());
 		
 		registerService(bc, new TimeSeriesImportProviderImpl(), DataSeriesImportProvider.class, new Properties());
 		registerService(bc, new NamedDoubleDataSeriesImportProviderImpl(), DataSeriesImportProvider.class, new Properties());

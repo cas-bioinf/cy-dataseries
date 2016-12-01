@@ -26,7 +26,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.FormSpecs;
 import com.jgoodies.forms.layout.RowSpec;
 
-import cz.cas.mbu.cydataseries.internal.dataimport.ImportParameters;
+import cz.cas.mbu.cydataseries.internal.dataimport.DataSeriesImportParameters;
 import cz.cas.mbu.cydataseries.internal.dataimport.MatlabSyntaxNumberList;
 
 import javax.swing.event.ChangeListener;
@@ -41,24 +41,40 @@ import javax.swing.event.ChangeEvent;
  *
  */
 
-public class DataSeriesImportOptionsPanel extends JPanel implements TunableValidator{
+public class IndexImportOptionsPanel extends JPanel implements TunableValidator{
 	private List<ChangeListener> parametersChangedListeners;
 	
 	private JTextField textFieldIndexValues;
-	private final ButtonGroup buttonGroupTranspose = new ButtonGroup();
 	private final ButtonGroup buttonGroupIndexSource = new ButtonGroup();
 	private JRadioButton rdbtnIndexFromHeader;
-	private JRadioButton rdbtnColumnsAsIndex;
 	private JRadioButton rdbtnManualIndexValuesAdd;
-	private JCheckBox chckbxDataContainesNames;
-	private JRadioButton rdbtnRowsAsIndex;
 	private JRadioButton rdbtnManualIndexValuesOverride;
 	private JLabel lblManualIndex;
+
+	
+	private final DocumentListener documentchangeListener = new DocumentListener() {
+
+		@Override
+		public void insertUpdate(DocumentEvent e) {
+			fireChangeEvent();
+		}
+
+		@Override
+		public void removeUpdate(DocumentEvent e) {
+			fireChangeEvent();				
+		}
+
+		@Override
+		public void changedUpdate(DocumentEvent e) {
+			fireChangeEvent();
+		}
+		
+	};
 
 	/**
 	 * Create the panel.
 	 */
-	public DataSeriesImportOptionsPanel() {
+	public IndexImportOptionsPanel() {
 		setLayout(new FormLayout(new ColumnSpec[] {
 				FormSpecs.RELATED_GAP_COLSPEC,
 				FormSpecs.DEFAULT_COLSPEC,
@@ -73,95 +89,42 @@ public class DataSeriesImportOptionsPanel extends JPanel implements TunableValid
 				FormSpecs.DEFAULT_ROWSPEC,
 				FormSpecs.RELATED_GAP_ROWSPEC,
 				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
-				FormSpecs.RELATED_GAP_ROWSPEC,
-				FormSpecs.DEFAULT_ROWSPEC,
 				FormSpecs.RELATED_GAP_ROWSPEC,}));
-		
-		rdbtnColumnsAsIndex = new JRadioButton("Columns as indices");
-		rdbtnColumnsAsIndex.setSelected(true);
-		buttonGroupTranspose.add(rdbtnColumnsAsIndex);
-		add(rdbtnColumnsAsIndex, "2, 2");
-		
-		rdbtnRowsAsIndex = new JRadioButton("Rows as indices (transpose)");
-		rdbtnRowsAsIndex.setSelected(true);
-		buttonGroupTranspose.add(rdbtnRowsAsIndex);
-		add(rdbtnRowsAsIndex, "4, 2, 3, 1");
-		
-		JSeparator separator = new JSeparator();
-		add(separator, "2, 4, 3, 1");
 		
 		rdbtnIndexFromHeader = new JRadioButton("Index values from header");
 		rdbtnIndexFromHeader.setSelected(true);
 		rdbtnIndexFromHeader.addItemListener(e -> indexSourceChanged());
 		buttonGroupIndexSource.add(rdbtnIndexFromHeader);
-		add(rdbtnIndexFromHeader, "2, 6");
+		add(rdbtnIndexFromHeader, "2, 2");
+		rdbtnIndexFromHeader.addItemListener(this::radioButtonChanged);
 		
 		rdbtnManualIndexValuesAdd = new JRadioButton("Manual index values (add)");
 		rdbtnManualIndexValuesAdd.addItemListener(e -> indexSourceChanged());
-
-		buttonGroupIndexSource.add(rdbtnManualIndexValuesAdd);
-		add(rdbtnManualIndexValuesAdd, "4, 6");
+		
+				buttonGroupIndexSource.add(rdbtnManualIndexValuesAdd);
+				add(rdbtnManualIndexValuesAdd, "4, 2");
+				rdbtnManualIndexValuesAdd.addItemListener(this::radioButtonChanged);
 		
 		rdbtnManualIndexValuesOverride = new JRadioButton("Manual index values (override)");
 		rdbtnManualIndexValuesOverride.addItemListener(e -> indexSourceChanged());
 		buttonGroupIndexSource.add(rdbtnManualIndexValuesOverride);
-		add(rdbtnManualIndexValuesOverride, "6, 6");
+		add(rdbtnManualIndexValuesOverride, "6, 2");
 		
 		lblManualIndex = new JLabel("Manual index:");
-		add(lblManualIndex, "2, 8, right, default");
+		add(lblManualIndex, "2, 4, right, default");
 		
 		textFieldIndexValues = new JTextField();
 		textFieldIndexValues.setEnabled(false);
-		add(textFieldIndexValues, "4, 8, 3, 1, fill, default");
+		add(textFieldIndexValues, "4, 4, 3, 1, fill, default");
 		textFieldIndexValues.setColumns(10);
+		textFieldIndexValues.getDocument().addDocumentListener(documentchangeListener);
 		
 		JLabel lblCommaSeparatedSupports = new JLabel("<html>Comma separated, supports Matlab notation for numbers<br>\r\n(e.g.,\"1:3,4:0.5:6\" &lt;-&gt; \"1,2,3,4,4.5,5,5.5,6\")</html>");
 		lblCommaSeparatedSupports.setFont(new Font("Tahoma", Font.ITALIC, 11));
-		add(lblCommaSeparatedSupports, "4, 10, 3, 1");
-		
-		JSeparator separator_1 = new JSeparator();
-		add(separator_1, "2, 12, 5, 1");
-		
-		chckbxDataContainesNames = new JCheckBox("Data start with names for dependent variables");
-		chckbxDataContainesNames.setSelected(true);
-		add(chckbxDataContainesNames, "2, 14, 3, 1");
+		add(lblCommaSeparatedSupports, "4, 6, 3, 1");
 
 		parametersChangedListeners = new ArrayList<>();
-		
-		rdbtnColumnsAsIndex.addItemListener(this::radioButtonChanged);
-		rdbtnRowsAsIndex.addItemListener(this::radioButtonChanged);
-		rdbtnIndexFromHeader.addItemListener(this::radioButtonChanged);
-		rdbtnManualIndexValuesAdd.addItemListener(this::radioButtonChanged);
-		
-		chckbxDataContainesNames.addItemListener(evt -> fireChangeEvent());
-		
-		
-		DocumentListener documentchangeListener = new DocumentListener() {
-
-			@Override
-			public void insertUpdate(DocumentEvent e) {
-				fireChangeEvent();
-			}
-
-			@Override
-			public void removeUpdate(DocumentEvent e) {
-				fireChangeEvent();				
-			}
-
-			@Override
-			public void changedUpdate(DocumentEvent e) {
-				fireChangeEvent();
-			}
-			
-		};
-		textFieldIndexValues.getDocument().addDocumentListener(documentchangeListener);
-		
+				
 		indexSourceChanged();
 	}
 	
@@ -182,25 +145,19 @@ public class DataSeriesImportOptionsPanel extends JPanel implements TunableValid
 			fireChangeEvent();
 		}
 	}
-	
-	
-	public boolean isTransposeBeforeImport()
-	{
-		return getRdbtnRowsAsIndex().isSelected();
-	}
-	
-	public ImportParameters.IndexSource getIndexSource()
+		
+	public DataSeriesImportParameters.IndexSource getIndexSource()
 	{
 		if (rdbtnIndexFromHeader.isSelected()) {
-			return ImportParameters.IndexSource.Data;
+			return DataSeriesImportParameters.IndexSource.Data;
 		}
 		else if (rdbtnManualIndexValuesAdd.isSelected())
 		{
-			return ImportParameters.IndexSource.ManualAdd;
+			return DataSeriesImportParameters.IndexSource.ManualAdd;
 		}
 		else 
 		{
-			return ImportParameters.IndexSource.ManualOverride;
+			return DataSeriesImportParameters.IndexSource.ManualOverride;
 		}
 	}
 	
@@ -232,13 +189,7 @@ public class DataSeriesImportOptionsPanel extends JPanel implements TunableValid
 		catch(NumberFormatException ex) {
 			return Collections.EMPTY_LIST;
 		}
-	}
-
-	public boolean isImportRowNames()
-	{
-		return getChckbxDataContainesNames().isSelected();
-	}
-	
+	}	
 	
 	@Override
 	public ValidationState getValidationState(Appendable errMsg) {
@@ -261,7 +212,7 @@ public class DataSeriesImportOptionsPanel extends JPanel implements TunableValid
 	
 	protected void indexSourceChanged()
 	{
-		boolean manualEnabled = getIndexSource() != ImportParameters.IndexSource.Data;
+		boolean manualEnabled = getIndexSource() != DataSeriesImportParameters.IndexSource.Data;
 		Component [] manualComponents = new Component[] {textFieldIndexValues, lblManualIndex};
 		for(Component c: manualComponents)
 		{
@@ -272,17 +223,8 @@ public class DataSeriesImportOptionsPanel extends JPanel implements TunableValid
 	protected JRadioButton getRdbtnIndexFromHeader() {
 		return rdbtnIndexFromHeader;
 	}
-	protected JRadioButton getRdbtnColumnsAsIndex() {
-		return rdbtnColumnsAsIndex;
-	}
 	protected JTextField getTextFieldIndexValues() {
 		return textFieldIndexValues;
-	}
-	protected JCheckBox getChckbxDataContainesNames() {
-		return chckbxDataContainesNames;
-	}
-	protected JRadioButton getRdbtnRowsAsIndex() {
-		return rdbtnRowsAsIndex;
 	}
 
 }

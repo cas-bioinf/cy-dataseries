@@ -17,17 +17,20 @@ import com.jgoodies.forms.layout.RowSpec;
 
 import cz.cas.mbu.cydataseries.dataimport.PreImportResults;
 import cz.cas.mbu.cydataseries.internal.dataimport.ImportHelper;
-import cz.cas.mbu.cydataseries.internal.dataimport.ImportParameters;
-import javax.swing.JButton;
+import cz.cas.mbu.cydataseries.internal.dataimport.DataSeriesImportParameters;
+import cz.cas.mbu.cydataseries.internal.dataimport.FileFormatImportParameters;
 
-public class AllImportParametersPanel extends JPanel {
+import javax.swing.JButton;
+import javax.swing.SwingConstants;
+
+public class TabularImportParametersPanel extends JPanel {
 
 	private String rawPreviewData;
 	private boolean rawPreviewDataTruncated;
 	private File inputFile;
 	
 	private FileImportOptionsPanel fileImportOptionsPanel;
-	private DataSeriesImportOptionsPanel dataSeriesImportOptionsPanel;
+	private RowColumnsImportOptionsPanel rowColumnsImportOptionsPanel;
 	private ImportPreviewPanel importPreviewPanel;
 
 	private final SelectColumnsToImportPanel columnsToImportPanel;
@@ -37,12 +40,18 @@ public class AllImportParametersPanel extends JPanel {
 	private JButton btnSelectColumnsTo;
 	
 	private PreImportResults lastPreviewResults;
+	private IndexImportOptionsPanel indexImportOptionsPanel;
+	private JSeparator separator_1;
+	private JSeparator separator_2;
+	private JSeparator separator_3;
 	
 	/**
 	 * Create the panel.
 	 */
-	public AllImportParametersPanel() {
+	public TabularImportParametersPanel() {
 		setLayout(new FormLayout(new ColumnSpec[] {
+				FormSpecs.RELATED_GAP_COLSPEC,
+				FormSpecs.DEFAULT_COLSPEC,
 				FormSpecs.RELATED_GAP_COLSPEC,
 				FormSpecs.DEFAULT_COLSPEC,
 				FormSpecs.RELATED_GAP_COLSPEC,
@@ -53,7 +62,17 @@ public class AllImportParametersPanel extends JPanel {
 				FormSpecs.DEFAULT_COLSPEC,
 				FormSpecs.RELATED_GAP_COLSPEC,},
 			new RowSpec[] {
-				RowSpec.decode("default:grow"),
+				FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,
+				FormSpecs.RELATED_GAP_ROWSPEC,
+				FormSpecs.DEFAULT_ROWSPEC,
 				FormSpecs.RELATED_GAP_ROWSPEC,
 				FormSpecs.DEFAULT_ROWSPEC,
 				FormSpecs.RELATED_GAP_ROWSPEC,
@@ -62,23 +81,37 @@ public class AllImportParametersPanel extends JPanel {
 				RowSpec.decode("default:grow"),}));
 		
 		fileImportOptionsPanel = new FileImportOptionsPanel();
-		add(fileImportOptionsPanel, "2, 1, 1, 3, fill, fill");
+		add(fileImportOptionsPanel, "2, 1, 1, 9, fill, fill");
 		
-		dataSeriesImportOptionsPanel = new DataSeriesImportOptionsPanel();
-		add(dataSeriesImportOptionsPanel, "4, 1, 5, 1, fill, fill");
+		separator_2 = new JSeparator();
+		separator_2.setOrientation(SwingConstants.VERTICAL);
+		add(separator_2, "4, 1, 1, 10");
+		
+		rowColumnsImportOptionsPanel = new RowColumnsImportOptionsPanel();
+		add(rowColumnsImportOptionsPanel, "6, 1, 5, 1, fill, fill");
+		
+		separator_1 = new JSeparator();
+		add(separator_1, "6, 3, 5, 1");
+		
+		indexImportOptionsPanel = new IndexImportOptionsPanel();
+		add(indexImportOptionsPanel, "6, 5, 5, 1, fill, fill");
 		
 		btnSelectColumnsTo = new JButton("Select columns to import...");
 		btnSelectColumnsTo.addActionListener(evt -> showSelectColumnsToImport());
-		add(btnSelectColumnsTo, "8, 3");
+		
+		separator_3 = new JSeparator();
+		add(separator_3, "6, 7, 5, 1");
+		add(btnSelectColumnsTo, "10, 9");
 		
 		separator = new JSeparator();
-		add(separator, "2, 5, 7, 1");
+		add(separator, "2, 11, 9, 1");
 		
 		importPreviewPanel = new ImportPreviewPanel();
-		add(importPreviewPanel, "2, 7, 7, 1, fill, fill");
+		add(importPreviewPanel, "2, 13, 9, 5, fill, fill");
 		
 		fileImportOptionsPanel.addChangedListener(evt -> updatePreview());
-		dataSeriesImportOptionsPanel.addChangedListener(evt -> updatePreview());
+		rowColumnsImportOptionsPanel.addChangedListener(evt -> updatePreview());
+		indexImportOptionsPanel.addChangedListener(evt -> updatePreview());
 		
 		columnsToImportPanel = new SelectColumnsToImportPanel();
 	}
@@ -98,8 +131,10 @@ public class AllImportParametersPanel extends JPanel {
 	protected void updatePreview()
 	{
 		try {
-			lastPreviewResults = ImportHelper.preImport(new StringReader(rawPreviewData), getImportParameters(), false /*strict*/);
-			importPreviewPanel.updatePreview(lastPreviewResults, getImportParameters(), rawPreviewDataTruncated);
+			DataSeriesImportParameters dataSeriesImportParameters = getDataSeriesImportParameters();
+			FileFormatImportParameters fileFormatImportParamaters = getFileFormatImportParamaters();
+			lastPreviewResults = ImportHelper.preImport(new StringReader(rawPreviewData), fileFormatImportParamaters, dataSeriesImportParameters, false /*strict*/);
+			importPreviewPanel.updatePreview(lastPreviewResults, dataSeriesImportParameters, fileFormatImportParamaters.isTransposeBeforeImport(), rawPreviewDataTruncated);
 		}
 		catch (Exception ex)
 		{
@@ -121,17 +156,21 @@ public class AllImportParametersPanel extends JPanel {
 		}
 	}
 	
-	public ImportParameters getImportParameters()
+	public FileFormatImportParameters getFileFormatImportParamaters()
 	{
-		ImportParameters value = new ImportParameters();
-		value.setFile(inputFile);
-		value.setPreviewData(rawPreviewData);
+		FileFormatImportParameters value = new FileFormatImportParameters();
 		value.setSeparator(fileImportOptionsPanel.getSeparator());
 		value.setCommentCharacter(fileImportOptionsPanel.getCommentCharacter());
-		value.setTransposeBeforeImport(dataSeriesImportOptionsPanel.isTransposeBeforeImport());
-		value.setIndexSource(dataSeriesImportOptionsPanel.getIndexSource());
-		value.setManualIndexValues(dataSeriesImportOptionsPanel.getManualIndexValues());
-		value.setImportRowNames(dataSeriesImportOptionsPanel.isImportRowNames());
+		value.setTransposeBeforeImport(rowColumnsImportOptionsPanel.isTransposeBeforeImport());
+		return value;
+	}
+	
+	public DataSeriesImportParameters getDataSeriesImportParameters()
+	{
+		DataSeriesImportParameters value = new DataSeriesImportParameters();
+		value.setIndexSource(indexImportOptionsPanel.getIndexSource());
+		value.setManualIndexValues(indexImportOptionsPanel.getManualIndexValues());
+		value.setImportRowNames(rowColumnsImportOptionsPanel.isImportRowNames());
 		value.setImportAllColumns(columnsToImportPanel.isImportAllColumns());
 		value.setImportedColumnIndices(columnsToImportPanel.getImportedColumnIndices());		
 		

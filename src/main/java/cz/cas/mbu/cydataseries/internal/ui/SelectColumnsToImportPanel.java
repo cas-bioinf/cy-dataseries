@@ -8,6 +8,8 @@ import com.jgoodies.forms.layout.FormSpecs;
 import javax.swing.JCheckBox;
 import javax.swing.JTable;
 import javax.swing.ListModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.JLabel;
 import javax.swing.JSeparator;
 import javax.swing.JList;
@@ -30,6 +32,9 @@ public class SelectColumnsToImportPanel extends JPanel {
 	private final JButton btnUncheckAll;
 	private final JScrollPane scrollPane;
 	private final JLabel lblSelectColumnsTo; 
+	
+	private final List<ChangeListener> changeListeners;
+	
 	/**
 	 * Create the panel.
 	 */
@@ -80,8 +85,21 @@ public class SelectColumnsToImportPanel extends JPanel {
 		add(scrollPane, "2, 10, 3, 1, fill, fill");
 		
 		columnList = new CheckBoxList();
+		columnList.addItemListener(evt -> fireChangeEvent());
 		scrollPane.setViewportView(columnList);
 
+		changeListeners = new ArrayList<>();
+	}
+	
+	public void addChangeListener(ChangeListener listener)
+	{
+		changeListeners.add(listener);
+	}
+	
+	protected void fireChangeEvent()
+	{
+		final ChangeEvent evt = new ChangeEvent(this);
+		changeListeners.forEach(x -> x.stateChanged(evt));
 	}
 	
 	private void setAll(boolean selected)
@@ -92,6 +110,7 @@ public class SelectColumnsToImportPanel extends JPanel {
 		}
 		columnList.invalidate();
 		columnList.repaint();
+		fireChangeEvent();
 	}
 	
 	private void updateColumnSelectionEnable()
@@ -101,6 +120,7 @@ public class SelectColumnsToImportPanel extends JPanel {
 		{
 			c.setEnabled(!chckbxImportAllColumns.isSelected());
 		}
+		fireChangeEvent();
 	}
 	
 	public boolean isImportAllColumns(){
