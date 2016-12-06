@@ -63,7 +63,7 @@ public class SoftFile {
 		
 		@Override
 		public String toString() {
-			return getCaption();
+			return type.toString() + ": " + getCaption();
 		}
 		
 	}
