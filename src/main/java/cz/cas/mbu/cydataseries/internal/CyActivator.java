@@ -26,17 +26,15 @@ import cz.cas.mbu.cydataseries.internal.data.NamedDoubleDataSeriesStorageProvide
 import cz.cas.mbu.cydataseries.internal.data.TimeSeriesStorageProviderImpl;
 import cz.cas.mbu.cydataseries.internal.dataimport.DataSeriesImportManagerImpl;
 import cz.cas.mbu.cydataseries.internal.dataimport.ImportDataSeriesTaskFactory;
-import cz.cas.mbu.cydataseries.internal.dataimport.TabularFilesImportParametersGuiHandlerFactory;
+import cz.cas.mbu.cydataseries.internal.dataimport.ImportSoftFileTaskFactory;
 import cz.cas.mbu.cydataseries.internal.dataimport.NamedDoubleDataSeriesImportProviderImpl;
+import cz.cas.mbu.cydataseries.internal.dataimport.SoftFileImportParametersGUIHandlerFactory;
+import cz.cas.mbu.cydataseries.internal.dataimport.TabularFileImportParametersGUIHandlerFactory;
 import cz.cas.mbu.cydataseries.internal.dataimport.TimeSeriesImportProviderImpl;
 import cz.cas.mbu.cydataseries.internal.smoothing.SmoothingServiceImpl;
 import cz.cas.mbu.cydataseries.internal.tasks.ExportDataSeriesTaskFactory;
-import cz.cas.mbu.cydataseries.internal.tasks.ManageMappingsTask;
 import cz.cas.mbu.cydataseries.internal.tasks.ManageMappingsTaskFactory;
-import cz.cas.mbu.cydataseries.internal.tasks.MapColumnTask;
 import cz.cas.mbu.cydataseries.internal.tasks.MapColumnTaskFactory;
-import cz.cas.mbu.cydataseries.internal.tasks.NetworkSelectedParameterPassingTaskFactory;
-import cz.cas.mbu.cydataseries.internal.tasks.ParameterPassingTaskFactory;
 import cz.cas.mbu.cydataseries.internal.tasks.RemoveColumnMappingTaskFactory;
 import cz.cas.mbu.cydataseries.internal.tasks.RemoveDataSeriesTaskFactory;
 import cz.cas.mbu.cydataseries.internal.tasks.SmoothDataSeriesTaskFactory;
@@ -48,6 +46,23 @@ import cz.cas.mbu.cydataseries.internal.ui.DataSeriesVisualPanel;
 public class CyActivator extends AbstractCyActivator {
 
 	public static final String APP_NAME_FOR_STORAGE = CyActivator.class.getPackage().getName();
+
+	private void registerMenuItem(BundleContext bc, String title, TaskFactory taskFactory)
+	{
+		registerMenuItem(bc, "Apps.Data Series", title, taskFactory);
+	}
+	
+	private void registerMenuItem(BundleContext bc, String menu, String title, TaskFactory taskFactory)
+	{
+		Properties properties = new Properties();
+		properties.setProperty(ServiceProperties.IN_MENU_BAR, "true");
+		properties.setProperty(ServiceProperties.PREFERRED_MENU, menu);
+		properties.setProperty(ServiceProperties.TITLE, title);
+		
+		registerService(bc, taskFactory, TaskFactory.class, properties);		
+	}
+	
+	
 	
 	@Override
 	public void start(BundleContext bc) throws Exception {
@@ -71,7 +86,8 @@ public class CyActivator extends AbstractCyActivator {
 		SmoothingService smoothingService = new SmoothingServiceImpl(); 
 		registerService(bc, smoothingService, SmoothingService.class, new Properties());
 		
-		registerService(bc, new TabularFilesImportParametersGuiHandlerFactory(), GUITunableHandlerFactory.class, new Properties());
+		registerService(bc, new TabularFileImportParametersGUIHandlerFactory(), GUITunableHandlerFactory.class, new Properties());
+		registerService(bc, new SoftFileImportParametersGUIHandlerFactory(), GUITunableHandlerFactory.class, new Properties());
 		
 		registerService(bc, new TimeSeriesImportProviderImpl(), DataSeriesImportProvider.class, new Properties());
 		registerService(bc, new NamedDoubleDataSeriesImportProviderImpl(), DataSeriesImportProvider.class, new Properties());
@@ -83,58 +99,26 @@ public class CyActivator extends AbstractCyActivator {
 		DataSeriesImportManager importManager = new DataSeriesImportManagerImpl(bc);
 		registerService(bc, importManager, DataSeriesImportManager.class, new Properties());
 		
-		Properties baseMenuProperties = new Properties();
-		baseMenuProperties.setProperty(ServiceProperties.PREFERRED_MENU, "Apps.Data Series");
-		baseMenuProperties.setProperty(ServiceProperties.IN_MENU_BAR, "true");
 		
-		Properties importProperties = new Properties();
-		importProperties.putAll(baseMenuProperties);
-		importProperties.setProperty(ServiceProperties.TITLE, "Import Data Series");
-		ImportDataSeriesTaskFactory importTaskFactory = new ImportDataSeriesTaskFactory(dataSeriesManager, importManager);
-		registerService(bc, importTaskFactory, TaskFactory.class, importProperties);
+		ImportDataSeriesTaskFactory importTaskFactory = new ImportDataSeriesTaskFactory(serviceRegistrar);
+		registerMenuItem(bc, "File.Import.Data Series", "From tabular file...", importTaskFactory);
+		registerMenuItem(bc, "File.Import.Data Series", "From SOFT file...", new ImportSoftFileTaskFactory(serviceRegistrar));
 
-		Properties exportProperties = new Properties();
-		exportProperties.putAll(baseMenuProperties);
-		exportProperties.setProperty(ServiceProperties.TITLE, "Export Data Series");
-		TaskFactory exportTaskFactory = new ExportDataSeriesTaskFactory(dataSeriesManager, storageManager);
-		registerService(bc, exportTaskFactory, TaskFactory.class, exportProperties);
+		registerMenuItem(bc, "File.Export", "Data Series...", new ExportDataSeriesTaskFactory(dataSeriesManager, storageManager));
 
-		Properties removeDataSeriesProperties = new Properties();
-		removeDataSeriesProperties.putAll(baseMenuProperties);
-		removeDataSeriesProperties.setProperty(ServiceProperties.TITLE, "Remove Data Series");
-		//removeDataSeriesProperties.setProperty("insertSeparatorAfter", Boolean.toString(true));
-		TaskFactory removeDataSeriesTaskFactory = new RemoveDataSeriesTaskFactory(dataSeriesManager);
-		registerService(bc, removeDataSeriesTaskFactory, TaskFactory.class, removeDataSeriesProperties);
+		registerMenuItem(bc, "Remove Data Series", new RemoveDataSeriesTaskFactory(dataSeriesManager));
 
-		TaskFactory mapColumnTaskFactory = new MapColumnTaskFactory(serviceRegistrar);
-		Properties mapProperties = new Properties();
-		mapProperties.putAll(baseMenuProperties);
-		mapProperties.setProperty(ServiceProperties.TITLE, "Map Column to Series");
-		registerService(bc, mapColumnTaskFactory, TaskFactory.class, mapProperties);
+		MapColumnTaskFactory mapColumnTaskFactory = new MapColumnTaskFactory(serviceRegistrar);
+		registerMenuItem(bc, "Map Column to Series", mapColumnTaskFactory);
 
-		TaskFactory removeMappingTaskFactory = new RemoveColumnMappingTaskFactory(mappingManager);
-		Properties removeMappingProperties = new Properties();
-		removeMappingProperties.putAll(baseMenuProperties);
-		removeMappingProperties.setProperty(ServiceProperties.TITLE, "Remove Column Mapping");
-		registerService(bc, removeMappingTaskFactory, TaskFactory.class, removeMappingProperties);
+		registerMenuItem(bc, "Remove Column Mapping", new RemoveColumnMappingTaskFactory(mappingManager));
 
-		ManageMappingsTaskFactory manageMappingTaskFactory = new ManageMappingsTaskFactory(serviceRegistrar);
-		Properties manageMappingProperties = new Properties();
-		manageMappingProperties.putAll(baseMenuProperties);
-		manageMappingProperties.setProperty(ServiceProperties.TITLE, "Manage Column Mappings");
-		registerService(bc, manageMappingTaskFactory, TaskFactory.class, manageMappingProperties);
-		
-		TaskFactory smoothTaskFactory = new SmoothDataSeriesTaskFactory(serviceRegistrar);
-		Properties smoothProperties = new Properties();
-		smoothProperties.putAll(baseMenuProperties);
-		smoothProperties.setProperty(ServiceProperties.TITLE, "Smooth data series");
-		registerService(bc, smoothTaskFactory, TaskFactory.class, smoothProperties);
-		
-		TaskFactory smoothInteractiveTaskFactory = new SmoothInteractiveShowUITaskFactory(serviceRegistrar);
-		Properties smoothInteractiveProperties = new Properties();
-		smoothInteractiveProperties.putAll(baseMenuProperties);
-		smoothInteractiveProperties.setProperty(ServiceProperties.TITLE, "Interactive smoothing");
-		registerService(bc, smoothInteractiveTaskFactory, TaskFactory.class, smoothInteractiveProperties);
+		registerMenuItem(bc, "Manage Column Mappings", new ManageMappingsTaskFactory(serviceRegistrar));
+
+		registerMenuItem(bc, "Smooth data series", new SmoothDataSeriesTaskFactory(serviceRegistrar));
+
+		SmoothInteractiveShowUITaskFactory smoothInteractiveTaskFactory = new SmoothInteractiveShowUITaskFactory(serviceRegistrar);
+		registerMenuItem(bc, "Interactive smoothing", smoothInteractiveTaskFactory);
 		
 		/*
 		Properties modifyProperties = new Properties(baseMenuProperties);

@@ -16,38 +16,21 @@ import cz.cas.mbu.cydataseries.dataimport.PreImportResults;
  * Helper functions for import.
  */
 public class ImportHelper {
-	
-	public static PreImportResults preImportFromArray(List<List<String>> records, DataSeriesImportParameters params, boolean strict) {
-		if(records.isEmpty()) {
-			return new PreImportResults(Collections.EMPTY_LIST, Collections.EMPTY_LIST, new String[][]{}, Collections.EMPTY_LIST);
-		}
-				
+
+	public static PreImportResults preImportFromArrayAndIndex(List<String> rawIndex, List<List<String>> records, DataSeriesImportParameters params, boolean strict) {
 		List<String> index;
 		List<String> rowNames;
 		String[][] cellData;
-		int dataStartIndex;
-		List<String> firstRow = records.get(0);
-		
-		List<String> rawIndex = new ArrayList<>(firstRow.size());
-				
-		for(int column = 0; column < firstRow.size(); column++)
-		{
-			rawIndex.add(firstRow.get(column));
-		}
 		
 		switch(params.getIndexSource())
 		{
 			case ManualAdd :
 				index = params.getManualIndexValues();
-				dataStartIndex = 0;
 				break;
 			case ManualOverride :
 				index = params.getManualIndexValues();
-				dataStartIndex = 1;
 				break;
-			case Data :
-				dataStartIndex = 1;
-				
+			case Data :			
 				int indexStart;		
 				if(params.isImportRowNames()) {
 					//skip the first column dedicated to row names
@@ -66,9 +49,9 @@ public class ImportHelper {
 					for(int column = indexStart; column < params.getImportedColumnIndices().size(); column++)
 					{
 						int columnIndex = params.getImportedColumnIndices().get(column);
-						if(columnIndex < firstRow.size())
+						if(columnIndex < rawIndex.size())
 						{
-							index.add(firstRow.get(columnIndex));													
+							index.add(rawIndex.get(columnIndex));													
 						}
 					}					
 				}		
@@ -77,11 +60,11 @@ public class ImportHelper {
 				throw new IllegalStateException("Unrecognized index source: " + params.getIndexSource());
 		}
 					
-		rowNames = new ArrayList<>(records.size() - dataStartIndex);
+		rowNames = new ArrayList<>(records.size());
 		
 		int maxColumns = 0;
 		if(params.isImportAllColumns()) {
-			for(int row = dataStartIndex; row < records.size(); row++) {
+			for(int row = 0; row < records.size(); row++) {
 				int numColumns = records.get(row).size();
 				if(params.isImportRowNames()) {
 					numColumns -= 1; //skip the column for row names
@@ -105,23 +88,23 @@ public class ImportHelper {
 			}
 		}
 		
+		maxColumns = Math.max(maxColumns, 0); //ensure non-negative
 		
-		
-		cellData = new String[records.size() - dataStartIndex][maxColumns];
+		cellData = new String[records.size()][maxColumns];
 
-		for(int row = dataStartIndex; row < records.size(); row++)
+		for(int row = 0; row < records.size(); row++)
 		{
 			List<String> currentRecord = records.get(row);
 			boolean rowNameImported = false;
 			int firstColumn = 0;
-			if(params.isImportRowNames() && currentRecord.size() > 0)
+			if(params.isImportRowNames() && !currentRecord.isEmpty())
 			{
 				if(params.isImportAllColumns())
 				{
 					rowNames.add(currentRecord.get(0));
 					rowNameImported = true;
 				}
-				else if (params.getImportedColumnIndices().get(0) < currentRecord.size())
+				else if (!params.getImportedColumnIndices().isEmpty() && params.getImportedColumnIndices().get(0) < currentRecord.size())
 				{
 					rowNames.add(currentRecord.get(params.getImportedColumnIndices().get(0)));
 					rowNameImported = true;
@@ -131,14 +114,14 @@ public class ImportHelper {
 			
 			if(!rowNameImported)
 			{
-				rowNames.add("Row" + Integer.toString(row - dataStartIndex + 1));
+				rowNames.add("Row" + Integer.toString(row + 1));
 			}
 					
 			if(params.isImportAllColumns())
 			{
 				for(int column = firstColumn; column < currentRecord.size(); column ++)
 				{
-					cellData[row - dataStartIndex][column - firstColumn] = currentRecord.get(column);
+					cellData[row][column - firstColumn] = currentRecord.get(column);
 				}
 			}
 			else
@@ -147,13 +130,41 @@ public class ImportHelper {
 				{
 					int columnIndex = params.getImportedColumnIndices().get(column);
 					if(columnIndex < currentRecord.size())
-					cellData[row - dataStartIndex][column - firstColumn] = currentRecord.get(columnIndex);
+					cellData[row][column - firstColumn] = currentRecord.get(columnIndex);
 				}
 				
 			}
 		}		
 		
-		return new PreImportResults(rowNames, index, cellData, rawIndex);		
+		return new PreImportResults(rowNames, index, cellData, rawIndex);			
+	}
+
+	
+	public static PreImportResults preImportFromArray(List<List<String>> records, DataSeriesImportParameters params, boolean strict) {
+		if(records.isEmpty()) {
+			return new PreImportResults(Collections.EMPTY_LIST, Collections.EMPTY_LIST, new String[][]{}, Collections.EMPTY_LIST);
+		}
+				
+		List<String> rawIndex = records.get(0);
+			
+		List<List<String>> dataRecords;
+		
+		switch(params.getIndexSource())
+		{
+			case ManualAdd :
+				dataRecords = records;
+				break;
+			case ManualOverride :
+				dataRecords = records.subList(1, records.size());
+				break;
+			case Data :
+				dataRecords = records.subList(1, records.size());
+				break;
+			default:
+				throw new IllegalStateException("Unrecognized index source: " + params.getIndexSource());
+		}		
+		
+		return preImportFromArrayAndIndex(rawIndex, dataRecords, params, strict);
 	}
 	
 		

@@ -6,7 +6,7 @@ import java.lang.reflect.Method;
 import org.cytoscape.work.Tunable;
 import org.cytoscape.work.swing.GUITunableHandlerFactory;
 
-public class TabularFilesImportParametersGuiHandlerFactory implements GUITunableHandlerFactory<TabularFileImportParametersGUIHandler> {
+public class TabularFileImportParametersGUIHandlerFactory implements GUITunableHandlerFactory<TabularFileImportParametersGUIHandler> {
 
 		@Override
 		public TabularFileImportParametersGUIHandler createTunableHandler(Field field, Object instance, Tunable t) {

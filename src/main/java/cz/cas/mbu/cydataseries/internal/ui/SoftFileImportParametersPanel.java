@@ -1,6 +1,7 @@
 package cz.cas.mbu.cydataseries.internal.ui;
 
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JPanel;
@@ -16,12 +17,16 @@ import com.jgoodies.forms.layout.RowSpec;
 import cz.cas.mbu.cydataseries.dataimport.PreImportResults;
 import cz.cas.mbu.cydataseries.internal.dataimport.DataSeriesImportParameters;
 import cz.cas.mbu.cydataseries.internal.dataimport.ImportHelper;
+import cz.cas.mbu.cydataseries.internal.dataimport.SoftFile.SoftTable;
+import cz.cas.mbu.cydataseries.internal.dataimport.SoftFileImportParameters;
 
 public class SoftFileImportParametersPanel extends JPanel {
 
 	private final IndexImportOptionsPanel indexImportOptionsPanel;
 	private final SelectColumnsToImportPanel columnsToImportPanel;
 	private final ImportPreviewPanel previewPanel;
+	
+	private SoftTable sourceTable;
 	
 	private List<List<String>> rawTableData;
 	private PreImportResults lastPreviewResults;
@@ -58,6 +63,16 @@ public class SoftFileImportParametersPanel extends JPanel {
 
 	}
 	
+	public void setData(SoftTable table)
+	{
+		this.sourceTable = table;
+		rawTableData = new ArrayList<>();
+		rawTableData.add(table.getColumnNames());
+		rawTableData.addAll(table.getContents());
+		columnsToImportPanel.setAvailableColumns(table.getColumnNames(), table.getColumnDescriptions());
+		updatePreview();
+	}
+	
 	protected void updatePreview()
 	{
 		try {
@@ -72,7 +87,6 @@ public class SoftFileImportParametersPanel extends JPanel {
 		}
 	}
 	
-
 	public DataSeriesImportParameters getDataSeriesImportParameters()
 	{
 		DataSeriesImportParameters value = new DataSeriesImportParameters();
@@ -81,6 +95,15 @@ public class SoftFileImportParametersPanel extends JPanel {
 		value.setImportRowNames(true);
 		value.setImportAllColumns(columnsToImportPanel.isImportAllColumns());
 		value.setImportedColumnIndices(columnsToImportPanel.getImportedColumnIndices());		
+		return value;
+	}
+	
+
+	public SoftFileImportParameters getSofFileImportParameters()
+	{
+		SoftFileImportParameters value = new SoftFileImportParameters();
+		value.setDataSeriesImportParameters(getDataSeriesImportParameters());
+		value.setSelectedTable(sourceTable);
 		return value;
 	}
 }

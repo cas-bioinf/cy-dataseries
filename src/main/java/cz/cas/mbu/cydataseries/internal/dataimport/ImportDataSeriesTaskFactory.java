@@ -1,5 +1,6 @@
 package cz.cas.mbu.cydataseries.internal.dataimport;
 
+import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.AbstractTaskFactory;
 import org.cytoscape.work.TaskIterator;
 
@@ -10,17 +11,15 @@ import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportManager;
 
 public class ImportDataSeriesTaskFactory extends AbstractTaskFactory {
 
-	private final DataSeriesManager dataSeriesManager;
-	private final DataSeriesImportManager importManager;
+	private final CyServiceRegistrar registrar;
 
-	public ImportDataSeriesTaskFactory(DataSeriesManager dataSeriesManager, DataSeriesImportManager importManager) {
+	public ImportDataSeriesTaskFactory(CyServiceRegistrar registrar) {
 		super();
-		this.dataSeriesManager = dataSeriesManager;
-		this.importManager = importManager;
+		this.registrar = registrar;
 	}
 
 	public TaskIterator createTaskIterator(Class<? extends DataSeries<?, ?>> preferredClass) {
-		ImportDataSeriesTask importTask = new ImportDataSeriesTask(dataSeriesManager, importManager);
+		ImportDataSeriesTask importTask = new ImportDataSeriesTask(registrar);
 		if(preferredClass != null)
 		{
 			importTask.setPreferredProvider(preferredClass);			

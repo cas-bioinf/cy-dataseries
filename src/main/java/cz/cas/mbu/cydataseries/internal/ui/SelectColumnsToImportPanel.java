@@ -35,6 +35,8 @@ public class SelectColumnsToImportPanel extends JPanel {
 	
 	private final List<ChangeListener> changeListeners;
 	
+	private static final int MAX_LABEL_CHARS = 60;
+	
 	/**
 	 * Create the panel.
 	 */
@@ -89,6 +91,8 @@ public class SelectColumnsToImportPanel extends JPanel {
 		scrollPane.setViewportView(columnList);
 
 		changeListeners = new ArrayList<>();
+		
+		updateColumnSelectionEnable();
 	}
 	
 	public void addChangeListener(ChangeListener listener)
@@ -155,22 +159,36 @@ public class SelectColumnsToImportPanel extends JPanel {
 			String label;
 			if(columnDescriptions != null)
 			{
-				label = Integer.toString(i) + ": \"" + columnNames.get(i) + "\" (" + columnDescriptions + ")";
+				label = Integer.toString(i) + ": \"" + columnNames.get(i) + "\" (" + columnDescriptions.get(i) + ")";
 			}
 			else
 			{
 				label = Integer.toString(i) + ": \"" + columnNames.get(i) + "\"";
 			}
+			
+			if(label.length() > MAX_LABEL_CHARS )
+			{
+				label = label.substring(0, MAX_LABEL_CHARS - 10) + " ... " + label.substring(label.length() - 10);
+			}
 			newModel.addElement(new CheckBoxList.Item(label));
 		}
 		
-		previouslySelected.forEach(column -> {
-			if(column < newModel.size())
+		if(isImportAllColumns())
+		{
+			for(int i = 0; i < newModel.size(); i++)
 			{
-				newModel.get(column).setSelected(true);
+				newModel.get(i).setSelected(true);
 			}
-		});
-		
+		}
+		else
+		{
+			previouslySelected.forEach(column -> {
+				if(column < newModel.size())
+				{
+					newModel.get(column).setSelected(true);
+				}
+			});
+		}
 		columnList.setModel(newModel);
 	}
 }

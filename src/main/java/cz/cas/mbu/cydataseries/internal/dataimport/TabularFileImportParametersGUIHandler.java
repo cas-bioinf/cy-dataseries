@@ -66,7 +66,7 @@ public class TabularFileImportParametersGUIHandler extends AbstractGUITunableHan
 		if(dataSeriesImportOptionsPanel != null)
 		{
 			try {
-				setValue(dataSeriesImportOptionsPanel.getDataSeriesImportParameters());
+				setValue(dataSeriesImportOptionsPanel.getTabularFileImportParameters());
 			} catch(IllegalAccessException | InvocationTargetException ex)
 			{
 				throw new RuntimeException(ex);

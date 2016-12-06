@@ -1,7 +1,9 @@
 package cz.cas.mbu.cydataseries.internal.dataimport;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 /**
@@ -10,23 +12,42 @@ import java.util.stream.Stream;
  *
  */
 public class SoftFile {
+	public enum EntityType {Platform,Series,Sample,Dataset}; 
+	
 	public static class SoftTable 
 	{
-		private String caption;
-		private List<String> columnNames;
-		private List<String> columnDescriptions;
-		private List<List<String>> contents;
+		private final EntityType type;
+		private final String caption;
+		private final List<String> columnNames;
+		private final List<String> columnDescriptions;
+		private final List<List<String>> contents;
 		
-				
-		public SoftTable(String caption, List<String> columnNames, List<String> columnDescriptions,
+		public SoftTable(EntityType type, String caption, List<String> columnNames, List<String> columnDescriptions,
 				List<List<String>> contents) {
 			super();
+			this.type = type;
 			this.caption = caption;
 			this.columnNames = columnNames;
 			this.columnDescriptions = columnDescriptions;
 			this.contents = contents;
 		}
 		
+		public SoftTable(EntityType type, String caption) {
+			super();
+			this.type = type;
+			this.caption = caption;
+			this.columnNames = new ArrayList<>();
+			this.columnDescriptions = new ArrayList<>();
+			this.contents = new ArrayList<>();
+		}
+		
+		
+		public EntityType getType() {
+			return type;
+		}
+
+
+
 		public String getCaption() {
 			return caption;
 		}
@@ -40,6 +61,10 @@ public class SoftFile {
 			return contents;
 		}
 		
+		@Override
+		public String toString() {
+			return getCaption();
+		}
 		
 	}
 	
@@ -54,13 +79,5 @@ public class SoftFile {
 		return tables;
 	}
 	
-	public static SoftFile fromLines(Stream<String> lines)
-	{
-		 
-		for(Iterator<String> it = lines.iterator(); it.hasNext(); it.next())
-		{
-			String line = it.next();
-		}
-		return new SoftFile(null);
-	}
+	
 }

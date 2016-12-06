@@ -34,6 +34,10 @@ public class PreImportResults {
 		return originalIndexValues;
 	}
 
+	/**
+	 * Checks that the pre-import data are OK.
+	 * @throws DataSeriesImportException when the lengths of row names and/or index do not match the cell data.
+	 */
 	public void checkConsistentcy() {
 		if (rowNames.size() != cellData.length) {
 			throw new DataSeriesImportException("The size of row names (" + rowNames.size()

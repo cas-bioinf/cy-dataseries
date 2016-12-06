@@ -17,6 +17,7 @@ import com.jgoodies.forms.layout.RowSpec;
 
 import cz.cas.mbu.cydataseries.dataimport.PreImportResults;
 import cz.cas.mbu.cydataseries.internal.dataimport.ImportHelper;
+import cz.cas.mbu.cydataseries.internal.dataimport.TabularFileImportParameters;
 import cz.cas.mbu.cydataseries.internal.dataimport.DataSeriesImportParameters;
 import cz.cas.mbu.cydataseries.internal.dataimport.FileFormatImportParameters;
 
@@ -177,4 +178,10 @@ public class TabularImportParametersPanel extends JPanel {
 		return value;
 	}
 
+	public TabularFileImportParameters getTabularFileImportParameters()
+	{
+		TabularFileImportParameters value = new TabularFileImportParameters(getFileFormatImportParamaters(), getDataSeriesImportParameters());
+		value.setFile(inputFile);
+		return value;
+	}
 }
