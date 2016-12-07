@@ -11,6 +11,7 @@ import org.apache.commons.csv.CSVParser;
 
 import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportException;
 import cz.cas.mbu.cydataseries.dataimport.PreImportResults;
+import cz.cas.mbu.cydataseries.internal.dataimport.DataSeriesImportParameters.IndexSource;
 
 /**
  * Helper functions for import.
@@ -74,8 +75,7 @@ public class ImportHelper {
 					throw new DataSeriesImportException("Row " + row + " has more columns (" + numColumns + ") than there are index values (" + index.size() + ")"); 
 				}
 				maxColumns = Math.max(maxColumns, numColumns);
-			}
-			maxColumns = Math.max(maxColumns, index.size());
+			}			
 		}
 		else
 		{
@@ -86,6 +86,12 @@ public class ImportHelper {
 			{
 				maxColumns = params.getImportedColumnIndices().size();				
 			}
+		}
+		
+		//Do not extend the table for manual index values (especially to avoid OutOfMemoryErrors on user inputting a lot of columns)
+		if(params.getIndexSource() == IndexSource.Data) 
+		{
+			maxColumns = Math.max(maxColumns, index.size());
 		}
 		
 		maxColumns = Math.max(maxColumns, 0); //ensure non-negative

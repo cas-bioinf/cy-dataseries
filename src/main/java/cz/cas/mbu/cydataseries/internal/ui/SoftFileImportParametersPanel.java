@@ -28,7 +28,6 @@ public class SoftFileImportParametersPanel extends JPanel {
 	
 	private SoftTable sourceTable;
 	
-	private List<List<String>> rawTableData;
 	private PreImportResults lastPreviewResults;
 	
 	private final Logger userLogger = Logger.getLogger(CyUserLog.NAME); 
@@ -63,12 +62,19 @@ public class SoftFileImportParametersPanel extends JPanel {
 
 	}
 	
+	/**
+	 * Clears the (possibly larger) data associated with this panel. Necessary until a fix for
+	 * a memory leak in Cytoscape is introduced.
+	 */
+	public void clearData()
+	{
+		sourceTable = null;
+		lastPreviewResults = null;
+	}
+	
 	public void setData(SoftTable table)
 	{
 		this.sourceTable = table;
-		rawTableData = new ArrayList<>();
-		rawTableData.add(table.getColumnNames());
-		rawTableData.addAll(table.getContents());
 		columnsToImportPanel.setAvailableColumns(table.getColumnNames(), table.getColumnDescriptions());
 		updatePreview();
 	}
@@ -77,7 +83,7 @@ public class SoftFileImportParametersPanel extends JPanel {
 	{
 		try {
 			DataSeriesImportParameters dataSeriesImportParameters = getDataSeriesImportParameters();
-			lastPreviewResults = ImportHelper.preImportFromArray(rawTableData, dataSeriesImportParameters, false /*strict*/);
+			lastPreviewResults = ImportHelper.preImportFromArrayAndIndex(sourceTable.getColumnNames(), sourceTable.getContents(), dataSeriesImportParameters, false /*strict*/);
 			previewPanel.updatePreview(lastPreviewResults, dataSeriesImportParameters, false, false);
 		}
 		catch (Exception ex)
@@ -91,7 +97,8 @@ public class SoftFileImportParametersPanel extends JPanel {
 	{
 		DataSeriesImportParameters value = new DataSeriesImportParameters();
 		value.setIndexSource(indexImportOptionsPanel.getIndexSource());
-		value.setManualIndexValues(indexImportOptionsPanel.getManualIndexValues());
+		List<String> manualIndexValues = indexImportOptionsPanel.getManualIndexValues();
+		value.setManualIndexValues(manualIndexValues);
 		value.setImportRowNames(true);
 		value.setImportAllColumns(columnsToImportPanel.isImportAllColumns());
 		value.setImportedColumnIndices(columnsToImportPanel.getImportedColumnIndices());		

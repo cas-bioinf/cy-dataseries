@@ -71,6 +71,7 @@ public class TabularFileImportParametersGUIHandler extends AbstractGUITunableHan
 			{
 				throw new RuntimeException(ex);
 			}
+			dataSeriesImportOptionsPanel = null; //Make sure the memory is up for GC
 		}
 	}
 }

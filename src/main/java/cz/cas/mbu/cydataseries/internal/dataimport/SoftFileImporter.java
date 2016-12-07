@@ -26,11 +26,11 @@ public class SoftFileImporter {
 	private State state = State.NoEntity;
 	private EntityType currentEntityType = null;
 	private String currentID = null;
-	private String currentCaption = null;
+	private String currentTitle = null;
 	private Map<String, String> currentColumnDescriptions = null;
 
 	
-	private SoftTable currentDatasetTable = null;
+	private SoftTable currentDirectlyImportedTable = null;
 
 	private Map<String, SoftTable> seriesTables = new HashMap<>(); // indexed by series ID
 	private Map<String, Map<String, Integer>> seriesDependentVariableIndicesMaps = new HashMap<>();
@@ -58,8 +58,9 @@ public class SoftFileImporter {
 		return new SoftFile(processedTables);
 	}
 
-	private void finalizeAll()
+	private void finalizeAll()	
 	{
+		//TODO Combine series tables with platform tables
 		processedTables.addAll(seriesTables.values());
 	}
 	
@@ -114,10 +115,10 @@ public class SoftFileImporter {
 		List<String> valuesList = Arrays.asList(values);
 		if(importTableDirectly(currentEntityType))
 		{
-			currentDatasetTable.getColumnNames().addAll(valuesList);
-			currentDatasetTable.getColumnNames().forEach(column ->
+			currentDirectlyImportedTable.getColumnNames().addAll(valuesList);
+			currentDirectlyImportedTable.getColumnNames().forEach(column ->
 			{
-				currentDatasetTable.getColumnDescriptions().add(currentColumnDescriptions.get(column));
+				currentDirectlyImportedTable.getColumnDescriptions().add(currentColumnDescriptions.get(column));
 			});
 		}
 		else if(currentEntityType == EntityType.Sample && currentSampleSeriesID != null){
@@ -149,7 +150,7 @@ public class SoftFileImporter {
 			String[] values = line.split("\t");
 			if(importTableDirectly(currentEntityType))
 			{
-				currentDatasetTable.getContents().add(Arrays.asList(values));
+				currentDirectlyImportedTable.getContents().add(Arrays.asList(values));
 			}
 			else if(currentEntityType == EntityType.Sample && currentSampleSeriesID != null){
 				String id = values[currentSampleIDColumnIndex];
@@ -208,7 +209,6 @@ public class SoftFileImporter {
 			{
 				state = State.EntityAttributes;
 				currentID = typeAndId.getValue();
-				currentCaption = typeAndId.getValue(); //seed the caption with ID, more info will be added, if encountered
 				currentColumnDescriptions = new HashMap<>();
 			}
 			else
@@ -223,7 +223,12 @@ public class SoftFileImporter {
 				state = State.EntityTableHeader;
 				if(importTableDirectly(currentEntityType))
 				{
-					currentDatasetTable = new SoftTable(EntityType.Dataset, currentCaption);
+					String caption = currentID;
+					if (currentTitle != null)
+					{
+						caption += " (" + currentTitle + ")";
+					}
+					currentDirectlyImportedTable = new SoftTable(currentEntityType, caption);
 				}
 				else if(currentEntityType == EntityType.Sample)				
 				{
@@ -239,9 +244,9 @@ public class SoftFileImporter {
 			}
 			else {
 				NameValuePair nameValue = processNameValuePair(line);
-				if (nameValue.getName().endsWith("_title") || (nameValue.getName().endsWith("description")))
+				if (nameValue.getName().endsWith("_title"))
 				{
-					currentCaption = currentCaption + " (" + nameValue.getValue() + ")"; 
+					currentTitle = nameValue.getValue(); 
 				}
 				else if (currentEntityType == EntityType.Sample && nameValue.getName().equals("Sample_series_id"))
 				{
@@ -293,17 +298,17 @@ public class SoftFileImporter {
 	
 	protected void finalizeCurrentEntity()
 	{
-		if(importTableDirectly(currentEntityType) && currentDatasetTable != null)
+		if(importTableDirectly(currentEntityType) && currentDirectlyImportedTable != null)
 		{
-			processedTables.add(currentDatasetTable);
-			directlyImportedTablesById.put(currentID, currentDatasetTable);
+			processedTables.add(currentDirectlyImportedTable);
+			directlyImportedTablesById.put(currentID, currentDirectlyImportedTable);
 		}
 		
 		currentEntityType = null;
 		currentID = null;
-		currentCaption = null;
+		currentTitle = null;
 		currentColumnDescriptions = null;
-		currentDatasetTable = null;
+		currentDirectlyImportedTable = null;
 		currentSampleSeriesID = null;
 		currentSampleTitle = null;
 		state = State.NoEntity;
