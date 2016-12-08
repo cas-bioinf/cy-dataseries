@@ -101,7 +101,7 @@ public class CyActivator extends AbstractCyActivator {
 		
 		
 		ImportDataSeriesTaskFactory importTaskFactory = new ImportDataSeriesTaskFactory(serviceRegistrar);
-		registerMenuItem(bc, "File.Import.Data Series", "From tabular file...", importTaskFactory);
+		registerMenuItem(bc, "File.Import.Data Series", "From tabular file (.csv,.tsv, etc.) ...", importTaskFactory);
 		registerMenuItem(bc, "File.Import.Data Series", "From SOFT file...", new ImportSoftFileTaskFactory(serviceRegistrar));
 
 		registerMenuItem(bc, "File.Export", "Data Series...", new ExportDataSeriesTaskFactory(dataSeriesManager, storageManager));

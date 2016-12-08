@@ -30,7 +30,7 @@ public class TimeSeriesImportProviderImpl implements DataSeriesImportProvider{
 				indexArray[index] = Double.parseDouble(rawValue);
 			} catch (NumberFormatException ex)
 			{
-				throw new DataSeriesImportException("Could not parse index (time point) no. " + index + " with value '" + rawValue +"' as a number.", ex);
+				throw new DataSeriesImportException("Could not parse index (time point) no. " + index + " with value '" + rawValue +"' as a number.\nTime series requires all index values to be numbers.", ex);
 			}
 		}
 					
@@ -39,8 +39,8 @@ public class TimeSeriesImportProviderImpl implements DataSeriesImportProvider{
 		{
 			for(int index = 0; index < dataArray[row].length; index++)
 			{
-				String rawValue = preImportResults.getCellData()[row][index];
-				if(rawValue == null)
+				String rawValue = preImportResults.getCellData()[row][index].trim();
+				if(rawValue == null || rawValue.equalsIgnoreCase("null") || rawValue.equalsIgnoreCase("NA"))
 				{
 					dataArray[row][index] = Double.NaN;
 				}

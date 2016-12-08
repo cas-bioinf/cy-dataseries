@@ -20,14 +20,14 @@ import cz.cas.mbu.cydataseries.internal.tasks.MapColumnTask;
 
 public abstract class AbstractImportTask extends AbstractValidatedTask {
 
-	@Tunable(description = "Name", required = true, gravity = 10)
+	@Tunable(description = "Name", required = true, gravity = 10, groups="Basic parameters")
 	public String name = "";
 
 
-	@Tunable(description = "Series Type", required = true, gravity = 20)
+	@Tunable(description = "Series Type", required = true, gravity = 20, groups="Basic parameters")
 	public ListSingleSelection<ProviderDisplay> provider;
 	
-	@Tunable(description = "Map the series to the current network after import", gravity = 30)
+	@Tunable(description = "Map the series to the current network after import", gravity = 30, groups="Basic parameters")
 	public boolean mapAfterImport = true;
 	
 	protected final DataSeriesManager dataSeriesManager;
@@ -97,6 +97,7 @@ public abstract class AbstractImportTask extends AbstractValidatedTask {
 		{			
 			MapColumnTask mapColumnTask = new MapColumnTask(registrar);
 			mapColumnTask.dataSeries.setSelectedValue(importedDS);
+			mapColumnTask.newColumnName = importedDS.getName();
 			insertTasksAfterCurrentTask(mapColumnTask);
 		}
 	}

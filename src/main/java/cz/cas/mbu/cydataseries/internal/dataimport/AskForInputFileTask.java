@@ -1,7 +1,9 @@
 package cz.cas.mbu.cydataseries.internal.dataimport;
 
 import java.io.File;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.cytoscape.work.ProvidesTitle;
 import org.cytoscape.work.TaskMonitor;
@@ -19,12 +21,26 @@ public class AskForInputFileTask extends AbstractValidatedTask {
 	
 	private final String title;
 	private final Consumer<File> fileTarget;
+	private final BiFunction<File, StringBuilder, ValidationState> validator;
 	
 	public AskForInputFileTask(String title, Consumer<File> fileTarget) {
 		super();
 		this.title = title;
 		this.fileTarget = fileTarget;
+		validator = null;
 	}
+	
+	
+
+	public AskForInputFileTask(String title, Consumer<File> fileTarget,
+			BiFunction<File, StringBuilder, ValidationState> validator) {
+		super();
+		this.title = title;
+		this.fileTarget = fileTarget;
+		this.validator = validator;
+	}
+
+
 
 	@ProvidesTitle
 	public String getTitle()
@@ -44,7 +60,14 @@ public class AskForInputFileTask extends AbstractValidatedTask {
 			errMsg.append("You have to select an input file");
 			return ValidationState.INVALID;
 		}
-		return ValidationState.OK;
+		if(validator != null)
+		{
+			return validator.apply(inputFile, errMsg);
+		}
+		else 
+		{
+			return ValidationState.OK;
+		}
 	}
 
 }

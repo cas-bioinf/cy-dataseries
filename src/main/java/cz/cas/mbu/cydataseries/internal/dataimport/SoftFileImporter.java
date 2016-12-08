@@ -46,7 +46,6 @@ public class SoftFileImporter {
 	private Map<String, SoftTable> directlyImportedTablesById = new HashMap<>();
 	
 	private String currentSampleSeriesID;
-	private String currentSampleTitle;
 	private int currentSampleIDColumnIndex;
 	private int currentSampleValueColumnIndex;
 	
@@ -115,6 +114,8 @@ public class SoftFileImporter {
 		//Combine series tables with corresponding platform tables
 		seriesTables.forEach(this::tryMergePlatformTable);
 		processedTables.addAll(seriesTables.values());
+		
+		processedTables.addAll(directlyImportedTablesById.values());
 	}
 	
 	public void parseLines(Stream<String> lines) {
@@ -136,16 +137,16 @@ public class SoftFileImporter {
 			processedTables = null;
 			throw new DataSeriesImportException("Out of memory while importing SOFT file");
 		}
-		catch(Throwable t)
+		catch(Throwable t) //working around issue http://code.cytoscape.org/redmine/issues/3623
 		{
 			logger.error("Error parsing SOFT file.", t);
-			if(t instanceof Exception) //working around issue http://code.cytoscape.org/redmine/issues/3623
+			if(t instanceof DataSeriesImportException) 
 			{
 				throw t;
 			}
 			else
 			{
-				throw new DataSeriesImportException(t.getMessage(), t);
+				throw new DataSeriesImportException("Error importing SOFT file:" + t.getMessage(), t);
 			}
 		}
 	}
@@ -204,9 +205,9 @@ public class SoftFileImporter {
 			currentTable.getColumnNames().add(currentID);
 			
 			StringBuilder columnDescription = new StringBuilder();
-			if(currentSampleTitle != null)
+			if(currentTitle != null)
 			{
-				columnDescription.append(currentSampleTitle);
+				columnDescription.append(currentTitle);
 			}
 			if(currentColumnDescriptions.containsKey(SAMPLE_VALUE_COLUMN_NAME))
 			{
@@ -233,26 +234,37 @@ public class SoftFileImporter {
 				currentDirectlyImportedTable.getContents().add(Arrays.asList(values));
 			}
 			else if(currentEntityType == EntityType.Sample && currentSampleSeriesID != null){
-				String id = values[currentSampleIDColumnIndex];
-				String value = values[currentSampleValueColumnIndex];
-				
-				SoftTable currentTable = seriesTables.get(currentSampleSeriesID);
-				Map<String,Integer> indexMap = seriesDependentVariableIndicesMaps.get(currentSampleSeriesID);
-				
-				if(!indexMap.containsKey(id))
+				if(currentSampleIDColumnIndex < values.length)
 				{
-					//Create a new row, the size of the number of columns 
-					indexMap.put(id, currentTable.getContents().size());
-					List<String> newRow = new ArrayList<>(currentTable.getColumnNames().size());
-					newRow.add(id);
-					currentTable.getColumnNames().forEach(x -> newRow.add(null)); 
-					currentTable.getContents().add(newRow);
+					String id = values[currentSampleIDColumnIndex];
+					String value;
+					if(currentSampleValueColumnIndex < values.length) 
+					{
+						value = values[currentSampleValueColumnIndex];
+					}
+					else
+					{
+						value = null;
+					}
+					
+					SoftTable currentTable = seriesTables.get(currentSampleSeriesID);
+					Map<String,Integer> indexMap = seriesDependentVariableIndicesMaps.get(currentSampleSeriesID);
+					
+					if(!indexMap.containsKey(id))
+					{
+						//Create a new row, the size of the number of columns 
+						indexMap.put(id, currentTable.getContents().size());
+						List<String> newRow = new ArrayList<>(currentTable.getColumnNames().size());
+						newRow.add(id);
+						currentTable.getColumnNames().forEach(x -> newRow.add(null)); 
+						currentTable.getContents().add(newRow);
+					}
+					
+					int row = indexMap.get(id);
+					
+					//Set the last column to the correct value
+					currentTable.getContents().get(row).set(currentTable.getColumnNames().size() - 1, value);
 				}
-				
-				int row = indexMap.get(id);
-				
-				//Set the last column to the correct value
-				currentTable.getContents().get(row).set(currentTable.getColumnNames().size() - 1, value);
 			}
 		}
 	}
@@ -332,10 +344,6 @@ public class SoftFileImporter {
 				{
 					currentSampleSeriesID = nameValue.getValue();
 				}
-				else if (currentEntityType == EntityType.Sample && nameValue.getName().equals("Sample_title"))
-				{
-					currentSampleTitle = nameValue.getValue();
-				}
 				else if (currentEntityType == EntityType.Series && nameValue.getName().equals("Series_platform_id")) 
 				{
 					seriesPlatforms.put(currentID, nameValue.getValue());
@@ -380,7 +388,6 @@ public class SoftFileImporter {
 	{
 		if(importTableDirectly(currentEntityType) && currentDirectlyImportedTable != null)
 		{
-			processedTables.add(currentDirectlyImportedTable);
 			directlyImportedTablesById.put(currentID, currentDirectlyImportedTable);
 		}
 		
@@ -390,7 +397,6 @@ public class SoftFileImporter {
 		currentColumnDescriptions = null;
 		currentDirectlyImportedTable = null;
 		currentSampleSeriesID = null;
-		currentSampleTitle = null;
 		state = State.NoEntity;
 	}
 	

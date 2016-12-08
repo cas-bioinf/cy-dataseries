@@ -35,7 +35,7 @@ public class SelectColumnsToImportPanel extends JPanel {
 	
 	private final List<ChangeListener> changeListeners;
 	
-	private static final int MAX_LABEL_CHARS = 60;
+	private static final int MAX_LABEL_CHARS = 70;
 	
 	/**
 	 * Create the panel.

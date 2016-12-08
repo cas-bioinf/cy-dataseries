@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.cytoscape.work.AbstractTask;
+import org.cytoscape.work.ProvidesTitle;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
 import org.cytoscape.work.util.ListSingleSelection;
@@ -14,7 +15,7 @@ import cz.cas.mbu.cydataseries.internal.dataimport.SoftFile.SoftTable;
 
 public class ChooseSoftTableTask extends AbstractTask {
 	@Tunable(description = "Choose dataset to import")
-	public ListSingleSelection<StringAndIndex> table; //not using SoftTable directly due to memory leaks in Task GUI
+	public ListSingleSelection<StringAndIndex> tableSelection; //not using SoftTable directly due to memory leaks in Task GUI
 	
 	private final Consumer<SoftTable> tableTarget;
 	
@@ -24,6 +25,12 @@ public class ChooseSoftTableTask extends AbstractTask {
 		this.tableTarget = tableTarget;
 	}
 
+	@ProvidesTitle
+	public String getTitle()
+	{
+		return "Choose table in the SOFT file to import";
+	}
+	
 	public void setSoftFile(SoftFile file)
 	{
 		softFile = file;		
@@ -32,25 +39,26 @@ public class ChooseSoftTableTask extends AbstractTask {
 			List<StringAndIndex> choice = new ArrayList<>();
 			for(int i = 0; i < file.getTables().size(); i++)
 			{
-				choice.add(new StringAndIndex(i, file.getTables().get(i).getCaption()));
+				SoftTable softTable = file.getTables().get(i);
+				choice.add(new StringAndIndex(i, softTable.getType().toString() + ": " + softTable.getCaption()));
 			}
-			table = new ListSingleSelection<>(choice);
+			tableSelection = new ListSingleSelection<>(choice);
 		}
 		else
 		{
-			table = null; //makes the GUI skip the prompt
+			tableSelection = null; //makes the GUI skip the prompt
 		}
 	}
 	
 	@Override
 	public void run(TaskMonitor taskMonitor) throws Exception {
-		if(table == null) //skipped the prompt - means there was only a single table (see setSoftFile)
+		if(tableSelection == null) //skipped the prompt - means there was only a single table (see setSoftFile)
 		{
 			tableTarget.accept(softFile.getTables().get(0));
 		}
 		else
 		{
-			tableTarget.accept(softFile.getTables().get(table.getSelectedValue().id));
+			tableTarget.accept(softFile.getTables().get(tableSelection.getSelectedValue().id));
 		}
 		softFile = null; //free the softFile for GC
 	}
