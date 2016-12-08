@@ -7,19 +7,26 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.log4j.Logger;
+import org.cytoscape.application.CyUserLog;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 
+import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportException;
 import cz.cas.mbu.cydataseries.internal.dataimport.SoftFile.EntityType;
 import cz.cas.mbu.cydataseries.internal.dataimport.SoftFile.SoftTable;
 
 public class SoftFileImporter {
 	
+	private static final String SAMPLE_ID_REF_COLUMN_NAME = "ID_REF";
+	private static final String SAMPLE_VALUE_COLUMN_NAME = "VALUE";
 	private final Logger logger = Logger.getLogger(SoftFileImporter.class);
+	private final Logger userLogger = Logger.getLogger(CyUserLog.NAME);
 	
 	private enum State {NoEntity,EntityAttributes,EntityTableHeader,EntityTableBody, Closed };
 
@@ -58,9 +65,55 @@ public class SoftFileImporter {
 		return new SoftFile(processedTables);
 	}
 
+	private void tryMergePlatformTable(String seriesId, SoftTable seriesTable)
+	{
+		String platformId = seriesPlatforms.get(seriesId); 
+		if(platformId != null)
+		{
+			SoftTable platformTable = directlyImportedTablesById.get(platformId);
+			if(platformTable != null)
+			{
+				int platformIdIndex = platformTable.getColumnNames().indexOf("ID");
+				if(platformIdIndex >= 0)
+				{
+					List<List<String>> mergedContents = new ArrayList<>();
+					List<String> seriesRowIds = seriesTable.getContents().stream().map(row -> row.get(0)).collect(Collectors.toList()); 
+					platformTable.getContents().forEach(platformRow ->
+					{
+						String rowId = platformRow.get(platformIdIndex);
+						int seriesRowIndex = seriesRowIds.indexOf(rowId);
+						if(seriesRowIndex > 0)
+						{
+							List<String> seriesRow = seriesTable.getContents().get(seriesRowIndex);
+							List<String> seriesData = seriesRow.subList(1, seriesRow.size()); //omit the ID column
+							mergedContents.add(new ListConcatenation<>(platformRow, seriesData));
+						}						
+					});
+					List<String> mergedColumnNames = new ListConcatenation<>(platformTable.getColumnNames(), seriesTable.getColumnNames().subList(1, seriesTable.getColumnNames().size()));
+					List<String> mergedColumnDescriptions = new ListConcatenation<>(platformTable.getColumnDescriptions(), seriesTable.getColumnDescriptions().subList(1, seriesTable.getColumnDescriptions().size()));
+					SoftTable mergedTable = new SoftTable(EntityType.Series, seriesTable.getCaption() + " + platform", mergedColumnNames, mergedColumnDescriptions, mergedContents);
+					processedTables.add(mergedTable);
+				}
+				else
+				{
+					userLogger.info("Platform '" + platformId + "' for series '" + seriesId + "' does not have an ID column.");					
+				}
+			}
+			else
+			{
+				userLogger.info("Platform '" + platformId + "' for series '" + seriesId + "' not found.");					
+			}
+		}
+		else 
+		{
+			userLogger.info("Series '" + seriesId + "' does not have any associated platform.");
+		}
+	}
+	
 	private void finalizeAll()	
 	{
-		//TODO Combine series tables with platform tables
+		//Combine series tables with corresponding platform tables
+		seriesTables.forEach(this::tryMergePlatformTable);
 		processedTables.addAll(seriesTables.values());
 	}
 	
@@ -73,10 +126,27 @@ public class SoftFileImporter {
 				parseLine(line);
 			}
 			finalizeCurrentEntity();
-		} catch(Throwable t)
+		}
+		catch(OutOfMemoryError e)
+		{
+			//free the memory
+			seriesTables = null;
+			directlyImportedTablesById = null;
+			currentDirectlyImportedTable = null;
+			processedTables = null;
+			throw new DataSeriesImportException("Out of memory while importing SOFT file");
+		}
+		catch(Throwable t)
 		{
 			logger.error("Error parsing SOFT file.", t);
-			throw t;
+			if(t instanceof Exception) //working around issue http://code.cytoscape.org/redmine/issues/3623
+			{
+				throw t;
+			}
+			else
+			{
+				throw new DataSeriesImportException(t.getMessage(), t);
+			}
 		}
 	}
 	
@@ -122,8 +192,8 @@ public class SoftFileImporter {
 			});
 		}
 		else if(currentEntityType == EntityType.Sample && currentSampleSeriesID != null){
-			currentSampleIDColumnIndex = valuesList.indexOf("ID_REF");
-			currentSampleValueColumnIndex = valuesList.indexOf("VALUE");
+			currentSampleIDColumnIndex = valuesList.indexOf(SAMPLE_ID_REF_COLUMN_NAME);
+			currentSampleValueColumnIndex = valuesList.indexOf(SAMPLE_VALUE_COLUMN_NAME);
 			
 			if(!seriesDependentVariableIndicesMaps.containsKey(currentSampleSeriesID))
 			{
@@ -132,7 +202,17 @@ public class SoftFileImporter {
 
 			SoftTable currentTable = seriesTables.get(currentSampleSeriesID);
 			currentTable.getColumnNames().add(currentID);
-			currentTable.getColumnDescriptions().add(currentSampleTitle);
+			
+			StringBuilder columnDescription = new StringBuilder();
+			if(currentSampleTitle != null)
+			{
+				columnDescription.append(currentSampleTitle);
+			}
+			if(currentColumnDescriptions.containsKey(SAMPLE_VALUE_COLUMN_NAME))
+			{
+				columnDescription.append(currentColumnDescriptions.get(SAMPLE_VALUE_COLUMN_NAME));
+			}
+			currentTable.getColumnDescriptions().add(columnDescription.toString());
 			//Adding empty values for all known genes for the current sample
 			currentTable.getContents().forEach(x -> x.add(null));
 		}

@@ -18,6 +18,7 @@ import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.AbstractTask;
+import org.cytoscape.work.ProvidesTitle;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
 import org.cytoscape.work.TunableValidator;
@@ -128,6 +129,12 @@ public class MapColumnTask extends AbstractValidatedTask {
 		
 	}
 	
+	
+	@ProvidesTitle
+	public String getTitle()
+	{
+		return "Map data series to network";
+	}
 	
 	private void updateExistingColumnForMapping(Class<? extends CyIdentifiable> targetClass)
 	{

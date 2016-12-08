@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.ContainsTunables;
+import org.cytoscape.work.ProvidesTitle;
 import org.cytoscape.work.TaskMonitor;
 
 import cz.cas.mbu.cydataseries.DataSeriesManager;
@@ -39,6 +40,12 @@ public class SmoothInteractivePerformTask extends AbstractValidatedTask {
 		this.rowGrouping = rowGrouping;
 		outputParameters = new SmoothingOutputParameters();
 		outputParameters.resultName = sourceTimeSeries + "_Smooth";
+	}
+	
+	@ProvidesTitle
+	public String getTitle()
+	{
+		return "Choose parameters for smoothing output";
 	}
 	
 

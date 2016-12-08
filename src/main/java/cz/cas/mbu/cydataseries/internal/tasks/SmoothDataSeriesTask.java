@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.ContainsTunables;
+import org.cytoscape.work.ProvidesTitle;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
 import org.cytoscape.work.util.ListMultipleSelection;
@@ -52,6 +53,12 @@ public class SmoothDataSeriesTask extends AbstractValidatedTask {
 		this.registrar = registrar;
 		timeSeries = new ListSingleSelection<>(dataSeriesManager.getDataSeriesByType(TimeSeries.class));
 		outputParameters = new SmoothingOutputParameters();
+	}
+	
+	@ProvidesTitle
+	public String getTitle()
+	{
+		return "Smooth a data series";
 	}
 	
 	@Override

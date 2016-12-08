@@ -157,7 +157,7 @@ public class SelectColumnsToImportPanel extends JPanel {
 		for(int i = 0; i < columnNames.size(); i++)
 		{
 			String label;
-			if(columnDescriptions != null)
+			if(columnDescriptions != null && columnDescriptions.get(i) != null && !columnDescriptions.get(i).isEmpty())
 			{
 				label = Integer.toString(i) + ": \"" + columnNames.get(i) + "\" (" + columnDescriptions.get(i) + ")";
 			}

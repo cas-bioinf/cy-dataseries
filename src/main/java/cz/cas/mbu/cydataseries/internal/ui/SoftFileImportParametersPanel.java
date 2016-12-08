@@ -1,6 +1,7 @@
 package cz.cas.mbu.cydataseries.internal.ui;
 
 import java.io.StringReader;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +27,7 @@ public class SoftFileImportParametersPanel extends JPanel {
 	private final SelectColumnsToImportPanel columnsToImportPanel;
 	private final ImportPreviewPanel previewPanel;
 	
-	private SoftTable sourceTable;
+	private WeakReference<SoftTable> sourceTable;
 	
 	private PreImportResults lastPreviewResults;
 	
@@ -62,19 +63,9 @@ public class SoftFileImportParametersPanel extends JPanel {
 
 	}
 	
-	/**
-	 * Clears the (possibly larger) data associated with this panel. Necessary until a fix for
-	 * a memory leak in Cytoscape is introduced.
-	 */
-	public void clearData()
-	{
-		sourceTable = null;
-		lastPreviewResults = null;
-	}
-	
 	public void setData(SoftTable table)
 	{
-		this.sourceTable = table;
+		this.sourceTable = new WeakReference<>(table);
 		columnsToImportPanel.setAvailableColumns(table.getColumnNames(), table.getColumnDescriptions());
 		updatePreview();
 	}
@@ -83,7 +74,7 @@ public class SoftFileImportParametersPanel extends JPanel {
 	{
 		try {
 			DataSeriesImportParameters dataSeriesImportParameters = getDataSeriesImportParameters();
-			lastPreviewResults = ImportHelper.preImportFromArrayAndIndex(sourceTable.getColumnNames(), sourceTable.getContents(), dataSeriesImportParameters, false /*strict*/);
+			lastPreviewResults = ImportHelper.preImportFromArrayAndIndex(sourceTable.get().getColumnNames(), sourceTable.get().getContents(), dataSeriesImportParameters, false /*strict*/);
 			previewPanel.updatePreview(lastPreviewResults, dataSeriesImportParameters, false, false);
 		}
 		catch (Exception ex)
@@ -110,7 +101,7 @@ public class SoftFileImportParametersPanel extends JPanel {
 	{
 		SoftFileImportParameters value = new SoftFileImportParameters();
 		value.setDataSeriesImportParameters(getDataSeriesImportParameters());
-		value.setSelectedTable(sourceTable);
+		value.setSelectedTable(sourceTable.get());
 		return value;
 	}
 }

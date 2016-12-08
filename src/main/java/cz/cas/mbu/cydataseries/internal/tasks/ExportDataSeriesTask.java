@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.cytoscape.work.ProvidesTitle;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
 import org.cytoscape.work.util.ListSingleSelection;
@@ -33,6 +34,13 @@ public class ExportDataSeriesTask extends AbstractValidatedTask {
 		dataSeries = new ListSingleSelection<>(dataSeriesManager.getAllDataSeries());
 		this.dataSeriesStorageManager = dataSeriesStorageManager;
 	}
+	
+	@ProvidesTitle
+	public String getTitle()
+	{
+		return "Export Data series";
+	}
+	
 	
 	@Override
 	protected ValidationState getValidationState(StringBuilder messageBuilder) {

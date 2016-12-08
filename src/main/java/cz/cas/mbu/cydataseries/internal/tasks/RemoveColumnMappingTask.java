@@ -1,5 +1,6 @@
 package cz.cas.mbu.cydataseries.internal.tasks;
 
+import org.cytoscape.work.ProvidesTitle;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
 import org.cytoscape.work.util.ListSingleSelection;
@@ -19,8 +20,14 @@ public class RemoveColumnMappingTask extends AbstractValidatedTask {
 	public RemoveColumnMappingTask(DataSeriesMappingManager mappingManager) {
 		super();
 		this.mappingManager = mappingManager;
-		targetMapping = new ListSingleSelection<>(mappingManager.getAllMappingDescriptors());
+		targetMapping = new ListSingleSelection<>(mappingManager.getAllMappingDescriptors());	
 	}
+	
+	@ProvidesTitle
+	public String getTitle()
+	{
+		return "Remove column mapping to Data series";
+	}	
 
 	@Override
 	public void run(TaskMonitor taskMonitor) throws Exception {

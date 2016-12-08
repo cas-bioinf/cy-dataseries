@@ -1,5 +1,6 @@
 package cz.cas.mbu.cydataseries.internal.tasks;
 
+import org.cytoscape.work.ProvidesTitle;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
 import org.cytoscape.work.util.ListSingleSelection;
@@ -17,6 +18,13 @@ public class RemoveDataSeriesTask extends AbstractValidatedTask {
 	public RemoveDataSeriesTask(DataSeriesManager dataSeriesManager) {
 		this.dataSeriesManager = dataSeriesManager;
 		dataSeries = new ListSingleSelection<>(dataSeriesManager.getAllDataSeries());
+	}
+	
+	
+	@ProvidesTitle
+	public String getTitle()
+	{
+		return "Remove data series";
 	}
 	
 	@Override

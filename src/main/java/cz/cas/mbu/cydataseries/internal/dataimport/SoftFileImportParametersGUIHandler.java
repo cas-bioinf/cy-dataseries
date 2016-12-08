@@ -65,12 +65,6 @@ public class SoftFileImportParametersGUIHandler extends AbstractGUITunableHandle
 			{
 				throw new RuntimeException(ex);
 			}
-			finally {
-				//make sure the memory is up for GC
-				importOptionsPanel.clearData();
-				importOptionsPanel = null; 
-				
-			}
 		}
 	}
 }
