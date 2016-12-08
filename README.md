@@ -8,18 +8,23 @@ Licensed under GPLv3.
 See [Wiki](https://github.com/martincerny/cy-dataseries/wiki) for more info
 
 ## Usage
-All functionality of cy-dataseries is available from the Cytoscape menu bar
+Import data from either SOFT files or tabular files (csv, tsv and the like) through
+```
+File -> Import -> Data Series
+```
+
+Modifying and other functionality of cy-dataseries is available from the Cytoscape menu bar
 ```
 Apps -> Data Series
 ```
-This includes the management of data series, i.e.
-* `import data series`
-* `export data series`
+This includes the management of data series and mapping of data series to networks, i.e.
 * `remove data series`
-
-and the mapping
 * `map column series`
 * `remove column mapping`
 * `manage column mapping`
 
-The import and export of `csv` files is supported.
+Finally, to export data series use
+```
+File -> Export -> Data Series
+```
+
