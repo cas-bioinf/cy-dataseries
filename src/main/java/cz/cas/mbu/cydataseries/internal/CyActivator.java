@@ -109,9 +109,9 @@ public class CyActivator extends AbstractCyActivator {
 		registerMenuItem(bc, "Remove Data Series", new RemoveDataSeriesTaskFactory(dataSeriesManager));
 
 		MapColumnTaskFactory mapColumnTaskFactory = new MapColumnTaskFactory(serviceRegistrar);
-		registerMenuItem(bc, "Map Column to Series", mapColumnTaskFactory);
+		//registerMenuItem(bc, "Map Column to Series", mapColumnTaskFactory);
 
-		registerMenuItem(bc, "Remove Column Mapping", new RemoveColumnMappingTaskFactory(mappingManager));
+		//registerMenuItem(bc, "Remove Column Mapping", new RemoveColumnMappingTaskFactory(mappingManager));
 
 		registerMenuItem(bc, "Manage Column Mappings", new ManageMappingsTaskFactory(serviceRegistrar));
 
