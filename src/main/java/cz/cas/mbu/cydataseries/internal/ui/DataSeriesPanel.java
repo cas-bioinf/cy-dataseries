@@ -154,7 +154,14 @@ public class DataSeriesPanel extends JPanel implements CytoPanelComponent2, Data
 					data[row][col + 2] = selectedDataSeries.getRowData(row).get(col);
 				}
 			}
-			DefaultTableModel model = new DefaultTableModel(data, columnNames);
+			DefaultTableModel model = new DefaultTableModel(data, columnNames) {
+
+				@Override
+				public boolean isCellEditable(int row, int column) {
+					return false;
+				}
+				
+			};
 			table.setModel(model);
 			for(int col = 0; col < table.getColumnModel().getColumnCount(); col++)
 			{

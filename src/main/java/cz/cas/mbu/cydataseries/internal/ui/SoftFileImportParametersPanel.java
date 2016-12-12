@@ -20,6 +20,9 @@ import cz.cas.mbu.cydataseries.internal.dataimport.DataSeriesImportParameters;
 import cz.cas.mbu.cydataseries.internal.dataimport.ImportHelper;
 import cz.cas.mbu.cydataseries.internal.dataimport.SoftFile.SoftTable;
 import cz.cas.mbu.cydataseries.internal.dataimport.SoftFileImportParameters;
+import javax.swing.border.TitledBorder;
+import javax.swing.UIManager;
+import java.awt.Color;
 
 public class SoftFileImportParametersPanel extends JPanel {
 
@@ -32,6 +35,8 @@ public class SoftFileImportParametersPanel extends JPanel {
 	private PreImportResults lastPreviewResults;
 	
 	private final Logger userLogger = Logger.getLogger(CyUserLog.NAME); 
+	private JPanel panel;
+	private JPanel panel_1;
 	
 	/**
 	 * Create the panel.
@@ -50,12 +55,29 @@ public class SoftFileImportParametersPanel extends JPanel {
 				RowSpec.decode("default:grow"),
 				FormSpecs.RELATED_GAP_ROWSPEC,}));
 		
+		panel = new JPanel();
+		panel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Index options", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
+		add(panel, "2, 2, fill, fill");
+		panel.setLayout(new FormLayout(new ColumnSpec[] {
+				ColumnSpec.decode("default:grow"),},
+			new RowSpec[] {
+				FormSpecs.DEFAULT_ROWSPEC,}));
+		
 		indexImportOptionsPanel = new IndexImportOptionsPanel();
-		add(indexImportOptionsPanel, "2, 2, fill, fill");
+		panel.add(indexImportOptionsPanel, "1, 1, fill, fill");
 		indexImportOptionsPanel.addChangedListener(evt -> updatePreview());
+		indexImportOptionsPanel.setManualAddVisible(false);
+		
+		panel_1 = new JPanel();
+		panel_1.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Columns to import", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
+		add(panel_1, "4, 2, fill, fill");
+		panel_1.setLayout(new FormLayout(new ColumnSpec[] {
+				ColumnSpec.decode("default:grow"),},
+			new RowSpec[] {
+				FormSpecs.DEFAULT_ROWSPEC,}));
 		
 		columnsToImportPanel = new SelectColumnsToImportPanel();
-		add(columnsToImportPanel, "4, 2, fill, fill");
+		panel_1.add(columnsToImportPanel, "1, 1, fill, fill");
 		columnsToImportPanel.addChangeListener(evt -> updatePreview());
 		
 		previewPanel = new ImportPreviewPanel();

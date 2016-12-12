@@ -144,7 +144,7 @@ public class MapColumnTask extends AbstractValidatedTask {
 	private void updateMapRowNamesWithColumn(Class<? extends CyIdentifiable> targetClass)
 	{
 		showColumnsForClass(String.class, mapRowNamesWithColumn, targetClass);
-		if(mapRowNamesWithColumn.getPossibleValues().contains("name"))
+		if(mapRowNamesWithColumn.getPossibleValues().contains("name") && mapRowNamesWithColumn.getSelectedValue() == null)
 		{
 			mapRowNamesWithColumn.setSelectedValue("name");
 		}

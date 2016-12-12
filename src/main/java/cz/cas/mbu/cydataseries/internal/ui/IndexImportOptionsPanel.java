@@ -128,6 +128,11 @@ public class IndexImportOptionsPanel extends JPanel implements TunableValidator{
 		indexSourceChanged();
 	}
 	
+	public void setManualAddVisible(boolean visible)
+	{
+		rdbtnManualIndexValuesAdd.setVisible(visible);
+	}
+	
 	public void addChangedListener(ChangeListener x)
 	{
 		parametersChangedListeners.add(x);
