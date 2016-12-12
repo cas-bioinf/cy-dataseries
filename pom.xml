@@ -12,7 +12,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>cz.cas.mbu.gn</groupId>
 	<artifactId>cy-dataseries</artifactId>
-	<version>0.9</version>
+	<version>0.9.1-SNAPSHOT</version>
 
 	<name>${bundle.symbolicName}</name>
 
