@@ -2,6 +2,8 @@ package cz.cas.mbu.cydataseries.internal.ui;
 
 import java.io.File;
 import java.io.StringReader;
+import java.util.Arrays;
+import java.util.Collections;
 
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -140,7 +142,7 @@ public class TabularImportParametersPanel extends JPanel {
 		catch (Exception ex)
 		{
 			userLogger.error("Error creating import preview", ex);
-			importPreviewPanel.showError(ex.getClass().getSimpleName() + ": " + ex.getMessage());			
+			importPreviewPanel.showError(ex.getClass().getSimpleName() + ": " + ex.getMessage(), Arrays.asList(rawPreviewData.split("\n", 100)));			
 		}
 	}
 	
@@ -153,7 +155,7 @@ public class TabularImportParametersPanel extends JPanel {
 			updatePreview();
 		}
 		else {
-			importPreviewPanel.showError("No import preview. Try clicking something else?");						
+			importPreviewPanel.showError("No import preview. Try clicking something else?", null);						
 		}
 	}
 	
