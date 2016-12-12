@@ -15,8 +15,7 @@ public interface DataSeries<INDEX, DATA> extends CyIdentifiable {
 	   * The data is read-only, writing to the list is undefined behavior. 
 	   * In other words, implementations decide, whether the changes made to the list affect
 	   * the underlying index or not. 
-	   * @param row
-	   * @return
+	   * @return The index
 	   */
 	  List<INDEX> getIndex();
 	  
@@ -26,7 +25,8 @@ public interface DataSeries<INDEX, DATA> extends CyIdentifiable {
 	  }
 	  
 	  /**
-	   * The list is read-only, writing to the list is undefined behavior.
+	   * The array is read-only, writing to the array is undefined behavior (implementations decide, whether changes to the array returned affect the actual series).
+	   * @return Persistent IDs corresponding to individual rows. Those IDs can be relied on to refer to specific rows in the series.
 	   * */ 
 	  int[] getRowIDs();
 	  
@@ -36,8 +36,8 @@ public interface DataSeries<INDEX, DATA> extends CyIdentifiable {
 	  }
 
 	  /**
-	   * Human-interpretable names for rows
-	   * @return
+	   * Human-interpretable names for rows.
+	   * The data is read-only, writing to the list is undefined behavior. 
 	   */
 	  List<String> getRowNames();
 	  
@@ -47,9 +47,10 @@ public interface DataSeries<INDEX, DATA> extends CyIdentifiable {
 	  }
 	  
 	  /**
-	   *  
-	   * @param suid
-	   * @return the row corresponding to the SUID or -1 if no data for this suid
+	   * Returns the row number (usable for {@link #getRowData(int)}) given a unique id. 
+	   * Unlike the row IDs, the row number is not guaranteed to be persistent. 
+	   * @param id
+	   * @return the row corresponding to the id or -1 if no data for this id
 	   */
 	  int idToRow(int id); 
 	  

@@ -5,9 +5,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
+/**
+ * An interface for all data series whose data is floating-point numeric
+ * @author Martin
+ *
+ * @param <INDEX>
+ */
 public interface DoubleDataSeries<INDEX> extends DataSeries<INDEX, Double>{
 	/**
-	 * First array index corresponds to the row and second to the column. 
+	 * First array index corresponds to the row and second to the columns (indices). 
 	 * @return
 	 */
 	public double[][] getDataArray();

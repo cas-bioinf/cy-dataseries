@@ -9,6 +9,12 @@ import org.cytoscape.model.subnetwork.CySubNetwork;
 
 import cz.cas.mbu.cydataseries.internal.Utils;
 
+/**
+ * A simple class gathering all information about a mapping in one place.
+ * @author Martin
+ *
+ * @param <T>
+ */
 public class MappingDescriptor<T extends DataSeries<?,?>> 
 {
 	private final CyNetwork network;

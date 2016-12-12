@@ -3,6 +3,11 @@ package cz.cas.mbu.cydataseries;
 import java.util.EventObject;
 import java.util.List;
 
+/**
+ * Event for the most important changes in data-series.
+ * @author Martin
+ *
+ */
 public class DataSeriesEvent extends EventObject{
 	public enum EventType { DS_ADDED, DS_REMOVED };
 	

@@ -6,6 +6,11 @@ import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyTable;
 
+/**
+ * Service to discover the available data series and add/remove data series to the session.
+ * @author Martin
+ *
+ */
 public interface DataSeriesManager {
 	
 	List<DataSeries<?,?>> getAllDataSeries();
@@ -20,11 +25,15 @@ public interface DataSeriesManager {
 	void registerDataSeries(DataSeries<?,?> ds);
 	
 	/**
-	 * Register a list of data series (only one event is created)
+	 * Register a list of data series (only one {@link DataSeriesEvent} is fired)
 	 * @param ds
 	 */
 	void registerDataSeries(List<? extends DataSeries<?, ?>> ds);
 	
+	/**
+	 * Removes the series from session (it will not be saved) along with all of its mappings.
+	 * @param ds
+	 */
 	void unregisterDataSeries(DataSeries<?,?> ds);
 	
 }

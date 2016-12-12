@@ -31,7 +31,7 @@ import java.util.Comparator;
  * Andre Bogus, and David Koelle
  *
  * To convert to use Templates (Java 1.5+):
- *   - Change "implements Comparator" to "implements Comparator<String>"
+ *   - Change "implements Comparator" to "implements Comparator&lt;String&gt;"
  *   - Change "compare(Object o1, Object o2)" to "compare(String s1, String s2)"
  *   - Remove the type checking and casting in compare().
  *
