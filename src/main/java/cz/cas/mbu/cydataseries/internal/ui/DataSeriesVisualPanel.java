@@ -196,16 +196,7 @@ public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 							}
 						});
 				});
-		
-		if(allSeries.isEmpty())
-		{
-			showAdjacentCheckbox.setEnabled(false);
-		}
-		else
-		{
-			showAdjacentCheckbox.setEnabled(true);
-		}
-		
+				
 		for(AbstractDataSeriesChartContainer chartContainer: chartContainers)
 		{
 			chartContainer.setSeriesData(allSeries, displayedDataSeries, rowIds, seriesVisible);						
