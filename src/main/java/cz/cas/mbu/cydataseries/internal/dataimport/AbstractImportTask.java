@@ -1,9 +1,12 @@
 package cz.cas.mbu.cydataseries.internal.dataimport;
 
+import java.nio.file.attribute.UserPrincipalLookupService;
 import java.security.GeneralSecurityException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.log4j.Logger;
+import org.cytoscape.application.CyUserLog;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
@@ -20,6 +23,8 @@ import cz.cas.mbu.cydataseries.internal.tasks.MapColumnTask;
 
 public abstract class AbstractImportTask extends AbstractValidatedTask {
 
+	private final Logger logger = Logger.getLogger(AbstractImportTask.class);
+	
 	@Tunable(description = "Name", required = true, gravity = 10, groups="Basic parameters")
 	public String name = "";
 
@@ -116,6 +121,7 @@ public abstract class AbstractImportTask extends AbstractValidatedTask {
 			tryImportSeries();
 		}
 		catch (Exception ex) {
+			logger.warn("Error in importing series:", ex);
 			errMsg.append(ex.getMessage());
 			return ValidationState.INVALID;
 		}			

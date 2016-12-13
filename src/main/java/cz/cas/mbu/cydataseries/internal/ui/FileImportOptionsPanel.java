@@ -171,6 +171,28 @@ public class FileImportOptionsPanel extends JPanel {
 		}
 	}
 	
+	public void suggestSeparator(char separator)
+	{
+		switch (separator) {
+			case ',':
+				getRdbtnComma().setSelected(true);
+				break;
+			case ';':
+				getRdbtnSemicolon().setSelected(true);
+				break;
+			case ' ':
+				getRdbtnSpace().setSelected(true);
+				break;
+			case '\t':
+				getRdbtnTab().setSelected(true);
+				break;
+			default:
+				getOtherSeparatorTextField().setText(Character.toString(separator));
+				getRdbtnOther().setSelected(true);
+				break;				
+		}
+	}
+	
 	public char getSeparator()
 	{
 		if(getRdbtnComma().isSelected())

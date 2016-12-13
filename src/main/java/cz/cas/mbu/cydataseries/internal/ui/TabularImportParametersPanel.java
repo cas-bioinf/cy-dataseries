@@ -129,6 +129,15 @@ public class TabularImportParametersPanel extends JPanel {
 	public void setInputfile(File inputFile)
 	{
 		this.inputFile = inputFile;
+		String nameLower = inputFile.getName().toLowerCase();
+		if(nameLower.endsWith(".tsv"))
+		{
+			fileImportOptionsPanel.suggestSeparator('\t');
+		}
+		else if (nameLower.endsWith(".csv"))
+		{
+			fileImportOptionsPanel.suggestSeparator(',');
+		}
 	}
 	
 	protected void updatePreview()

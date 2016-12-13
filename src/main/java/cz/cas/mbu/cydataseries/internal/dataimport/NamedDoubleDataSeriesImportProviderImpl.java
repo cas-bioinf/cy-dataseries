@@ -25,28 +25,8 @@ public class NamedDoubleDataSeriesImportProviderImpl implements DataSeriesImport
 		
 		List<String> indexArray = new ArrayList<>(preImportResults.getIndexValues());
 					
-		double[][] dataArray = new double[preImportResults.getCellData().length][preImportResults.getIndexValues().size()];
-		for(int row = 0; row < dataArray.length; row++)
-		{
-			for(int index = 0; index < dataArray[row].length; index++)
-			{
-				String rawValue = preImportResults.getCellData()[row][index];
-				if(rawValue == null)
-				{
-					dataArray[row][index] = Double.NaN;
-				}
-				else 
-				{
-					try {					
-						dataArray[row][index] = Double.parseDouble(rawValue); 
-					}
-					catch (NumberFormatException ex)
-					{
-						throw new DataSeriesImportException("Could not parse data at row no. " + row + ", index no. " + index + " with value '" + rawValue + "' as a number.", ex);
-					}
-				}
-			}
-		}
+		double[][] dataArray = ImportProviderUtils.parseDataArrayAsDoubles(preImportResults);
+
 		return new NamedDoubleDataSeriesImpl(suid, name, rowIDs, rowNames, indexArray, dataArray);
 	}
 

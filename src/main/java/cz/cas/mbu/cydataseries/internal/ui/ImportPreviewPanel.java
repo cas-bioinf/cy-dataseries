@@ -116,7 +116,7 @@ public class ImportPreviewPanel extends JPanel {
 			data[1][0] = "==== The initial " + (firstLinesOfFile.size()) + " lines of the file are below ====";
 			for(int i = 0; i < firstLinesOfFile.size();i++)
 			{
-				data[i+ 2][0] = firstLinesOfFile.get(i);
+				data[i + 2][0] = "Line " + (i + 1) + ": " + firstLinesOfFile.get(i);
 			}
 		}
 		else
