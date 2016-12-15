@@ -21,13 +21,13 @@ public class SmoothingOutputParameters {
 	public String resultName;
 	
 	@Tunable(description="Map the resulting series to the same nodes/edges as the original", groups ="Output")
-	public boolean mapResult;
+	public boolean mapResult = true;
 	
 	@Tunable(description="Replace the mapping of the original series with the new series",dependsOn="mapResult=true", groups ="Output")
-	public boolean replaceMapping = true;
+	public boolean replaceMapping = false;
 	
 	@Tunable(description="Suffix added to the newly created mapping columns", dependsOn="replaceMapping=false", groups ="Output")
-	public String mappingSuffix;
+	public String mappingSuffix = "_smooth";
 
 	public ValidationState getValidationState(TimeSeries sourceTimeSeries, CyServiceRegistrar registrar, StringBuilder errMsg) {
 		if(resultName.isEmpty())
