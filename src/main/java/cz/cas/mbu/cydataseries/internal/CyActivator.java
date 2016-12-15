@@ -15,6 +15,7 @@ import org.osgi.framework.BundleContext;
 
 import cz.cas.mbu.cydataseries.DataSeriesFactory;
 import cz.cas.mbu.cydataseries.DataSeriesListener;
+import cz.cas.mbu.cydataseries.DataSeriesMappingListener;
 import cz.cas.mbu.cydataseries.DataSeriesPublicTasks;
 import cz.cas.mbu.cydataseries.DataSeriesStorageManager;
 import cz.cas.mbu.cydataseries.DataSeriesStorageProvider;
@@ -71,7 +72,7 @@ public class CyActivator extends AbstractCyActivator {
 
 		CyServiceRegistrar serviceRegistrar = getService(bc, CyServiceRegistrar.class);		
 
-		DataSeriesMappingManagerImpl mappingManager = new DataSeriesMappingManagerImpl();
+		DataSeriesMappingManagerImpl mappingManager = new DataSeriesMappingManagerImpl(bc);
 		registerAllServices(bc, mappingManager, new Properties());
 
 		DataSeriesManagerImpl dataSeriesManager = new DataSeriesManagerImpl(bc, mappingManager);
@@ -132,6 +133,8 @@ public class CyActivator extends AbstractCyActivator {
 		DataSeriesVisualPanel visualPanel = new DataSeriesVisualPanel(cyApplicationManager, dataSeriesManager, mappingManager);
 		registerService(bc, visualPanel, CytoPanelComponent.class, new Properties());
 		registerService(bc, visualPanel, RowsSetListener.class, new Properties());
+		registerService(bc, visualPanel, DataSeriesListener.class, new Properties());
+		registerService(bc, visualPanel, DataSeriesMappingListener.class, new Properties());
 		
 		registerService(bc, new DataSeriesPublicTasksImpl(importTaskFactory, mapColumnTaskFactory, smoothInteractiveTaskFactory), DataSeriesPublicTasks.class, new Properties());
 	}

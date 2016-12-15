@@ -40,7 +40,11 @@ import org.jfree.chart.plot.DrawingSupplier;
 import org.omg.CORBA.NamedValue;
 
 import cz.cas.mbu.cydataseries.DataSeries;
+import cz.cas.mbu.cydataseries.DataSeriesEvent;
+import cz.cas.mbu.cydataseries.DataSeriesListener;
 import cz.cas.mbu.cydataseries.DataSeriesManager;
+import cz.cas.mbu.cydataseries.DataSeriesMappingEvent;
+import cz.cas.mbu.cydataseries.DataSeriesMappingListener;
 import cz.cas.mbu.cydataseries.DataSeriesMappingManager;
 import cz.cas.mbu.cydataseries.MappingDescriptor;
 import cz.cas.mbu.cydataseries.TimeSeries;
@@ -53,7 +57,7 @@ import com.jgoodies.forms.layout.FormSpecs;
 import javax.swing.JLabel;
 import javax.swing.JSeparator;
 
-public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2, RowsSetListener {
+public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2, RowsSetListener, DataSeriesListener, DataSeriesMappingListener {
 
 	private boolean ignoreSelection = false;
 	
@@ -353,6 +357,19 @@ public class DataSeriesVisualPanel extends JPanel implements CytoPanelComponent2
 		}
 	}
 
+	
+	
+	@Override
+	public void handleEvent(DataSeriesEvent event) {
+		updateVisual();
+	}
+
+	@Override
+	public void handleEvent(DataSeriesMappingEvent event) {
+		updateVisual();
+	}
+	
+	
 	protected JCheckBox getShowAdjacentCheckbox() {
 		return showAdjacentCheckbox;
 	}
