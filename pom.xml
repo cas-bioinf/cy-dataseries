@@ -14,7 +14,7 @@
 	<artifactId>cy-dataseries</artifactId>
 	<version>0.9.1-SNAPSHOT</version>
 
-	<name>${bundle.symbolicName}</name>
+	<name>CyDataSeries</name>
 
 	<packaging>bundle</packaging>
 
