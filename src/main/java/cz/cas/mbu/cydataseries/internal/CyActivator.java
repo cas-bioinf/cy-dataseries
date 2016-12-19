@@ -15,6 +15,7 @@ import org.osgi.framework.BundleContext;
 
 import cz.cas.mbu.cydataseries.DataSeriesFactory;
 import cz.cas.mbu.cydataseries.DataSeriesListener;
+import cz.cas.mbu.cydataseries.DataSeriesMappingListener;
 import cz.cas.mbu.cydataseries.DataSeriesPublicTasks;
 import cz.cas.mbu.cydataseries.DataSeriesStorageManager;
 import cz.cas.mbu.cydataseries.DataSeriesStorageProvider;
@@ -45,11 +46,12 @@ import cz.cas.mbu.cydataseries.internal.ui.DataSeriesVisualPanel;
 /** Entry point for bundle. */
 public class CyActivator extends AbstractCyActivator {
 
+	private static final String DEFAULT_MENU = "Apps.Data Series";
 	public static final String APP_NAME_FOR_STORAGE = CyActivator.class.getPackage().getName();
 
 	private void registerMenuItem(BundleContext bc, String title, TaskFactory taskFactory)
 	{
-		registerMenuItem(bc, "Apps.Data Series", title, taskFactory);
+		registerMenuItem(bc, DEFAULT_MENU, title, taskFactory);
 	}
 	
 	private void registerMenuItem(BundleContext bc, String menu, String title, TaskFactory taskFactory)
@@ -71,7 +73,7 @@ public class CyActivator extends AbstractCyActivator {
 
 		CyServiceRegistrar serviceRegistrar = getService(bc, CyServiceRegistrar.class);		
 
-		DataSeriesMappingManagerImpl mappingManager = new DataSeriesMappingManagerImpl();
+		DataSeriesMappingManagerImpl mappingManager = new DataSeriesMappingManagerImpl(bc);
 		registerAllServices(bc, mappingManager, new Properties());
 
 		DataSeriesManagerImpl dataSeriesManager = new DataSeriesManagerImpl(bc, mappingManager);
@@ -102,7 +104,8 @@ public class CyActivator extends AbstractCyActivator {
 		
 		ImportDataSeriesTaskFactory importTaskFactory = new ImportDataSeriesTaskFactory(serviceRegistrar);
 		registerMenuItem(bc, "File.Import.Data Series", "From tabular file (.csv,.tsv, etc.) ...", importTaskFactory);
-		registerMenuItem(bc, "File.Import.Data Series", "From SOFT file...", new ImportSoftFileTaskFactory(serviceRegistrar));
+		ImportSoftFileTaskFactory importSoftTaskFactory = new ImportSoftFileTaskFactory(serviceRegistrar);
+		registerMenuItem(bc, "File.Import.Data Series", "From SOFT file...", importSoftTaskFactory);
 
 		registerMenuItem(bc, "File.Export", "Data Series...", new ExportDataSeriesTaskFactory(dataSeriesManager, storageManager));
 
@@ -115,7 +118,7 @@ public class CyActivator extends AbstractCyActivator {
 
 		registerMenuItem(bc, "Manage Column Mappings", new ManageMappingsTaskFactory(serviceRegistrar));
 
-		registerMenuItem(bc, "Smooth data series", new SmoothDataSeriesTaskFactory(serviceRegistrar));
+		registerMenuItem(bc, DEFAULT_MENU + ".Advanced smoothing", "Linear kernel", new SmoothDataSeriesTaskFactory(serviceRegistrar));
 
 		SmoothInteractiveShowUITaskFactory smoothInteractiveTaskFactory = new SmoothInteractiveShowUITaskFactory(serviceRegistrar);
 		registerMenuItem(bc, "Interactive smoothing", smoothInteractiveTaskFactory);
@@ -132,8 +135,10 @@ public class CyActivator extends AbstractCyActivator {
 		DataSeriesVisualPanel visualPanel = new DataSeriesVisualPanel(cyApplicationManager, dataSeriesManager, mappingManager);
 		registerService(bc, visualPanel, CytoPanelComponent.class, new Properties());
 		registerService(bc, visualPanel, RowsSetListener.class, new Properties());
+		registerService(bc, visualPanel, DataSeriesListener.class, new Properties());
+		registerService(bc, visualPanel, DataSeriesMappingListener.class, new Properties());
 		
-		registerService(bc, new DataSeriesPublicTasksImpl(importTaskFactory, mapColumnTaskFactory, smoothInteractiveTaskFactory), DataSeriesPublicTasks.class, new Properties());
+		registerService(bc, new DataSeriesPublicTasksImpl(importTaskFactory, importSoftTaskFactory, mapColumnTaskFactory, smoothInteractiveTaskFactory), DataSeriesPublicTasks.class, new Properties());
 	}
 
 }

@@ -103,7 +103,7 @@ public class DataSeriesManagerImpl implements DataSeriesManager {
 		{
 			if(service instanceof DataSeriesListener)
 			{
-				((DataSeriesListener)service).dataSeriesEvent(event);				
+				((DataSeriesListener)service).handleEvent(event);				
 			}
 			else
 			{

@@ -91,7 +91,7 @@ public class DataSeriesPanel extends JPanel implements CytoPanelComponent2, Data
 	
 	
 	@Override
-	public void dataSeriesEvent(DataSeriesEvent event) {
+	public void handleEvent(DataSeriesEvent event) {
 		updateDataSeriesComboBox();
 	}
 

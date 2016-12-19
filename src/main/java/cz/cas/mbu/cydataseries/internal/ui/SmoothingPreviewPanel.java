@@ -429,7 +429,7 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 		int maxDisplayed = getMaxDisplayed();		
 
 		//Resample if maxDisplayed increased, unless we are already showing the whole series
-		if(maxDisplayed > currentlyShownGroupings.size() && currentlyShownGroupings.size() == sourceTimeSeries.getRowCount())
+		if(maxDisplayed > currentlyShownGroupings.size() && currentlyShownGroupings.size() < sourceTimeSeries.getRowCount())
 		{
 			sampleShownRows();
 		}

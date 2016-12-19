@@ -102,7 +102,7 @@ public class SoftFileImportParametersPanel extends JPanel {
 		catch (Exception ex)
 		{
 			userLogger.error("Error creating import preview", ex);
-			previewPanel.showError(ex.getClass().getSimpleName() + ": " + ex.getMessage());			
+			previewPanel.showError(ex.getClass().getSimpleName() + ": " + ex.getMessage(), null);			
 		}
 	}
 	

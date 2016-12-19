@@ -1,22 +1,23 @@
 package cz.cas.mbu.cydataseries.internal.ui;
 
+import java.awt.Font;
+import java.util.List;
+
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
+
+import com.jgoodies.forms.layout.ColumnSpec;
+import com.jgoodies.forms.layout.FormLayout;
+import com.jgoodies.forms.layout.FormSpecs;
+import com.jgoodies.forms.layout.RowSpec;
 
 import cz.cas.mbu.cydataseries.dataimport.PreImportResults;
 import cz.cas.mbu.cydataseries.internal.dataimport.DataSeriesImportParameters;
-
-import javax.swing.JScrollPane;
-import javax.swing.ScrollPaneConstants;
-import java.awt.BorderLayout;
-import javax.swing.JLabel;
-import java.awt.Font;
-import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.forms.layout.ColumnSpec;
-import com.jgoodies.forms.layout.RowSpec;
-import com.jgoodies.forms.layout.FormSpecs;
-import javax.swing.SwingConstants;
 
 public class ImportPreviewPanel extends JPanel {
 	private JTable table;
@@ -104,9 +105,27 @@ public class ImportPreviewPanel extends JPanel {
 	    lblDimensions.setText(dimensionsText.toString());
 	}
 
-	public void showError(String error) {
-		Object[] columns = new Object[] { "There was an error in generating preview" };
-		Object[][] data = new Object[][] { { error } };
+	public void showError(String error, List<String> firstLinesOfFile) {
+		Object[] columns = new Object[] { "There was an error in generating preview" };		
+		Object[][] data;
+		
+		if(firstLinesOfFile != null) 
+		{
+			data = new Object[firstLinesOfFile.size() + 2][1];
+			data[0][0] = error;
+			data[1][0] = "==== The initial " + (firstLinesOfFile.size()) + " lines of the file are below ====";
+			for(int i = 0; i < firstLinesOfFile.size();i++)
+			{
+				data[i + 2][0] = "Line " + (i + 1) + ": " + firstLinesOfFile.get(i);
+			}
+		}
+		else
+		{
+			data = new Object[][] {{error}};
+		}		
 		table.setModel(new DefaultTableModel(data, columns));
+		table.getColumnModel().getColumn(0).setMinWidth(800);
+		
+		lblDimensions.setText("There was an error in generating preview");
 	}
 }

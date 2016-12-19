@@ -12,13 +12,20 @@ import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.model.subnetwork.CyRootNetwork;
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Maps;
 
 import cz.cas.mbu.cydataseries.DataSeries;
+import cz.cas.mbu.cydataseries.DataSeriesEvent;
 import cz.cas.mbu.cydataseries.DataSeriesException;
+import cz.cas.mbu.cydataseries.DataSeriesListener;
+import cz.cas.mbu.cydataseries.DataSeriesMappingEvent;
+import cz.cas.mbu.cydataseries.DataSeriesMappingEvent.EventType;
+import cz.cas.mbu.cydataseries.DataSeriesMappingListener;
 import cz.cas.mbu.cydataseries.DataSeriesMappingManager;
 import cz.cas.mbu.cydataseries.MappingDescriptor;
 
@@ -26,11 +33,30 @@ public class DataSeriesMappingManagerImpl implements DataSeriesMappingManager{
 
 	private final Logger logger = LoggerFactory.getLogger(DataSeriesMappingManagerImpl.class); 
 	
-	Map<CyNetwork, Map<Class<? extends CyIdentifiable>, Map<String, DataSeries<?,?>>>> mappings;
+	private final Map<CyNetwork, Map<Class<? extends CyIdentifiable>, Map<String, DataSeries<?,?>>>> mappings;
 	
-	public  DataSeriesMappingManagerImpl()
+	private final ServiceTracker listenerTracker;
+
+	public  DataSeriesMappingManagerImpl(BundleContext bc)
 	{
 		mappings = new HashMap<>();
+		listenerTracker = new ServiceTracker(bc, DataSeriesMappingListener.class.getName(), null);
+		listenerTracker.open();		
+	}
+	
+	protected void fireEvent(DataSeriesMappingEvent event)
+	{
+		for(Object service : listenerTracker.getServices())
+		{
+			if(service instanceof DataSeriesMappingListener)
+			{
+				((DataSeriesMappingListener)service).handleEvent(event);				
+			}
+			else
+			{
+				logger.error("Listener is not of correct class");
+			}
+		}
 	}
 	
 	
@@ -57,10 +83,16 @@ public class DataSeriesMappingManagerImpl implements DataSeriesMappingManager{
 			logger.warn("Remapping column '" + columnName +"' for network " + Utils.getNetworkName(network) + " class " + targetClass.getSimpleName());			
 		}
 		localMap.put(columnName, ds);
+		
+		fireEvent(new DataSeriesMappingEvent(this, EventType.MAPPING_ADDED, Collections.singletonList(new MappingDescriptor<DataSeries<?,?>>(network, targetClass, columnName, ds))));
 	}
 
 	@Override
-	public void unmapTableColumn(CyNetwork network, Class<? extends CyIdentifiable> targetClass, String columnName) {
+	public void unmapTableColumn(CyNetwork network, Class<? extends CyIdentifiable> targetClass, String columnName) {		
+		unmapTableColumnInternal(network, targetClass, columnName, true);
+	}
+	
+	protected void unmapTableColumnInternal(CyNetwork network, Class<? extends CyIdentifiable> targetClass, String columnName, boolean fireEvent) {
 		Map<Class<? extends CyIdentifiable>, Map<String, DataSeries<?, ?>>> networkMappings = mappings.get(network);
 		if (networkMappings == null)
 		{
@@ -79,8 +111,13 @@ public class DataSeriesMappingManagerImpl implements DataSeriesMappingManager{
 			logger.warn("Mappings for column '" + columnName + "' for network " + Utils.getNetworkName(network)  + " and class " + targetClass.getSimpleName() + " does not exist, cannot remove.");
 			return;			
 		}
+		DataSeries<?,?> ds = localMap.get(columnName); //store for event
 		localMap.remove(columnName);
-		
+
+		if(fireEvent)
+		{
+			fireEvent(new DataSeriesMappingEvent(this, EventType.MAPPING_REMOVED, Collections.singletonList(new MappingDescriptor<DataSeries<?,?>>(network, targetClass, columnName, ds))));
+		}		
 	}
 
 	@Override
@@ -269,7 +306,12 @@ public class DataSeriesMappingManagerImpl implements DataSeriesMappingManager{
 	
 	public void removeAllMappings()
 	{
+		//store copy for event
+		List<MappingDescriptor<? extends DataSeries<?,?>>> descriptors = getAllMappingDescriptors();
+		
 		mappings.clear();
+		
+		fireEvent(new DataSeriesMappingEvent(this, EventType.MAPPING_REMOVED, descriptors));
 	}
 
 }

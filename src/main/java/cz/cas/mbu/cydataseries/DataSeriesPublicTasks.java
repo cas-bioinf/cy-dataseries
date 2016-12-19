@@ -9,8 +9,10 @@ import org.cytoscape.work.TaskIterator;
  *
  */
 public interface DataSeriesPublicTasks {
-	TaskIterator getImportDataSeriesTask();
-	TaskIterator getImportDataSeriesTask(Class<? extends DataSeries<?, ?>> preferredClass);
+	TaskIterator getImportDataSeriesTabularTask();
+	TaskIterator getImportDataSeriesTabularTask(Class<? extends DataSeries<?, ?>> preferredClass);
+	TaskIterator getImportSoftFileTask();
+	TaskIterator getImportSoftFileTask(Class<? extends DataSeries<?, ?>> preferredClass);
 	TaskIterator getMapDataSeriesTask();
 	TaskIterator getInteractiveSmoothingTask();
 }
