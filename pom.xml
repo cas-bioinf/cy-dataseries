@@ -10,11 +10,11 @@
 	</properties>
 
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>cz.cas.mbu.gn</groupId>
+	<groupId>cz.cas.mbu</groupId>
 	<artifactId>cy-dataseries</artifactId>
 	<version>0.9.1</version>
 
-	<name>${bundle.symbolicName}</name>
+	<name>CyDataSeries</name>
 
 	<packaging>bundle</packaging>
 
