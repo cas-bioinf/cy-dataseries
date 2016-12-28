@@ -3,6 +3,7 @@ package cz.cas.mbu.cydataseries.internal.smoothing;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -24,25 +25,25 @@ public class SmoothingServiceImpl implements SmoothingService{
 	
 
 	@Override
-	public TimeSeries linearKernelSmoothing(TimeSeries noisyData, double[] estimateX, double bandwidth, String resultName) {
+	public TimeSeries smooth(TimeSeries noisyData, double[] estimateX, SingleParameterSmoothingProvider provider, double parameter, String resultName) {
 		double[][] resultData = new double[noisyData.getRowCount()][];
 		for(int row = 0; row < noisyData.getRowCount(); row++)
 		{
-			resultData[row] = KernelSmoothing.linearKernalEstimator(noisyData.getIndexArray(), noisyData.getRowDataArray(row), estimateX, bandwidth);
+			resultData[row] = provider.smooth(noisyData.getIndexArray(), noisyData.getRowDataArray(row), estimateX, parameter);
 		}
 		return new TimeSeriesImpl(SUIDFactory.getNextSUID(), resultName, Arrays.copyOf(noisyData.getRowIDs(),noisyData.getRowCount()), new ArrayList<>(noisyData.getRowNames()), Arrays.copyOf(estimateX,  estimateX.length), resultData);
 	}
 
 	
 	@Override
-	public TimeSeries linearKernelSmoothing(TimeSeries noisyData, double[] estimateX, double bandwidth, String resultName, Map<String, List<Integer>> rowGrouping) {
+	public TimeSeries smooth(TimeSeries noisyData, double[] estimateX, SingleParameterSmoothingProvider provider, double parameter, String resultName, Map<String, List<Integer>> rowGrouping) {
 		double[][] resultData = new double[rowGrouping.size()][];
 		int[] rowIds = new int[rowGrouping.size()];
 		List<String> rowNames = new ArrayList<>();
 		int row = 0;
 		for(Map.Entry<String, List<Integer>> rowGroup : rowGrouping.entrySet())
 		{
-			resultData[row] = linearKernelSmoothing(noisyData, estimateX, bandwidth, rowGroup.getValue());
+			resultData[row] = smooth(noisyData, estimateX, provider, parameter, rowGroup.getValue());
 			rowIds[row] = row;
 			rowNames.add(rowGroup.getKey());
 			row++;
@@ -51,7 +52,7 @@ public class SmoothingServiceImpl implements SmoothingService{
 	}
 
 	@Override
-	public double[] linearKernelSmoothing(TimeSeries noisyData, double[] estimateX, double bandwidth, List<Integer> rows)
+	public double[] smooth(TimeSeries noisyData, double[] estimateX, SingleParameterSmoothingProvider provider, double parameter, List<Integer> rows)
 	{
 		double[] allRowsConcat = new double[rows.size() * noisyData.getIndexCount()];
 		double[] repeatedIndex = new double[rows.size() * noisyData.getIndexCount()];
@@ -64,7 +65,7 @@ public class SmoothingServiceImpl implements SmoothingService{
 		}
 	
 		//Do the smoothing
-		double[] smoothedY = KernelSmoothing.linearKernalEstimator(repeatedIndex, allRowsConcat, estimateX, bandwidth);
+		double[] smoothedY = provider.smooth(repeatedIndex, allRowsConcat, estimateX, parameter);
 		return smoothedY;
 	}
 	
@@ -108,6 +109,15 @@ public class SmoothingServiceImpl implements SmoothingService{
 			
 			return Doubles.toArray(resultWithoutDuplicates);
 		}
+	}
+
+
+	@Override
+	public List<SingleParameterSmoothingProvider> getSmoothingProviders() {
+		return Arrays.asList(new SingleParameterSmoothingProvider[] { 
+				new LinearKernelSmoothingProvider(), 
+				new LinearSmoothingProvider()} 
+		);
 	}
 		
 	
