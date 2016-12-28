@@ -167,7 +167,7 @@ public class MapColumnTask extends AbstractValidatedTask {
 	
 	@Override
 	public void run(TaskMonitor tm) throws Exception {
-		CyNetwork network = applicationManager.getCurrentNetwork();
+		CyNetwork network = targetNetwork.getSelectedValue();
 		CyTable targetTable = mappingManager.getMappingTable(network, targetClass.getSelectedValue().getTargetClass());
 		
 		//Create the actual mapping
@@ -245,7 +245,7 @@ public class MapColumnTask extends AbstractValidatedTask {
 	@Override
 	public ValidationState getValidationState(StringBuilder errMsg) {
 		ValidationState result = ValidationState.OK;
-		CyNetwork network = applicationManager.getCurrentNetwork();
+		CyNetwork network = targetNetwork.getSelectedValue();
 		CyTable targetTable = mappingManager.getMappingTable(network, targetClass.getSelectedValue().getTargetClass());
 		
 		if(createNewColumn && targetTable.getColumn(newColumnName) != null)
