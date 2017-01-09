@@ -4,6 +4,7 @@ import java.awt.Dimension;
 import java.util.List;
 
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -74,17 +75,18 @@ public class MappingManagerPanel extends JPanel {
 	
 	public final void updateContents()
 	{
-		Object[] columnNames = new Object[] { "Target type", "Column", "Data series" };
+		Object[] columnNames = new Object[] { "Network", "Target type", "Column", "Data series" };
 		
 		displayedDescriptors = registrar.getService(DataSeriesMappingManager.class).getAllMappingDescriptors();
-		Object[][] data = new Object[displayedDescriptors.size()][3];
+		Object[][] data = new Object[displayedDescriptors.size()][4];
 		
 		for(int row = 0; row < displayedDescriptors.size(); row++)
 		{
 			MappingDescriptor<?> desc = displayedDescriptors.get(row); 
-			data[row][0] = desc.getTargetClass().getSimpleName();
-			data[row][1] = desc.getColumnName();
-			data[row][2] = desc.getDataSeries().getName();
+			data[row][0] = desc.getNetwork().toString();
+			data[row][1] = desc.getTargetClass().getSimpleName();
+			data[row][2] = desc.getColumnName();
+			data[row][3] = desc.getDataSeries().getName();
 		}
 		
 		DefaultTableModel model = new DefaultTableModel(data, columnNames);
@@ -93,8 +95,15 @@ public class MappingManagerPanel extends JPanel {
 
 	private void addClicked()
 	{
-		MapColumnTask task = new MapColumnTask(registrar);
-		startTask(task);
+		if(registrar.getService(DataSeriesManager.class).getAllDataSeries().isEmpty())
+		{
+			JOptionPane.showMessageDialog(this, "No data series available to map.", "Error", JOptionPane.ERROR_MESSAGE);
+		}
+		else
+		{
+			MapColumnTask task = new MapColumnTask(registrar);
+			startTask(task);
+		}
 	}
 	
 	private void removeClicked()
