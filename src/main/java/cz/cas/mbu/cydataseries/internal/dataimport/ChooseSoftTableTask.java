@@ -13,6 +13,11 @@ import org.cytoscape.work.util.ListSingleSelection;
 
 import cz.cas.mbu.cydataseries.internal.dataimport.SoftFile.SoftTable;
 
+/**
+ * Lets the user choose which SOFT table found in a file to import.
+ * @author MBU
+ *
+ */
 public class ChooseSoftTableTask extends AbstractTask {
 	@Tunable(description = "Choose dataset to import")
 	public ListSingleSelection<StringAndIndex> tableSelection; //not using SoftTable directly due to memory leaks in Task GUI

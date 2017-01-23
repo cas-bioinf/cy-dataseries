@@ -9,6 +9,11 @@ import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportProvider;
 import cz.cas.mbu.cydataseries.dataimport.PreImportResults;
 import cz.cas.mbu.cydataseries.internal.data.TimeSeriesImpl;
 
+/**
+ * Import provider for {@link TimeSeriesImpl}. Can be consided an example implementation.
+ * @author MBU
+ *
+ */
 public class TimeSeriesImportProviderImpl implements DataSeriesImportProvider{
 
 	@Override

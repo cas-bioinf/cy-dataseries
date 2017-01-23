@@ -3,6 +3,12 @@ package cz.cas.mbu.cydataseries.internal.dataimport;
 import java.util.AbstractList;
 import java.util.List;
 
+/**
+ * Combines two lists into one while delegating all read and writes to the individual lists.
+ * @author MBU
+ *
+ * @param <T>
+ */
 public class ListConcatenation<T> extends AbstractList<T> {
 	private final List<T> list1;
 	private final List<T> list2;

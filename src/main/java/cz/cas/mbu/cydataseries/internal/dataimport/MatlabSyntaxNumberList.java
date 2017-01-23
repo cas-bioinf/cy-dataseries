@@ -3,6 +3,11 @@ package cz.cas.mbu.cydataseries.internal.dataimport;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Helps translate to/from Matlab syntax for number sequences (e.g.: 1:5,6:0.3:8,9)
+ * @author MBU
+ *
+ */
 public class MatlabSyntaxNumberList {
 	public static double DEFAULT_CONCATENATION_EPSILON = 0.0001;
 	

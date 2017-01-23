@@ -11,7 +11,11 @@ import cz.cas.mbu.cydataseries.DataSeries;
 import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportManager;
 import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportProvider;
 
-
+/**
+ * Implementaiton of {@link DataSeriesImportManager} see there for method descriptions.
+ * @author MBU
+ *
+ */
 public class DataSeriesImportManagerImpl implements DataSeriesImportManager {
 
 	private final Logger logger = Logger.getLogger(DataSeriesImportManager.class);

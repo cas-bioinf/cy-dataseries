@@ -7,7 +7,12 @@ import org.slf4j.LoggerFactory;
 
 import cz.cas.mbu.cydataseries.DataSeries;
 
-
+/**
+ * A simple storage provider for {@link TimeSeriesImpl}. Should serve as an example to 
+ * implement other storage providers.
+ * @author MBU
+ *
+ */
 public class TimeSeriesStorageProviderImpl extends AbstractDataSeriesStorageProvider {
 
 	private final Logger logger = LoggerFactory.getLogger(TimeSeriesStorageProviderImpl.class);

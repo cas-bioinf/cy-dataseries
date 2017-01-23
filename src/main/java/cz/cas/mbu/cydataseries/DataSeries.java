@@ -4,6 +4,13 @@ import java.util.List;
 
 import org.cytoscape.model.CyIdentifiable;
 
+/**
+ * Main interface for all data series.
+ * @author MBU
+ *
+ * @param <INDEX> The type of index (independent variable)
+ * @param <DATA> The type of data of the series.
+ */
 public interface DataSeries<INDEX, DATA> extends CyIdentifiable {
 		
 	  String getName();

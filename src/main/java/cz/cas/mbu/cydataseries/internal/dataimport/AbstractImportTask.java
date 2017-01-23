@@ -21,6 +21,13 @@ import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportProvider;
 import cz.cas.mbu.cydataseries.internal.tasks.AbstractValidatedTask;
 import cz.cas.mbu.cydataseries.internal.tasks.MapColumnTask;
 
+/**
+ * Handling of parameters common to {@link ImportSoftFileTask} and {@link ImportDataSeriesTask}.
+ * Note that counterintuitively, the actual import happens during the validation stage (this lets us signal errors to user and
+ * let them correct their import settings instead of having to start all over).
+ * @author MBU
+ *
+ */
 public abstract class AbstractImportTask extends AbstractValidatedTask {
 
 	private final Logger logger = Logger.getLogger(AbstractImportTask.class);

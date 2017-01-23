@@ -21,6 +21,11 @@ import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportException;
 import cz.cas.mbu.cydataseries.internal.dataimport.SoftFile.EntityType;
 import cz.cas.mbu.cydataseries.internal.dataimport.SoftFile.SoftTable;
 
+/**
+ * Basic import of SOFT files.
+ * @author MBU
+ *
+ */
 public class SoftFileImporter {
 	
 	private static final String SAMPLE_ID_REF_COLUMN_NAME = "ID_REF";

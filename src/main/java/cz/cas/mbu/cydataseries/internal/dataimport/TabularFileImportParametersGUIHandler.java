@@ -19,6 +19,11 @@ import org.cytoscape.work.swing.AbstractGUITunableHandler;
 
 import cz.cas.mbu.cydataseries.internal.ui.TabularImportParametersPanel;
 
+/**
+ * Providing GUI representation of {@link TabularFileImportParameters} via Tunables. 
+ * @author MBU
+ *
+ */
 public class TabularFileImportParametersGUIHandler extends AbstractGUITunableHandler {
 
 	private final Logger userLogger = Logger.getLogger(CyUserLog.NAME); 

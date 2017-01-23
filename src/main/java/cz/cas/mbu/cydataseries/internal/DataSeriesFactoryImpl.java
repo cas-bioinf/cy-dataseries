@@ -10,6 +10,11 @@ import cz.cas.mbu.cydataseries.TimeSeries;
 import cz.cas.mbu.cydataseries.internal.data.NamedDoubleDataSeriesImpl;
 import cz.cas.mbu.cydataseries.internal.data.TimeSeriesImpl;
 
+/**
+ * Implementation of {@link DataSeriesFactory}, check there for method descriptions.
+ * @author MBU
+ *
+ */
 public class DataSeriesFactoryImpl implements DataSeriesFactory {
 
 	private int[] createRowIDs(int count)

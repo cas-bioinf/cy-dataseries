@@ -4,7 +4,7 @@ import java.util.EventObject;
 import java.util.List;
 
 /**
- * Event for the most important changes in data-series.
+ * Event for changes in mapping of data-series to network entities.
  * @author Martin
  *
  */

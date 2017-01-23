@@ -20,6 +20,11 @@ import org.cytoscape.work.swing.AbstractGUITunableHandler;
 import cz.cas.mbu.cydataseries.internal.ui.SoftFileImportParametersPanel;
 import cz.cas.mbu.cydataseries.internal.ui.TabularImportParametersPanel;
 
+/**
+ * Providing GUI representation of {@link SoftFileImportParameters} via Tunables. 
+ * @author MBU
+ *
+ */
 public class SoftFileImportParametersGUIHandler extends AbstractGUITunableHandler {
 
 	private final Logger userLogger = Logger.getLogger(CyUserLog.NAME);

@@ -7,7 +7,11 @@ import org.slf4j.LoggerFactory;
 
 import cz.cas.mbu.cydataseries.DataSeries;
 
-
+/**
+ * Storage provider for {@link NamedDoubleDataSeriesImpl}.
+ * @author MBU
+ *
+ */
 public class NamedDoubleDataSeriesStorageProviderImpl extends AbstractDataSeriesStorageProvider {
 
 	private final Logger logger = LoggerFactory.getLogger(NamedDoubleDataSeriesStorageProviderImpl.class);
