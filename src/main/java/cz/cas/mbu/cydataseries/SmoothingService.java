@@ -4,13 +4,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import cz.cas.mbu.cydataseries.internal.smoothing.SingleParameterSmoothingProvider;
+
 /**
  * Service for smoothing time series.
  * @author Martin
  *
  */
 public interface SmoothingService {
-	TimeSeries linearKernelSmoothing(TimeSeries noisyData, double[] estimateX, double bandwidth, String resultName);
+	TimeSeries smooth(TimeSeries noisyData, double[] estimateX, SingleParameterSmoothingProvider provider, double parameter, String resultName);
 	
 	/**
 	 * 
@@ -21,7 +23,7 @@ public interface SmoothingService {
 	 * @param rowGrouping Map of result row name to row indices (not row IDs) that will be smoothed to give the output
 	 * @return
 	 */
-	TimeSeries linearKernelSmoothing(TimeSeries noisyData, double[] estimateX, double bandwidth, String resultName, Map<String, List<Integer>> rowGrouping);	
+	TimeSeries smooth(TimeSeries noisyData, double[] estimateX, SingleParameterSmoothingProvider provider, double parameter, String resultName, Map<String, List<Integer>> rowGrouping);	
 	
 	/**
 	 * Smooth a single row
@@ -31,7 +33,7 @@ public interface SmoothingService {
 	 * @param rows
 	 * @return
 	 */
-	double[] linearKernelSmoothing(TimeSeries noisyData, double[] estimateX, double bandwidth, List<Integer> rows);
+	double[] smooth(TimeSeries noisyData, double[] estimateX, SingleParameterSmoothingProvider provider, double parameter, List<Integer> rows);
 	
 	/**
 	 * Get a row grouping where all rows with the same name in the series are mapped to a single row in the output.
@@ -46,4 +48,6 @@ public interface SmoothingService {
 	 * @return
 	 */
 	double[] mergeTimePoints(Collection<TimeSeries> timeSeries);
+	
+	List<SingleParameterSmoothingProvider> getSmoothingProviders();
 }

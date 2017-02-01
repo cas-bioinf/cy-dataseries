@@ -25,6 +25,11 @@ import cz.cas.mbu.cydataseries.DataSeriesManager;
 import cz.cas.mbu.cydataseries.DataSeriesMappingManager;
 import cz.cas.mbu.cydataseries.DataSeriesStorageProvider;
 
+/**
+ * Implementation of {@link DataSeriesManager}, check there for method documentation.
+ * @author MBU
+ *
+ */
 public class DataSeriesManagerImpl implements DataSeriesManager {
 
 	
@@ -96,7 +101,10 @@ public class DataSeriesManagerImpl implements DataSeriesManager {
 				.collect(Collectors.toList());		
 	}
 
-	
+	/**
+	 * Send an event to all registered {@link DataSeriesListener} services.
+	 * @param event
+	 */
 	protected void fireEvent(DataSeriesEvent event)
 	{
 		for(Object service : listenerTracker.getServices())

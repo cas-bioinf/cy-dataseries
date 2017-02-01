@@ -7,6 +7,13 @@ import java.util.Map;
 
 import cz.cas.mbu.cydataseries.DataSeries;
 
+/**
+ * Basic methods for all DSs that are explicitly represented in the memory.
+ * @author MBU
+ *
+ * @param <INDEX>
+ * @param <DATA>
+ */
 public abstract class AbstractDataSeries<INDEX, DATA> implements DataSeries<INDEX, DATA>{
 
 	private int[] rowIds;

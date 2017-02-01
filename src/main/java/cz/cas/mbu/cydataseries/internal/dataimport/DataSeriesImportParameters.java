@@ -3,8 +3,26 @@ package cz.cas.mbu.cydataseries.internal.dataimport;
 import java.io.File;
 import java.util.List;
 
+/**
+ * A collection of all import parameters that are common to all import methods.
+ * @author MBU
+ *
+ */
 public class DataSeriesImportParameters {
-	public enum IndexSource { Data, ManualAdd, ManualOverride }
+	public enum IndexSource {
+		/**
+		 * Index is first row of the data
+		 */
+		Data, 
+		/**
+		 * Index is given in {@link DataSeriesImportParameters#getManualIndexValues()} and data contain no index.
+		 */
+		ManualAdd, 
+		/**
+		 * Index is given in {@link DataSeriesImportParameters#getManualIndexValues()} and data also contains index - the first row of data should be ignored..
+		 */
+		ManualOverride 
+		}
 	
 	
 	private IndexSource indexSource;

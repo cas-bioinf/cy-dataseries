@@ -8,6 +8,11 @@ import cz.cas.mbu.cydataseries.DataSeriesPublicTasks;
 import cz.cas.mbu.cydataseries.internal.dataimport.ImportDataSeriesTaskFactory;
 import cz.cas.mbu.cydataseries.internal.dataimport.ImportSoftFileTaskFactory;
 
+/**
+ * Implementation for {@link DataSeriesPublicTasks}, see there for method descriptions.
+ * @author MBU
+ *
+ */
 public class DataSeriesPublicTasksImpl implements DataSeriesPublicTasks {
 
 	private final ImportDataSeriesTaskFactory importTabularTaskFactory;

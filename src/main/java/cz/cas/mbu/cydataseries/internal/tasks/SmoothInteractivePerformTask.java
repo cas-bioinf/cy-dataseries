@@ -12,6 +12,7 @@ import cz.cas.mbu.cydataseries.DataSeriesManager;
 import cz.cas.mbu.cydataseries.MappingManipulationService;
 import cz.cas.mbu.cydataseries.SmoothingService;
 import cz.cas.mbu.cydataseries.TimeSeries;
+import cz.cas.mbu.cydataseries.internal.smoothing.SingleParameterSmoothingProvider;
 import cz.cas.mbu.cydataseries.internal.ui.SmoothingPreviewPanel;
 
 public class SmoothInteractivePerformTask extends AbstractValidatedTask {
@@ -23,19 +24,21 @@ public class SmoothInteractivePerformTask extends AbstractValidatedTask {
 	
 	private final TimeSeries sourceTimeSeries;
 	private final double[] estimateX;
-	private final double bandwidth;
+	private final SingleParameterSmoothingProvider provider; 
+	private final double parameter;
 	Map<String, List<Integer>> rowGrouping;
 	
 	private final SmoothingPreviewPanel sourcePanel;
 	
 
 	public SmoothInteractivePerformTask(CyServiceRegistrar registrar, TimeSeries sourceTimeSeries,
-			double[] estimateX, double bandwidth, Map<String, List<Integer>> rowGrouping, SmoothingPreviewPanel sourcePanel) {
+			double[] estimateX, SingleParameterSmoothingProvider provider, double parameter, Map<String, List<Integer>> rowGrouping, SmoothingPreviewPanel sourcePanel) {
 		super();
 		this.registrar = registrar;
 		this.sourceTimeSeries = sourceTimeSeries;
 		this.estimateX = estimateX;
-		this.bandwidth = bandwidth;
+		this.provider = provider;
+		this.parameter = parameter;
 		this.sourcePanel = sourcePanel;
 		this.rowGrouping = rowGrouping;
 		outputParameters = new SmoothingOutputParameters();
@@ -53,7 +56,7 @@ public class SmoothInteractivePerformTask extends AbstractValidatedTask {
 	public void run(TaskMonitor taskMonitor) throws Exception {
 		
 		SmoothingService smoothingService = registrar.getService(SmoothingService.class);
-		TimeSeries smoothedSeries = smoothingService.linearKernelSmoothing(sourceTimeSeries, estimateX, bandwidth, outputParameters.resultName, rowGrouping);
+		TimeSeries smoothedSeries = smoothingService.smooth(sourceTimeSeries, estimateX, provider, parameter, outputParameters.resultName, rowGrouping);
 		
 		registrar.getService(DataSeriesManager.class).registerDataSeries(smoothedSeries);
 		

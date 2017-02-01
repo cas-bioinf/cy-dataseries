@@ -5,7 +5,7 @@ import java.util.List;
 import cz.cas.mbu.cydataseries.NamedDoubleDataSeries;
 
 /**
- * Time series.
+ * Named double series - typically repeated measurements.
  */
 public class NamedDoubleDataSeriesImpl extends AbstractListIndexDataSeries<String, Double> implements NamedDoubleDataSeries {
 

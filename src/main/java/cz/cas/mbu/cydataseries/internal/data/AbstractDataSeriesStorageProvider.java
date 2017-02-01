@@ -22,6 +22,15 @@ import cz.cas.mbu.cydataseries.DataSeriesException;
 import cz.cas.mbu.cydataseries.DataSeriesStorageProvider;
 import cz.cas.mbu.cydataseries.internal.DataSeriesStorageManagerImpl;
 
+/**
+ * A base class for all DS storage providers that can directly convert all index and data values from/to string.
+ * To store a new type of DS, you usually want to extend this class and override 
+ * {@link #transformDataForWrite(Object)}, {@link #transformIndexForWrite(Object). 
+ * Further you should create a custom {@link #DataSeriesBuilder} subclass and override {@link #getSeriesBuilder()} to return an instance of it.
+ * See {@link TimeSeriesStorageProviderImpl} for an example implementation.
+ * @author MBU
+ *
+ */
 public abstract class AbstractDataSeriesStorageProvider  implements DataSeriesStorageProvider {
 
 	private final Logger logger = LoggerFactory.getLogger(AbstractDataSeriesStorageProvider.class); 
@@ -32,6 +41,10 @@ public abstract class AbstractDataSeriesStorageProvider  implements DataSeriesSt
 
 	protected abstract DataSeriesBuilder getSeriesBuilder();
 	
+	/**
+	 * Loads the data series by first getting an DS implementation-specific builder via {@link #getSeriesBuilder()} 
+	 * and then calling the relevant methods of it. 
+	 */
 	@Override
 	public DataSeries<?, ?> loadDataSeries(File file, String name, long oldSuid) throws IOException {
 		try (CSVParser parser = new CSVParser(new FileReader(file), DataSeriesStorageManagerImpl.CSV_FORMAT))
@@ -93,16 +106,31 @@ public abstract class AbstractDataSeriesStorageProvider  implements DataSeriesSt
 		}
 	}
 	
+	/**
+	 * Override this to transform index values for storage.
+	 * The default implementation simply calls {@link Object#toString()}.
+	 * @param index
+	 * @return
+	 */
 	protected String transformIndexForWrite(Object index)
 	{
 		return index.toString();
 	}
 	
+	/**
+	 * Override this to transform data values for storage.
+	 * The default implementation simply calls {@link Object#toString()}.
+	 * @param index
+	 * @return
+	 */
 	protected String transformDataForWrite(Object data)
 	{
 		return data.toString();		
 	}
 
+	/**
+	 * Save data series by calling {@link #transformDataForWrite(Object)} and {@link #transformIndexForWrite(Object)}.
+	 */
 	@Override
 	public void saveDataSeries(DataSeries<?, ?> dataSeries, File file) throws IOException {
 		if(!getProvidedClass().isAssignableFrom(dataSeries.getClass()))
@@ -134,35 +162,79 @@ public abstract class AbstractDataSeriesStorageProvider  implements DataSeriesSt
 		
 	}
 
+	/**
+	 * Handles individual steps of loading a DS and finaly returns a newly created data series. 
+	 * @author MBU
+	 *
+	 */
 	protected abstract static class DataSeriesBuilder {
 		protected List<String> _rowNames;
 		protected int[] _rowIds;
 		protected String _name;
 		protected Long _suid;
 		
+		/**
+		 * Called once when row names for all rows are parsed.
+		 * @param rowNames
+		 * @return
+		 */
 		public DataSeriesBuilder rowNames(List<String> rowNames) {
 			_rowNames = rowNames;
 			return this;
 		}
 		
+		/**
+		 * Called once, when ro IDs for all rows are parsed.
+		 * @param rowIds
+		 * @return
+		 */
 		public DataSeriesBuilder rowIds(int[] rowIds) {
 			_rowIds = rowIds;
 			return this;
 		}
 		
+		/**
+		 * Called once, when the name of the DS is parsed.
+		 * @param name
+		 * @return
+		 */
 		public DataSeriesBuilder name(String name) {
 			_name = name;
 			return this;
 		}
 		
+		/**
+		 * Called once, when the SUID of the DS is parsed.
+		 * @param suid
+		 * @return
+		 */
 		public DataSeriesBuilder suid(Long suid) {
 			_suid = suid;
 			return this;
 		}
 		
+		/**
+		 * Called once, when the index of the DS is read
+		 * @param indexStrings
+		 * @return
+		 */
 		public abstract DataSeriesBuilder parseIndex(List<String> indexStrings);
+		
+		/**
+		 * Called for each index-row combination as it is parsed. 
+		 * This is guaranteed to be called after {@link #parseIndex(List)}, {@link #rowIds(int[])} and {@link #rowNames(List)},
+		 * so it is safe to allocate a data array based on the calls to this methods.
+		 * @param index
+		 * @param row
+		 * @param data
+		 * @return
+		 */
 		public abstract DataSeriesBuilder setDataPoint(int index, int row, String data);
 		
+		/**
+		 * Create a DS instance from the gathered information.
+		 * @return
+		 */
 		public abstract DataSeries<?, ?> build();
 	}
 }

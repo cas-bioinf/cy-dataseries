@@ -10,6 +10,11 @@ import cz.cas.mbu.cydataseries.dataimport.DataSeriesImportProvider;
 import cz.cas.mbu.cydataseries.dataimport.PreImportResults;
 import cz.cas.mbu.cydataseries.internal.data.NamedDoubleDataSeriesImpl;
 
+/**
+ * Import provider for {@link NamedDoubleDataSeriesImpl}.
+ * @author MBU
+ *
+ */
 public class NamedDoubleDataSeriesImportProviderImpl implements DataSeriesImportProvider{
 
 	@Override

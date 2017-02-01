@@ -31,10 +31,18 @@ import org.osgi.util.tracker.ServiceTracker;
 import cz.cas.mbu.cydataseries.DataSeries;
 import cz.cas.mbu.cydataseries.DataSeriesManager;
 import cz.cas.mbu.cydataseries.DataSeriesMappingManager;
+import cz.cas.mbu.cydataseries.DataSeriesPublicTasks;
 import cz.cas.mbu.cydataseries.DataSeriesStorageManager;
 import cz.cas.mbu.cydataseries.DataSeriesStorageProvider;
 
 import org.apache.log4j.Logger;
+
+/**
+ * Implementation for {@link DataSeriesStorageManager}, see there for method descriptions.
+ * Additionally, this class is also registered as session loaded and saved listener and performs the actual save/load of DS.
+ * @author MBU
+ *
+ */
 
 public class DataSeriesStorageManagerImpl implements DataSeriesStorageManager, SessionAboutToBeSavedListener, SessionLoadedListener {
 	private static final String SERIES_LIST_FILENAME = "_dataSeriesList.tsv";

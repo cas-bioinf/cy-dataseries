@@ -30,6 +30,7 @@ import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskManager;
 import org.jfree.chart.ChartPanel;
+import org.omg.CORBA.Current;
 
 import com.google.common.primitives.Doubles;
 import com.jgoodies.forms.layout.CellConstraints;
@@ -42,10 +43,14 @@ import cz.cas.mbu.cydataseries.SmoothingService;
 import cz.cas.mbu.cydataseries.TimeSeries;
 import cz.cas.mbu.cydataseries.internal.dataimport.MatlabSyntaxNumberList;
 import cz.cas.mbu.cydataseries.internal.smoothing.KernelSmoothing;
+import cz.cas.mbu.cydataseries.internal.smoothing.LinearKernelSmoothingProvider;
+import cz.cas.mbu.cydataseries.internal.smoothing.ParameterDisplayAid;
+import cz.cas.mbu.cydataseries.internal.smoothing.SingleParameterSmoothingProvider;
 import cz.cas.mbu.cydataseries.internal.tasks.SmoothInteractivePerformTask;
 import javax.swing.JRadioButton;
 import javax.swing.ButtonGroup;
 import javax.swing.JSlider;
+import javax.swing.SwingConstants;
 
 public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent {
 
@@ -60,11 +65,12 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 	private double[] estimateX = null;
 	
 	private Map<String,List<Integer>> currentlyShownGroupings;
-	private double currentBandwidth;
-	private double minExpectedBandwidth;
-	private double maxExpectedBandwidth;
+	private double currentParameter;
+	
+	private SingleParameterSmoothingProvider currentProvider;
+	private ParameterDisplayAid displayAid;
 		
-	private boolean updatingBandwidth = false;
+	private boolean updatingParameter = false;
 	
 	private final Color errorTextFieldBackground = new Color(255, 125, 128);
 	private final Color defaultTextFieldBackground;
@@ -72,14 +78,17 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 	private final Random random;
 	
 	private String caption;
-	private JTextField bandwidthTextField;
-	private JSlider bandwidthSlider; 
+	private JTextField parameterTextField;
+	private JSlider parameterSlider; 
 	private JTextField timePointsTextField;
 	private final ButtonGroup timePointsButtonGroup = new ButtonGroup();
 	private JTextField numEquidistantTextField;
 	private JRadioButton rdbtnKeepSourceTimePoints;
 	private JRadioButton rdbtnEquidistantTimePoints;
 	private JRadioButton rdbtnGivenTimePoints;
+	private JLabel lblParameterValue;
+	private JLabel lblSmoothingType;
+	private JComboBox<ProviderDisplay> providerComboBox;
 	
 	/**
 	 * Create the panel.
@@ -96,7 +105,7 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 				FormSpecs.RELATED_GAP_COLSPEC,
 				FormSpecs.DEFAULT_COLSPEC,
 				FormSpecs.RELATED_GAP_COLSPEC,
-				FormSpecs.DEFAULT_COLSPEC,
+				ColumnSpec.decode("default:grow"),
 				FormSpecs.RELATED_GAP_COLSPEC,
 				FormSpecs.DEFAULT_COLSPEC,
 				FormSpecs.RELATED_GAP_COLSPEC,
@@ -151,12 +160,11 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 		btnPerformSmoothing.setFont(new Font("Tahoma", Font.BOLD, 13));
 		btnPerformSmoothing.addActionListener(evt -> performSmoothing());
 		
-		JLabel lblSmoothingBandwidth = new JLabel("Smoothing bandwidth:");
-		controlPanel.add(lblSmoothingBandwidth, "2, 4, right, default");
+		lblSmoothingType = new JLabel("Smoothing algorithm:");
+		controlPanel.add(lblSmoothingType, "2, 4, right, default");
 		
-		bandwidthSlider = new JSlider();
-		controlPanel.add(bandwidthSlider, "4, 4");
-		bandwidthSlider.addChangeListener(evt -> bandwidthSliderChanged());
+		providerComboBox = new JComboBox<>();
+		controlPanel.add(providerComboBox, "4, 4, fill, default");
 								
 		rdbtnEquidistantTimePoints = new JRadioButton("Estimate at N equidistant points:");
 		rdbtnEquidistantTimePoints.setSelected(true);
@@ -171,11 +179,12 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 		controlPanel.add(btnPerformSmoothing, "12, 4");
 		numEquidistantTextField.getDocument().addDocumentListener(UIUtils.listenForAllDocumentChanges(this::timePointsInputChanged));
 		
-		bandwidthTextField = new JTextField();
-		controlPanel.add(bandwidthTextField, "4, 6, fill, default");
-		bandwidthTextField.setColumns(10);
+		JLabel lblSmoothingBandwidth = new JLabel("Smoothing amount:");
+		controlPanel.add(lblSmoothingBandwidth, "2, 6, right, default");
 		
-		this.defaultTextFieldBackground = bandwidthTextField.getBackground();
+		parameterSlider = new JSlider();
+		controlPanel.add(parameterSlider, "4, 6");
+		parameterSlider.addChangeListener(evt -> bandwidthSliderChanged());
 		
 		rdbtnGivenTimePoints = new JRadioButton("Estimate at specific time points:");
 		timePointsButtonGroup.add(rdbtnGivenTimePoints);
@@ -192,6 +201,16 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 		JButton btnClose = new JButton("Close");
 		controlPanel.add(btnClose, "12, 6");
 		
+		lblParameterValue = new JLabel("Parameter value:");
+		lblParameterValue.setHorizontalAlignment(SwingConstants.TRAILING);
+		controlPanel.add(lblParameterValue, "2, 8, right, default");
+		
+		parameterTextField = new JTextField();
+		controlPanel.add(parameterTextField, "4, 8, fill, default");
+		parameterTextField.setColumns(10);
+		
+		this.defaultTextFieldBackground = parameterTextField.getBackground();
+		
 		JLabel lblCommaSeparatedSupports = new JLabel("<html>Comma separated, supports Matlab notation (e.g. 1,2,3:5,10:2:20). Points outside the original interval are ignored.</html>");
 		lblCommaSeparatedSupports.setFont(new Font("Tahoma", Font.ITALIC, 11));
 		controlPanel.add(lblCommaSeparatedSupports, "6, 8, 5, 1");
@@ -207,11 +226,26 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 		{
 			updateEstimateX();
 			
-			guessBandwidth(sourceTimeSeries);
-			updateDisplayedBandwidth();
+			ProviderDisplay[] providerDisplays = registrar.getService(SmoothingService.class).getSmoothingProviders().stream()
+					.map(ProviderDisplay::new)
+					.toArray(ProviderDisplay[]::new);			
+			providerComboBox.setModel(new DefaultComboBoxModel<>(providerDisplays));
+			providerComboBox.setSelectedIndex(0);
+			
+			providerComboBox.addItemListener(evt -> {
+				if(evt.getStateChange() == ItemEvent.SELECTED)
+				{
+					updateProvider();
+				}
+			});
+			
+			currentProvider = providerDisplays[0].getProvider();
+			displayAid = currentProvider.getDisplayAid(sourceTimeSeries.getIndexArray());
+			guessBandwidth();
+			updateDisplayedParameter();
 			
 			//Add listener only after initial assignment to the bandwidth text field
-			bandwidthTextField.getDocument().addDocumentListener(UIUtils.listenForAllDocumentChanges(this::bandwidthTextChanged));
+			parameterTextField.getDocument().addDocumentListener(UIUtils.listenForAllDocumentChanges(this::bandwidthTextChanged));
 			
 			
 			sampleShownRows();
@@ -222,42 +256,59 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 		
 	}
 
-	private void updateDisplayedBandwidth() {
-		updateDisplayedBandwidthText();
-		updateDisplayedBandwidthSlider();
+	private void updateDisplayedParameter() {
+		updateDisplayedParameterText();
+		updateDisplayedParameterSlider();
 	}
 
-	private void updateDisplayedBandwidthText()
+	private void updateProvider()
 	{
-		bandwidthTextField.setText(Double.toString(currentBandwidth));		
+		if(providerComboBox.getSelectedIndex() >= 0)
+		{
+			currentProvider = providerComboBox.getItemAt(providerComboBox.getSelectedIndex()).getProvider();
+			displayAid = currentProvider.getDisplayAid(sourceTimeSeries.getIndexArray());
+			
+			updatingParameter = true;
+			
+			if(displayAid == null)
+			{
+				parameterSlider.setEnabled(false);
+				parameterTextField.setEnabled(false);
+			}
+			else
+			{
+				parameterSlider.setEnabled(true);
+				parameterTextField.setEnabled(true);
+				
+				currentParameter = displayAid.bestParameterGuess(); 
+				updateDisplayedParameter();
+			}
+			
+			updatingParameter = false;
+			
+			updateDisplayGrid();
+		}
 	}
 	
-	private void updateDisplayedBandwidthSlider()
+	private void updateDisplayedParameterText()
 	{
-		bandwidthSlider.setValue((int)(Math.sqrt((currentBandwidth - minExpectedBandwidth) / maxExpectedBandwidth) * bandwidthSlider.getMaximum()));
+		parameterTextField.setText(Double.toString(currentParameter));		
 	}
 	
-	private void guessBandwidth(TimeSeries ts)
+	private void updateDisplayedParameterSlider()
 	{
-		if(ts.getIndexCount() < 2)
+		if(displayAid != null)
 		{
-			minExpectedBandwidth = 0.01;
-			currentBandwidth = 1;
-			maxExpectedBandwidth = 100;
+			parameterSlider.setValue((int)(displayAid.parameterValueToSmoothingAmount(currentParameter) * parameterSlider.getMaximum()));
 		}
-		double maxDiff = 0;
-		double minDiff = Double.POSITIVE_INFINITY;
-		List<Double> sortedList = new ArrayList<>(ts.getIndex());
-		sortedList.sort(null);
-		for(int i = 1; i < sortedList.size(); i++)
+	}
+	
+	private void guessBandwidth()
+	{
+		if(displayAid != null)
 		{
-			double diff = sortedList.get(i) - sortedList.get(i - 1);
-			maxDiff = Math.max(maxDiff, diff);
-			minDiff = Math.min(minDiff, diff);
+			currentParameter = displayAid.bestParameterGuess();
 		}
-		currentBandwidth = Math.max(0.0001, maxDiff);
-		minExpectedBandwidth = minDiff / 5;
-		maxExpectedBandwidth = (sortedList.get(sortedList.size() - 1) - sortedList.get(0));
 	}
 	
 	private void sampleShownRows()
@@ -472,7 +523,7 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 					}
 				
 					//Do the smoothing
-					double[] smoothedY = KernelSmoothing.linearKernalEstimator(repeatedIndex, allRowsConcat, estimateX, currentBandwidth);
+					double[] smoothedY = currentProvider.smooth(repeatedIndex, allRowsConcat, estimateX, currentParameter);
 					
 					SmoothingChartContainer chartContainer = new SmoothingChartContainer();
 					chartContainer.setSmoothingData(repeatedIndex, allRowsConcat, estimateX, smoothedY, entry.getKey());
@@ -518,42 +569,42 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 	
 	private void bandwidthSliderChanged()
 	{
-		if(updatingBandwidth)
+		if(updatingParameter)
 		{
 			return;
 		}
 		try 
 		{
-			updatingBandwidth = true;
-			double rootNormalizedBandwidth = ((double)bandwidthSlider.getValue()) / ((double)bandwidthSlider.getMaximum()) ;
-			currentBandwidth = rootNormalizedBandwidth * rootNormalizedBandwidth * (maxExpectedBandwidth - minExpectedBandwidth) + minExpectedBandwidth; 
-			updateDisplayedBandwidthText();
+			updatingParameter = true;
+			double smoothingAmount = ((double)parameterSlider.getValue()) / ((double)parameterSlider.getMaximum()) ;
+			currentParameter = displayAid.smoothingAmountToParameterValue(smoothingAmount);			
+			updateDisplayedParameterText();
 			updateDisplayGrid();
 		}
 		finally
 		{
-			updatingBandwidth = false;
+			updatingParameter = false;
 		}
 	}
 	
 	private void bandwidthTextChanged()
 	{
-		if(updatingBandwidth)
+		if(updatingParameter)
 		{
 			return;
 		}
 		try 
 		{
-			updatingBandwidth = true;
+			updatingParameter = true;
 			
 			boolean showError = false;
 			try 
 			{
-				double bandwidth = Double.parseDouble(bandwidthTextField.getText());
+				double bandwidth = Double.parseDouble(parameterTextField.getText());
 				if (bandwidth > 0 && Double.isFinite(bandwidth))
 				{
-					currentBandwidth = bandwidth;
-					updateDisplayedBandwidthSlider();
+					currentParameter = bandwidth;
+					updateDisplayedParameterSlider();
 					updateDisplayGrid();
 				}
 				else
@@ -567,16 +618,16 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 			
 			if(showError)
 			{
-				bandwidthTextField.setBackground(errorTextFieldBackground);
+				parameterTextField.setBackground(errorTextFieldBackground);
 			}
 			else
 			{
-				bandwidthTextField.setBackground(defaultTextFieldBackground);
+				parameterTextField.setBackground(defaultTextFieldBackground);
 			}			
 		}
 		finally
 		{
-			updatingBandwidth = false;
+			updatingParameter = false;
 		}
 		
 	}
@@ -584,7 +635,7 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 	private void performSmoothing()
 	{
 		Map<String, List<Integer>> rowGrouping = registrar.getService(SmoothingService.class).getDefaultRowGrouping(sourceTimeSeries);
-		registrar.getService(TaskManager.class).execute(new TaskIterator(new SmoothInteractivePerformTask(registrar, sourceTimeSeries, estimateX, currentBandwidth, rowGrouping, this)));
+		registrar.getService(TaskManager.class).execute(new TaskIterator(new SmoothInteractivePerformTask(registrar, sourceTimeSeries, estimateX, currentProvider, currentParameter, rowGrouping, this)));
 	}
 	
 	public void closePanel()
@@ -620,4 +671,23 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 	}
 			
 
+	private static class ProviderDisplay {
+		private final SingleParameterSmoothingProvider provider;
+
+		public ProviderDisplay(SingleParameterSmoothingProvider provider) {
+			super();
+			this.provider = provider;
+		}
+		
+		public SingleParameterSmoothingProvider getProvider() {
+			return provider;
+		}
+
+		@Override
+		public String toString() {
+			return provider.getName();
+		}
+		
+		
+	}
 }

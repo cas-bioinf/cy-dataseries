@@ -20,6 +20,7 @@ import cz.cas.mbu.cydataseries.MappingManipulationService;
 import cz.cas.mbu.cydataseries.SmoothingService;
 import cz.cas.mbu.cydataseries.TimeSeries;
 import cz.cas.mbu.cydataseries.internal.dataimport.MatlabSyntaxNumberList;
+import cz.cas.mbu.cydataseries.internal.smoothing.LinearKernelSmoothingProvider;
 
 public class SmoothDataSeriesTask extends AbstractValidatedTask {
 		
@@ -35,8 +36,7 @@ public class SmoothDataSeriesTask extends AbstractValidatedTask {
 
 	@Tunable(description="Combine rows with the same name together")
 	public boolean combineRows;
-	
-	
+		
 	@Tunable(description="Kernel bandwidth")
 	public double bandwidth = 1;
 	
@@ -76,7 +76,7 @@ public class SmoothDataSeriesTask extends AbstractValidatedTask {
 			resultTimePoints = Arrays.copyOf(sourceTimeSeries.getIndexArray(), sourceTimeSeries.getIndexCount());
 		}
 		
-		smoothedSeries = smoothingService.linearKernelSmoothing(sourceTimeSeries, resultTimePoints, bandwidth, outputParameters.resultName);		
+		smoothedSeries = smoothingService.smooth(sourceTimeSeries, resultTimePoints, new LinearKernelSmoothingProvider(), bandwidth, outputParameters.resultName);		
 		dataSeriesManager.registerDataSeries(smoothedSeries);
 		
 		Map<String, List<Integer>> rowGrouping;

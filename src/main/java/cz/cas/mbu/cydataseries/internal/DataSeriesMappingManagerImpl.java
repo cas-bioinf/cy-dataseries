@@ -6,12 +6,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.cytoscape.model.CyIdentifiable;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyTable;
-import org.cytoscape.model.subnetwork.CyRootNetwork;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
@@ -20,15 +18,18 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Maps;
 
 import cz.cas.mbu.cydataseries.DataSeries;
-import cz.cas.mbu.cydataseries.DataSeriesEvent;
 import cz.cas.mbu.cydataseries.DataSeriesException;
-import cz.cas.mbu.cydataseries.DataSeriesListener;
 import cz.cas.mbu.cydataseries.DataSeriesMappingEvent;
 import cz.cas.mbu.cydataseries.DataSeriesMappingEvent.EventType;
 import cz.cas.mbu.cydataseries.DataSeriesMappingListener;
 import cz.cas.mbu.cydataseries.DataSeriesMappingManager;
 import cz.cas.mbu.cydataseries.MappingDescriptor;
 
+/**
+ * Implementation of {@link DataSeriesMappingManager}, check there for method documentation.
+ * @author MBU
+ *
+ */
 public class DataSeriesMappingManagerImpl implements DataSeriesMappingManager{
 
 	private final Logger logger = LoggerFactory.getLogger(DataSeriesMappingManagerImpl.class); 
@@ -44,6 +45,10 @@ public class DataSeriesMappingManagerImpl implements DataSeriesMappingManager{
 		listenerTracker.open();		
 	}
 	
+	/**
+	 * Send event to all registered {@link DataSeriesMappingListener} services
+	 * @param event
+	 */
 	protected void fireEvent(DataSeriesMappingEvent event)
 	{
 		for(Object service : listenerTracker.getServices())

@@ -2,6 +2,11 @@ package cz.cas.mbu.cydataseries.internal.dataimport;
 
 import java.io.File;
 
+/**
+ * Gathers all parameters needed to import DS from a tabular file.
+ * @author MBU
+ *
+ */
 public class TabularFileImportParameters {
 	private final FileFormatImportParameters fileFormatParameters;
 	private final DataSeriesImportParameters dataSeriesParameters;

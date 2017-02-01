@@ -1,7 +1,11 @@
 package cz.cas.mbu.cydataseries;
 
+import cz.cas.mbu.cydataseries.internal.DataSeriesStorageManagerImpl;
+
 /**
  * Manages to {@link DataSeriesStorageProvider} instances.
+ * The implementaion {@link DataSeriesStorageManagerImpl} is directly responsible for
+ * performing save/load.
  * @author Martin
  *
  */

@@ -11,9 +11,15 @@ import org.cytoscape.service.util.CyServiceRegistrar;
 
 import cz.cas.mbu.cydataseries.DataSeries;
 import cz.cas.mbu.cydataseries.DataSeriesMappingManager;
+import cz.cas.mbu.cydataseries.DataSeriesPublicTasks;
 import cz.cas.mbu.cydataseries.MappingDescriptor;
 import cz.cas.mbu.cydataseries.MappingManipulationService;
 
+/**
+ * Implementation for {@link MappingManipulationService}, see there for method descriptions.
+ * @author MBU
+ *
+ */
 public class MappingManipulationServiceImpl implements MappingManipulationService {
 	private final CyServiceRegistrar registrar;	
 	
@@ -40,6 +46,13 @@ public class MappingManipulationServiceImpl implements MappingManipulationServic
 		}
 	}
 	
+	/**
+	 * Convert a row grouping (map of names of rows in the new mapping to their IDs in the old mapping) to a map
+	 * of IDs in the old mapping to IDs in the new mapping.
+	 * @param rowGrouping
+	 * @param targetTimeSeries
+	 * @return
+	 */
 	private Map<Integer, Integer> rowMappingFromRowGrouping(Map<String, List<Integer>> rowGrouping,
 			DataSeries<?, ?> targetTimeSeries) {
 		if(rowGrouping == null)

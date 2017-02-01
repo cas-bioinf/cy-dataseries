@@ -23,6 +23,11 @@ public class AskForInputFileTask extends AbstractValidatedTask {
 	private final Consumer<File> fileTarget;
 	private final BiFunction<File, StringBuilder, ValidationState> validator;
 	
+	/**
+	 * 
+	 * @param title
+	 * @param fileTarget This is called once the user chooses the file.
+	 */
 	public AskForInputFileTask(String title, Consumer<File> fileTarget) {
 		super();
 		this.title = title;

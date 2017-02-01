@@ -1,8 +1,10 @@
 package cz.cas.mbu.cydataseries.internal.dataimport;
 
-import java.io.File;
-import java.util.List;
-
+/**
+ * A collection of parameters specific to import of tabular files.
+ * @author MBU
+ *
+ */
 public class FileFormatImportParameters {
 	
 	private char separator;
