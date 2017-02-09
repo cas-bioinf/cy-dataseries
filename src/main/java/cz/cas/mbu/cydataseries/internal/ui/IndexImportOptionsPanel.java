@@ -173,7 +173,7 @@ public class IndexImportOptionsPanel extends JPanel implements TunableValidator{
 	private List<String> getManualIndexValuesInternal()
 	{
 		String value = getTextFieldIndexValues().getText(); 
-		if(value.matches("^[0-9,:]*$"))
+		if(value.matches("^[\\-+0-9,:]*$"))
 		{
 			return MatlabSyntaxNumberList.listFromString(value).stream()
 					.map(x -> Double.toString(x))
