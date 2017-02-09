@@ -93,20 +93,18 @@ public class IndexImportOptionsPanel extends JPanel implements TunableValidator{
 		
 		rdbtnIndexFromHeader = new JRadioButton("Index values from header");
 		rdbtnIndexFromHeader.setSelected(true);
-		rdbtnIndexFromHeader.addItemListener(e -> indexSourceChanged());
 		buttonGroupIndexSource.add(rdbtnIndexFromHeader);
 		add(rdbtnIndexFromHeader, "2, 2");
 		rdbtnIndexFromHeader.addItemListener(this::radioButtonChanged);
 		
 		rdbtnManualIndexValuesAdd = new JRadioButton("Manual index values (add)");
-		rdbtnManualIndexValuesAdd.addItemListener(e -> indexSourceChanged());
 		
 				buttonGroupIndexSource.add(rdbtnManualIndexValuesAdd);
 				add(rdbtnManualIndexValuesAdd, "4, 2");
 				rdbtnManualIndexValuesAdd.addItemListener(this::radioButtonChanged);
 		
 		rdbtnManualIndexValuesOverride = new JRadioButton("Manual index values (override)");
-		rdbtnManualIndexValuesOverride.addItemListener(e -> indexSourceChanged());
+		rdbtnManualIndexValuesOverride.addItemListener(this::radioButtonChanged);
 		buttonGroupIndexSource.add(rdbtnManualIndexValuesOverride);
 		add(rdbtnManualIndexValuesOverride, "6, 2");
 		
@@ -147,6 +145,7 @@ public class IndexImportOptionsPanel extends JPanel implements TunableValidator{
 	protected void radioButtonChanged(ItemEvent evt) {
 		if(evt.getStateChange() == ItemEvent.SELECTED)
 		{
+			indexSourceChanged();
 			fireChangeEvent();
 		}
 	}
