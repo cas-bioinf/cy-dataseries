@@ -16,7 +16,7 @@ public interface DataSeriesImportProvider {
 	 * @param preImportResults preprocessed results
 	 * @return
 	 */
-	DataSeries<?, ?> importDataDataSeries(String name, Long suid, PreImportResults preImportResults);
+	DataSeries<?, ?> importDataSeries(String name, Long suid, PreImportResults preImportResults);
 	
 	/**
 	 * A user-facing description of the data series this provider handles.
@@ -25,7 +25,7 @@ public interface DataSeriesImportProvider {
 	String getDescription();
 	
 	/**
-	 * Returns the class that is created when {@link #importDataDataSeries(String, Long, PreImportResults)} is called.
+	 * Returns the class that is created when {@link #importDataSeries(String, Long, PreImportResults)} is called.
 	 * Implementations should return interfaces rather than concrete classes. May return null, if the actual class is determined based on data.
 	 * @return the most specific super interface or null. 
 	 */

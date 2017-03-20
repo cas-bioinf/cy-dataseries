@@ -52,7 +52,7 @@ public class ImportDataSeriesTask extends AbstractImportTask {
 	{
 		try (FileReader inputReader = new FileReader(importParameters.getFile())) {
 			PreImportResults preImportResults = ImportHelper.preImport(inputReader, importParameters.getFileFormatParameters(), importParameters.getDataSeriesParameters(), true /* strict */);
-			DataSeries<?, ?> ds = provider.getSelectedValue().getProvider().importDataDataSeries(name, SUIDFactory.getNextSUID(), preImportResults);
+			DataSeries<?, ?> ds = provider.getSelectedValue().getProvider().importDataSeries(name, SUIDFactory.getNextSUID(), preImportResults);
 			importedDS = ds;
 		}
 	}

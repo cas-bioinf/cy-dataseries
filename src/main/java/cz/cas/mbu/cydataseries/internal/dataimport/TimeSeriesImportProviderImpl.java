@@ -17,7 +17,7 @@ import cz.cas.mbu.cydataseries.internal.data.TimeSeriesImpl;
 public class TimeSeriesImportProviderImpl implements DataSeriesImportProvider{
 
 	@Override
-	public DataSeries<?, ?> importDataDataSeries(String name, Long suid, PreImportResults preImportResults) {
+	public DataSeries<?, ?> importDataSeries(String name, Long suid, PreImportResults preImportResults) {
 		preImportResults.checkConsistentcy();
 		
 		int[] rowIDs = new int[preImportResults.getCellData().length];

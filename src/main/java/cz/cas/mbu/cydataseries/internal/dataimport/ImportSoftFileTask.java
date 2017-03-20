@@ -30,7 +30,7 @@ public class ImportSoftFileTask extends AbstractImportTask {
 	{
 		SoftTable table = importParameters.getSelectedTable();
 		PreImportResults preImportResults = ImportHelper.preImportFromArrayAndIndex(table.getColumnNames(), table.getContents(), importParameters.getDataSeriesImportParameters(), true /* strict */);
-		DataSeries<?, ?> ds = provider.getSelectedValue().getProvider().importDataDataSeries(name, SUIDFactory.getNextSUID(), preImportResults);
+		DataSeries<?, ?> ds = provider.getSelectedValue().getProvider().importDataSeries(name, SUIDFactory.getNextSUID(), preImportResults);
 		importedDS = ds;
 	}
 		
