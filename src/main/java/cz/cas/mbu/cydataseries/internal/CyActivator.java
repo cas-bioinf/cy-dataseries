@@ -33,6 +33,8 @@ import cz.cas.mbu.cydataseries.internal.dataimport.SoftFileImportParametersGUIHa
 import cz.cas.mbu.cydataseries.internal.dataimport.TabularFileImportParametersGUIHandlerFactory;
 import cz.cas.mbu.cydataseries.internal.dataimport.TimeSeriesImportProviderImpl;
 import cz.cas.mbu.cydataseries.internal.smoothing.SmoothingServiceImpl;
+import cz.cas.mbu.cydataseries.internal.tasks.ExponentiateDataSeriesTask;
+import cz.cas.mbu.cydataseries.internal.tasks.ExponentiateDataSeriesTaskFactory;
 import cz.cas.mbu.cydataseries.internal.tasks.ExportDataSeriesTaskFactory;
 import cz.cas.mbu.cydataseries.internal.tasks.ManageMappingsTaskFactory;
 import cz.cas.mbu.cydataseries.internal.tasks.MapColumnTaskFactory;
@@ -120,6 +122,8 @@ public class CyActivator extends AbstractCyActivator {
 
 		registerMenuItem(bc, DEFAULT_MENU + ".Advanced smoothing", "Linear kernel", new SmoothDataSeriesTaskFactory(serviceRegistrar));
 
+		registerMenuItem(bc, "Exponentiate Data Series", new ExponentiateDataSeriesTaskFactory(dataSeriesManager));
+		
 		SmoothInteractiveShowUITaskFactory smoothInteractiveTaskFactory = new SmoothInteractiveShowUITaskFactory(serviceRegistrar);
 		registerMenuItem(bc, "Interactive smoothing", smoothInteractiveTaskFactory);
 		
