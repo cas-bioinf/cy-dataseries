@@ -26,11 +26,11 @@ import cz.cas.mbu.cydataseries.DoubleDataSeries;
 public class ExponentiateDataSeriesTask extends AbstractValidatedTask {
 
 	@Tunable(description = "Series to exponentiate")
-	public ListSingleSelection<DataSeries<?, ?>> dataSeries;
+	public ListSingleSelection<DoubleDataSeries> dataSeries;
 
 	public ExponentiateDataSeriesTask(DataSeriesManager dataSeriesManager) {
 		dataSeries = new ListSingleSelection<>(
-				dataSeriesManager.getAllDataSeries());
+				dataSeriesManager.getDataSeriesByType(DoubleDataSeries.class));
 	}
 
 	@ProvidesTitle
@@ -40,8 +40,7 @@ public class ExponentiateDataSeriesTask extends AbstractValidatedTask {
 
 	@Override
 	public void run(TaskMonitor taskMonitor) throws Exception {
-		DoubleDataSeries<?> doubleDataSeries = (DoubleDataSeries<?>) dataSeries
-				.getSelectedValue();
+		DoubleDataSeries<?> doubleDataSeries = dataSeries.getSelectedValue();
 		for (int i = 0; i < doubleDataSeries.getRowCount(); i++) {
 			for (int j = 0; j < doubleDataSeries.getRowDataArray(i).length; j++) {
 				doubleDataSeries.getDataArray()[i][j] = Math
