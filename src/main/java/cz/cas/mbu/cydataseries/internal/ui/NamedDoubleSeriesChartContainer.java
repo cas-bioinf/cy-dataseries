@@ -38,10 +38,7 @@ public class NamedDoubleSeriesChartContainer extends AbstractDataSeriesChartCont
 	
 	@Override
 	protected void clearDataset() {
-		while(dataset.getRowCount() > 0)
-		{
-			dataset.removeRow(0);
-		}
+		dataset.clear();
 	}
 
 	@Override
