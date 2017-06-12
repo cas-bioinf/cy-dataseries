@@ -10,9 +10,9 @@ import org.cytoscape.work.TaskMonitor;
 
 import cz.cas.mbu.cydataseries.DataSeriesManager;
 import cz.cas.mbu.cydataseries.MappingManipulationService;
+import cz.cas.mbu.cydataseries.SingleParameterSmoothingProvider;
 import cz.cas.mbu.cydataseries.SmoothingService;
 import cz.cas.mbu.cydataseries.TimeSeries;
-import cz.cas.mbu.cydataseries.internal.smoothing.SingleParameterSmoothingProvider;
 import cz.cas.mbu.cydataseries.internal.ui.SmoothingPreviewPanel;
 
 public class SmoothInteractivePerformTask extends AbstractValidatedTask {

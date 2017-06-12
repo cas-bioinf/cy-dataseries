@@ -6,6 +6,8 @@ import java.util.List;
 
 import com.google.common.primitives.Doubles;
 
+import cz.cas.mbu.cydataseries.SingleParameterSmoothingProvider;
+
 public class LinearKernelSmoothingProvider implements SingleParameterSmoothingProvider{
 
 	@Override
@@ -66,7 +68,15 @@ public class LinearKernelSmoothingProvider implements SingleParameterSmoothingPr
 			this.minExpectedBandwidth = minExpectedBandwidth;
 			this.maxExpectedBandwidth = maxExpectedBandwidth;
 		}
+				
 		
+		@Override
+		public String getParameterName() {
+			return "Bandwidth";
+		}
+
+
+
 		@Override
 		public double bestParameterGuess() {
 			return bestGuess;

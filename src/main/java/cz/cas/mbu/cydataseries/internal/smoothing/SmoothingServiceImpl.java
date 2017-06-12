@@ -15,6 +15,7 @@ import org.cytoscape.model.SUIDFactory;
 
 import com.google.common.primitives.Doubles;
 
+import cz.cas.mbu.cydataseries.SingleParameterSmoothingProvider;
 import cz.cas.mbu.cydataseries.SmoothingService;
 import cz.cas.mbu.cydataseries.TimeSeries;
 import cz.cas.mbu.cydataseries.internal.data.TimeSeriesImpl;
@@ -114,9 +115,12 @@ public class SmoothingServiceImpl implements SmoothingService{
 
 	@Override
 	public List<SingleParameterSmoothingProvider> getSmoothingProviders() {
-		return Arrays.asList(new SingleParameterSmoothingProvider[] { 
+		return Arrays.asList(new SingleParameterSmoothingProvider[] {
+				new BSPlineRegressionSmoothingProvider(3),
 				new LinearKernelSmoothingProvider(), 
-				new LinearSmoothingProvider()} 
+				new LinearSmoothingProvider(),
+				new PolynomialSmoothingProvider(),
+				} 
 		);
 	}
 		

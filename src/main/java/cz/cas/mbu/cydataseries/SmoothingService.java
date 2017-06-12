@@ -4,8 +4,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import cz.cas.mbu.cydataseries.internal.smoothing.SingleParameterSmoothingProvider;
-
 /**
  * Service for smoothing time series.
  * @author Martin

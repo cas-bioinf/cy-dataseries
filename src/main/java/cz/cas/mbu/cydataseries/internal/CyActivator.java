@@ -33,12 +33,10 @@ import cz.cas.mbu.cydataseries.internal.dataimport.SoftFileImportParametersGUIHa
 import cz.cas.mbu.cydataseries.internal.dataimport.TabularFileImportParametersGUIHandlerFactory;
 import cz.cas.mbu.cydataseries.internal.dataimport.TimeSeriesImportProviderImpl;
 import cz.cas.mbu.cydataseries.internal.smoothing.SmoothingServiceImpl;
-import cz.cas.mbu.cydataseries.internal.tasks.ExponentiateDataSeriesTask;
 import cz.cas.mbu.cydataseries.internal.tasks.ExponentiateDataSeriesTaskFactory;
 import cz.cas.mbu.cydataseries.internal.tasks.ExportDataSeriesTaskFactory;
 import cz.cas.mbu.cydataseries.internal.tasks.ManageMappingsTaskFactory;
 import cz.cas.mbu.cydataseries.internal.tasks.MapColumnTaskFactory;
-import cz.cas.mbu.cydataseries.internal.tasks.RemoveColumnMappingTaskFactory;
 import cz.cas.mbu.cydataseries.internal.tasks.RemoveDataSeriesTaskFactory;
 import cz.cas.mbu.cydataseries.internal.tasks.SmoothDataSeriesTaskFactory;
 import cz.cas.mbu.cydataseries.internal.tasks.SmoothInteractiveShowUITaskFactory;
@@ -127,11 +125,6 @@ public class CyActivator extends AbstractCyActivator {
 		SmoothInteractiveShowUITaskFactory smoothInteractiveTaskFactory = new SmoothInteractiveShowUITaskFactory(serviceRegistrar);
 		registerMenuItem(bc, "Interactive smoothing", smoothInteractiveTaskFactory);
 		
-		/*
-		Properties modifyProperties = new Properties(baseMenuProperties);
-		modifyProperties.setProperty(ServiceProperties.TITLE, "Add Time Series...");
-		registerService(bc, addTaskFactory, TaskFactory.class, addProperties);
-		*/
 		DataSeriesPanel panel = new DataSeriesPanel(serviceRegistrar);
 		registerService(bc, panel, CytoPanelComponent.class, new Properties());
 		registerService(bc, panel, DataSeriesListener.class, new Properties());

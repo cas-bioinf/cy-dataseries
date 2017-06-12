@@ -3,6 +3,8 @@ package cz.cas.mbu.cydataseries.internal.smoothing;
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 
+import cz.cas.mbu.cydataseries.SingleParameterSmoothingProvider;
+
 public class LinearSmoothingProvider implements SingleParameterSmoothingProvider {
 
 	@Override
@@ -32,7 +34,7 @@ public class LinearSmoothingProvider implements SingleParameterSmoothingProvider
 
 	@Override
 	public String getName() {
-		return "Linear (no parameter)";
+		return "Linear";
 	}
 
 	@Override

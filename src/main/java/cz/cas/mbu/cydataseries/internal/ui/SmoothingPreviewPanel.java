@@ -39,13 +39,13 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.FormSpecs;
 import com.jgoodies.forms.layout.RowSpec;
 
+import cz.cas.mbu.cydataseries.SingleParameterSmoothingProvider;
 import cz.cas.mbu.cydataseries.SmoothingService;
 import cz.cas.mbu.cydataseries.TimeSeries;
 import cz.cas.mbu.cydataseries.internal.dataimport.MatlabSyntaxNumberList;
 import cz.cas.mbu.cydataseries.internal.smoothing.KernelSmoothing;
 import cz.cas.mbu.cydataseries.internal.smoothing.LinearKernelSmoothingProvider;
 import cz.cas.mbu.cydataseries.internal.smoothing.ParameterDisplayAid;
-import cz.cas.mbu.cydataseries.internal.smoothing.SingleParameterSmoothingProvider;
 import cz.cas.mbu.cydataseries.internal.tasks.SmoothInteractivePerformTask;
 import javax.swing.JRadioButton;
 import javax.swing.ButtonGroup;
@@ -86,7 +86,7 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 	private JRadioButton rdbtnKeepSourceTimePoints;
 	private JRadioButton rdbtnEquidistantTimePoints;
 	private JRadioButton rdbtnGivenTimePoints;
-	private JLabel lblParameterValue;
+	private JLabel parameterNameLabel;
 	private JLabel lblSmoothingType;
 	private JComboBox<ProviderDisplay> providerComboBox;
 	
@@ -201,9 +201,9 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 		JButton btnClose = new JButton("Close");
 		controlPanel.add(btnClose, "12, 6");
 		
-		lblParameterValue = new JLabel("Parameter value:");
-		lblParameterValue.setHorizontalAlignment(SwingConstants.TRAILING);
-		controlPanel.add(lblParameterValue, "2, 8, right, default");
+		parameterNameLabel = new JLabel("Parameter value:");
+		parameterNameLabel.setHorizontalAlignment(SwingConstants.TRAILING);
+		controlPanel.add(parameterNameLabel, "2, 8, right, default");
 		
 		parameterTextField = new JTextField();
 		controlPanel.add(parameterTextField, "4, 8, fill, default");
@@ -241,7 +241,8 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 			
 			currentProvider = providerDisplays[0].getProvider();
 			displayAid = currentProvider.getDisplayAid(sourceTimeSeries.getIndexArray());
-			guessBandwidth();
+			guessParameterValue();
+			updateParameterGUI();
 			updateDisplayedParameter();
 			
 			//Add listener only after initial assignment to the bandwidth text field
@@ -260,6 +261,22 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 		updateDisplayedParameterText();
 		updateDisplayedParameterSlider();
 	}
+	
+	private void updateParameterGUI() {
+		if(displayAid == null)
+		{
+			parameterSlider.setEnabled(false);
+			parameterTextField.setVisible(false);
+			parameterNameLabel.setText("");
+		}
+		else
+		{
+			parameterSlider.setEnabled(true);
+			parameterTextField.setVisible(true);			
+			parameterNameLabel.setText(displayAid.getParameterName() + ":");
+		}
+		
+	}
 
 	private void updateProvider()
 	{
@@ -269,18 +286,11 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 			displayAid = currentProvider.getDisplayAid(sourceTimeSeries.getIndexArray());
 			
 			updatingParameter = true;
-			
-			if(displayAid == null)
+
+			updateParameterGUI();
+			if(displayAid != null)
 			{
-				parameterSlider.setEnabled(false);
-				parameterTextField.setEnabled(false);
-			}
-			else
-			{
-				parameterSlider.setEnabled(true);
-				parameterTextField.setEnabled(true);
-				
-				currentParameter = displayAid.bestParameterGuess(); 
+				currentParameter = displayAid.bestParameterGuess();
 				updateDisplayedParameter();
 			}
 			
@@ -303,7 +313,7 @@ public class SmoothingPreviewPanel extends JPanel implements CytoPanelComponent 
 		}
 	}
 	
-	private void guessBandwidth()
+	private void guessParameterValue()
 	{
 		if(displayAid != null)
 		{
