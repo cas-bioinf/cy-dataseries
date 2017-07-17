@@ -25,8 +25,8 @@ import cz.cas.mbu.cydataseries.internal.DataSeriesStorageManagerImpl;
 /**
  * A base class for all DS storage providers that can directly convert all index and data values from/to string.
  * To store a new type of DS, you usually want to extend this class and override 
- * {@link #transformDataForWrite(Object)}, {@link #transformIndexForWrite(Object). 
- * Further you should create a custom {@link #DataSeriesBuilder} subclass and override {@link #getSeriesBuilder()} to return an instance of it.
+ * {@link #transformDataForWrite(Object)}, {@link #transformIndexForWrite(Object)}. 
+ * Further you should create a custom {@link DataSeriesBuilder} subclass and override {@link #getSeriesBuilder()} to return an instance of it.
  * See {@link TimeSeriesStorageProviderImpl} for an example implementation.
  * @author MBU
  *
@@ -120,7 +120,7 @@ public abstract class AbstractDataSeriesStorageProvider  implements DataSeriesSt
 	/**
 	 * Override this to transform data values for storage.
 	 * The default implementation simply calls {@link Object#toString()}.
-	 * @param index
+	 * @param data
 	 * @return
 	 */
 	protected String transformDataForWrite(Object data)

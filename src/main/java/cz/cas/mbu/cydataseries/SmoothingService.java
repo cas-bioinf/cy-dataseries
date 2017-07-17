@@ -11,23 +11,26 @@ import java.util.Map;
  */
 public interface SmoothingService {
 	TimeSeries smooth(TimeSeries noisyData, double[] estimateX, SingleParameterSmoothingProvider provider, double parameter, String resultName);
-	
+
 	/**
 	 * 
 	 * @param noisyData
 	 * @param estimateX
-	 * @param bandwidth
+	 * @param provider
+	 * @param parameter
 	 * @param resultName
 	 * @param rowGrouping Map of result row name to row indices (not row IDs) that will be smoothed to give the output
 	 * @return
 	 */
 	TimeSeries smooth(TimeSeries noisyData, double[] estimateX, SingleParameterSmoothingProvider provider, double parameter, String resultName, Map<String, List<Integer>> rowGrouping);	
 	
+
 	/**
 	 * Smooth a single row
 	 * @param noisyData
 	 * @param estimateX
-	 * @param bandwidth
+	 * @param provider
+	 * @param parameter
 	 * @param rows
 	 * @return
 	 */
